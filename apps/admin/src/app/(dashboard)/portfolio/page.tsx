@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, Wallet } from "lucide-react";
 import {
   Badge,
   Button,
@@ -36,6 +36,7 @@ import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { GalleryField, VideoField, type GalleryImageItem, type VideoItem } from "./media-fields";
+import { ProjectFinanceDialog } from "@/components/finance/project-finance-dialog";
 
 interface Category {
   id: string;
@@ -407,6 +408,7 @@ export default function PortfolioPage() {
   });
 
   const [editing, setEditing] = React.useState<Project | null | undefined>(undefined);
+  const [viewingFinance, setViewingFinance] = React.useState<Project | null>(null);
 
   async function handleDelete(id: string) {
     if (!confirm("Delete this project?")) return;
@@ -481,6 +483,9 @@ export default function PortfolioPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => setViewingFinance(project)} aria-label="View finance">
+                        <Wallet className="size-4" />
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => setEditing(project)}>
                         <Pencil className="size-4" />
                       </Button>
@@ -520,6 +525,14 @@ export default function PortfolioPage() {
             setEditing(undefined);
             list.reload();
           }}
+        />
+      )}
+
+      {viewingFinance && (
+        <ProjectFinanceDialog
+          projectId={viewingFinance.id}
+          projectTitle={viewingFinance.title}
+          onClose={() => setViewingFinance(null)}
         />
       )}
     </div>

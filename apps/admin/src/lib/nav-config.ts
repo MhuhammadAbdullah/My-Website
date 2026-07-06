@@ -16,6 +16,12 @@ import {
   ShieldCheck,
   KeyRound,
   Home,
+  FileText,
+  Receipt,
+  Wallet,
+  Building2,
+  SlidersHorizontal,
+  FileBarChart,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -46,6 +52,17 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: "FAQs", href: "/faqs", icon: HelpCircle },
       { label: "Team", href: "/team", icon: Users },
       { label: "Affiliate Tools", href: "/affiliate", icon: Link2 },
+    ],
+  },
+  {
+    label: "Finance",
+    items: [
+      { label: "Quotations", href: "/finance/quotations", icon: FileText },
+      { label: "Invoices", href: "/finance/invoices", icon: Receipt },
+      { label: "Payments", href: "/finance/payments", icon: Wallet },
+      { label: "Clients", href: "/finance/clients", icon: Building2 },
+      { label: "Reports", href: "/finance/reports", icon: FileBarChart },
+      { label: "Finance Settings", href: "/finance/settings", icon: SlidersHorizontal },
     ],
   },
   {

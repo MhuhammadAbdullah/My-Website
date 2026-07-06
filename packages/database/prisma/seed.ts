@@ -33,6 +33,7 @@ async function main() {
     "home", "about", "services", "pricing", "portfolio", "projects", "categories",
     "testimonials", "faqs", "team", "affiliate", "media", "navigation",
     "footer", "seo", "analytics", "settings", "users", "roles", "permissions",
+    "clients", "quotations", "invoices", "payments", "financeSettings",
   ];
   const actions = ["view", "create", "update", "delete"];
 
@@ -62,6 +63,18 @@ async function main() {
       },
     },
   });
+
+  // The `create` block above only runs the first time this role is created --
+  // on every later reseed (e.g. after adding new resources) `update: {}` is a
+  // no-op, so newly-added permissions would silently never reach an
+  // already-existing Super Admin role. Re-sync explicitly, every run.
+  for (const p of permissions) {
+    await prisma.rolePermission.upsert({
+      where: { roleId_permissionId: { roleId: adminRole.id, permissionId: p.id } },
+      update: {},
+      create: { roleId: adminRole.id, permissionId: p.id },
+    });
+  }
 
   await prisma.role.upsert({
     where: { slug: "editor" },

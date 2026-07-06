@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "@agency/database";
+import { homePageContentSchema, aboutPageContentSchema } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
 
@@ -18,10 +19,11 @@ pagesRouter.put(
   requireAuth,
   requirePermission("home", "update"),
   asyncHandler(async (req, res) => {
+    const data = homePageContentSchema.parse(req.body);
     const existing = await prisma.homePageContent.findFirst();
     const item = existing
-      ? await prisma.homePageContent.update({ where: { id: existing.id }, data: req.body })
-      : await prisma.homePageContent.create({ data: req.body });
+      ? await prisma.homePageContent.update({ where: { id: existing.id }, data })
+      : await prisma.homePageContent.create({ data });
     res.json({ item });
   }),
 );
@@ -39,10 +41,11 @@ pagesRouter.put(
   requireAuth,
   requirePermission("home", "update"),
   asyncHandler(async (req, res) => {
+    const data = aboutPageContentSchema.parse(req.body);
     const existing = await prisma.aboutPageContent.findFirst();
     const item = existing
-      ? await prisma.aboutPageContent.update({ where: { id: existing.id }, data: req.body })
-      : await prisma.aboutPageContent.create({ data: req.body });
+      ? await prisma.aboutPageContent.update({ where: { id: existing.id }, data })
+      : await prisma.aboutPageContent.create({ data });
     res.json({ item });
   }),
 );

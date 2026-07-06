@@ -1,4 +1,5 @@
 export * from "./countries";
+export * from "./finance-calc";
 
 export function slugify(input: string): string {
   return input

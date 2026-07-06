@@ -35,7 +35,20 @@ export default function HomeContentPage() {
   const [saving, setSaving] = React.useState(false);
 
   React.useEffect(() => {
-    if (content) setForm(content);
+    // Pick only the editable fields -- the GET response also includes id/
+    // seoId/updatedAt/seo (from `include: { seo: true }`), and naively
+    // spreading the whole object back into the PUT body used to send Prisma
+    // a raw `seo` object where it expects a nested-write shape, causing a
+    // PrismaClientValidationError on every save.
+    if (content) {
+      setForm({
+        heroHeadline: content.heroHeadline,
+        heroSubheadline: content.heroSubheadline,
+        heroCtaLabel: content.heroCtaLabel,
+        heroCtaHref: content.heroCtaHref,
+        stats: content.stats,
+      });
+    }
   }, [content]);
 
   async function handleSave() {

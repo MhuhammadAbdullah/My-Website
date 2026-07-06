@@ -65,6 +65,45 @@ enum BillingType {
   CUSTOM
 }
 
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PricingType {
+  FIXED
+  HOURLY
+  MONTHLY
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  STRIPE
+  PAYPAL
+  WISE
+  JAZZCASH
+  EASYPAISA
+  CUSTOM
+}
+
 // ---------------------------------------------------------------------------
 // Auth (Better Auth — Prisma adapter shape) + RBAC
 // ---------------------------------------------------------------------------
@@ -89,6 +128,10 @@ model User {
 
   sessions Session[]
   accounts Account[]
+
+  createdQuotations Quotation[]
+  createdInvoices   Invoice[]
+  createdPayments   Payment[]
 
   @@map("users")
 }
@@ -199,6 +242,7 @@ model Media {
   teamMemberAvatar TeamMember[]
   affiliateToolLogo AffiliateTool[]
   ogImages         SeoMeta[]
+  paymentAttachments Payment[]
 
   @@map("media")
 }
@@ -408,6 +452,9 @@ model Project {
   relatedFrom Project[] @relation("RelatedProjects")
   relatedTo   Project[] @relation("RelatedProjects")
 
+  quotations Quotation[]
+  invoices   Invoice[]
+
   @@map("projects")
 }
 
@@ -613,4 +660,169 @@ model AboutPageContent {
   seo SeoMeta? @relation(fields: [seoId], references: [id])
 
   @@map("about_page_content")
+}
+
+// ---------------------------------------------------------------------------
+// Finance
+// ---------------------------------------------------------------------------
+
+model Client {
+  id         String   @id @default(cuid())
+  name       String
+  email      String?
+  phone      String?
+  company    String?
+  address    String?
+  currency   String
+  notes      String?
+  isArchived Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  quotations Quotation[]
+  invoices   Invoice[]
+
+  @@map("finance_clients")
+}
+
+model Quotation {
+  id            String          @id @default(cuid())
+  quoteNumber   String          @unique
+  status        QuotationStatus @default(DRAFT)
+  issueDate     DateTime
+  expiryDate    DateTime
+  clientId      String
+  projectId     String?
+  currency      String
+  notes         String?
+  terms         String?
+  signatureText String?
+  subtotal      Decimal         @default(0)
+  discountTotal Decimal         @default(0)
+  taxTotal      Decimal         @default(0)
+  grandTotal    Decimal         @default(0)
+  isArchived    Boolean         @default(false)
+  createdById   String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  client    Client          @relation(fields: [clientId], references: [id])
+  project   Project?        @relation(fields: [projectId], references: [id])
+  createdBy User?           @relation(fields: [createdById], references: [id])
+  items     QuotationItem[]
+  invoices  Invoice[]
+
+  @@map("finance_quotations")
+}
+
+model QuotationItem {
+  id            String       @id @default(cuid())
+  quotationId   String
+  name          String
+  description   String?
+  pricingType   PricingType  @default(FIXED)
+  quantity      Decimal      @default(1)
+  unitPrice     Decimal
+  discountType  DiscountType @default(PERCENT)
+  discountValue Decimal      @default(0)
+  taxPercent    Decimal      @default(0)
+  lineTotal     Decimal      @default(0)
+  order         Int          @default(0)
+
+  quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  @@map("finance_quotation_items")
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime
+  dueDate       DateTime
+  clientId      String
+  projectId     String?
+  quotationId   String?
+  currency      String
+  notes         String?
+  terms         String?
+  signatureText String?
+  subtotal      Decimal       @default(0)
+  discountTotal Decimal       @default(0)
+  taxTotal      Decimal       @default(0)
+  grandTotal    Decimal       @default(0)
+  amountPaid    Decimal       @default(0)
+  balance       Decimal       @default(0)
+  createdById   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  client    Client        @relation(fields: [clientId], references: [id])
+  project   Project?      @relation(fields: [projectId], references: [id])
+  quotation Quotation?    @relation(fields: [quotationId], references: [id])
+  createdBy User?         @relation(fields: [createdById], references: [id])
+  items     InvoiceItem[]
+  payments  Payment[]
+
+  @@map("finance_invoices")
+}
+
+model InvoiceItem {
+  id            String       @id @default(cuid())
+  invoiceId     String
+  name          String
+  description   String?
+  pricingType   PricingType  @default(FIXED)
+  quantity      Decimal      @default(1)
+  unitPrice     Decimal
+  discountType  DiscountType @default(PERCENT)
+  discountValue Decimal      @default(0)
+  taxPercent    Decimal      @default(0)
+  lineTotal     Decimal      @default(0)
+  order         Int          @default(0)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("finance_invoice_items")
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  invoiceId     String
+  amount        Decimal
+  currency      String
+  paymentDate   DateTime
+  method        PaymentMethod
+  transactionId String?
+  notes         String?
+  attachmentId  String?
+  createdById   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  invoice    Invoice @relation(fields: [invoiceId], references: [id])
+  attachment Media?  @relation(fields: [attachmentId], references: [id])
+  createdBy  User?   @relation(fields: [createdById], references: [id])
+
+  @@map("finance_payments")
+}
+
+model FinanceSettings {
+  id                  String   @id @default(cuid())
+  defaultCurrency     String   @default("PKR")
+  supportedCurrencies String[]
+  taxRate             Decimal  @default(0)
+  invoicePrefix       String   @default("INV")
+  quotePrefix         String   @default("QUO")
+  invoiceNumberFormat String   @default("{PREFIX}-{YEAR}-{SEQ}")
+  quoteNumberFormat   String   @default("{PREFIX}-{YEAR}-{SEQ}")
+  nextInvoiceSeq      Int      @default(1)
+  nextQuoteSeq        Int      @default(1)
+  bankingDetails      Json?
+  paymentInstructions String?
+  footerNotes         String?
+  termsAndConditions  String?
+  updatedAt           DateTime @updatedAt
+
+  @@map("finance_settings")
 }

@@ -98,3 +98,36 @@ export const navItemSchema = z.object({
   order: z.number().int().default(0),
 });
 export type NavItemInput = z.infer<typeof navItemSchema>;
+
+export const homeStatSchema = z.object({
+  label: z.string().min(1),
+  value: z.string().min(1),
+  suffix: z.string().default(""),
+});
+
+// Deliberately omits `id`/`seoId`/`updatedAt`/`seo` -- the admin form's GET
+// response includes those (via `include: { seo: true }`), and a naive
+// round-trip of that full object back into a PUT body used to send a raw
+// `seo` object where Prisma expects a nested-write shape (`connect`/`update`/
+// etc.), which threw PrismaClientValidationError on every save. Parsing
+// through this schema strips those fields back out before they ever reach
+// Prisma, in addition to actually validating the real fields.
+export const homePageContentSchema = z.object({
+  heroHeadline: z.string().min(1, "Hero headline is required"),
+  heroSubheadline: z.string().min(1, "Hero subheadline is required"),
+  heroCtaLabel: z.string().min(1, "CTA label is required"),
+  heroCtaHref: z.string().min(1, "CTA link is required"),
+  stats: z.array(homeStatSchema).default([]),
+});
+export type HomePageContentInput = z.infer<typeof homePageContentSchema>;
+
+// Same leaked-relation issue as homePageContentSchema above, for /pages/about.
+export const aboutPageContentSchema = z.object({
+  story: z.string().min(1, "Story is required"),
+  mission: z.string().min(1, "Mission is required"),
+  vision: z.string().min(1, "Vision is required"),
+  philosophy: z.string().min(1, "Philosophy is required"),
+  yearsExperience: z.coerce.number().int().min(0),
+  projectsShipped: z.coerce.number().int().min(0),
+});
+export type AboutPageContentInput = z.infer<typeof aboutPageContentSchema>;

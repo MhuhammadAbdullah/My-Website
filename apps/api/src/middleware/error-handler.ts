@@ -45,6 +45,10 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
       res.status(409).json({ error: "A record with that value already exists" });
       return;
     }
+    if (err.code === "P2003") {
+      res.status(409).json({ error: "This record is still referenced by other data and cannot be deleted" });
+      return;
+    }
   }
 
   // Malformed query args (e.g. a field the schema doesn't recognize) — a bug

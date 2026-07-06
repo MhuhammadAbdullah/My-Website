@@ -14,6 +14,13 @@ import { rolesRouter, permissionsRouter, usersRouter } from "./roles.routes.js";
 import { pagesRouter } from "./pages.routes.js";
 import { skillsRouter } from "./skills.routes.js";
 import { coreValuesRouter, timelineEventsRouter, certificationsRouter } from "./about-content.routes.js";
+import { clientsRouter } from "./clients.routes.js";
+import { quotationsRouter } from "./quotations.routes.js";
+import { invoicesRouter } from "./invoices.routes.js";
+import { paymentsRouter } from "./payments.routes.js";
+import { financeSettingsRouter } from "./finance-settings.routes.js";
+import { financeDashboardRouter } from "./finance-dashboard.routes.js";
+import { financeProjectsRouter } from "./finance-projects.routes.js";
 
 export const apiRouter = Router();
 
@@ -36,3 +43,10 @@ apiRouter.use("/skills", skillsRouter);
 apiRouter.use("/core-values", coreValuesRouter);
 apiRouter.use("/timeline-events", timelineEventsRouter);
 apiRouter.use("/certifications", certificationsRouter);
+apiRouter.use("/finance/clients", clientsRouter);
+apiRouter.use("/finance/quotations", quotationsRouter);
+apiRouter.use("/finance/invoices", invoicesRouter);
+apiRouter.use("/finance/payments", paymentsRouter);
+apiRouter.use("/finance/settings", financeSettingsRouter);
+apiRouter.use("/finance/dashboard", financeDashboardRouter);
+apiRouter.use("/finance/projects", financeProjectsRouter);
