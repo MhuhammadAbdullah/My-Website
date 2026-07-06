@@ -1,0 +1,616 @@
+// Agency Website — core schema.
+// Conventions used throughout (see architecture plan):
+//   - cuid ids, createdAt/updatedAt on every model
+//   - ContentStatus + `order` Int on anything manageable/orderable from the admin panel
+//   - slug (unique) on anything with its own public URL
+//   - optional 1:1 SeoMeta relation on anything that renders its own page
+//   - Media is the single source of truth for Cloudinary assets
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Shared enums
+// ---------------------------------------------------------------------------
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum TechCategory {
+  FRONTEND
+  BACKEND
+  DATABASE
+  DEVOPS
+  DESIGN
+  TOOL
+}
+
+enum FaqContext {
+  GENERAL
+  SERVICE
+  PORTFOLIO
+  CONTACT
+  AFFILIATE
+}
+
+enum NavLocation {
+  HEADER
+  FOOTER
+}
+
+enum SubmissionStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CLOSED
+  ARCHIVED
+}
+
+enum BillingType {
+  ONE_TIME
+  HOURLY
+  MONTHLY
+  YEARLY
+  CUSTOM
+}
+
+// ---------------------------------------------------------------------------
+// Auth (Better Auth — Prisma adapter shape) + RBAC
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Better Auth "admin" plugin baseline
+  banned         Boolean   @default(false)
+  banReason      String?
+  banExpires     DateTime?
+
+  // Granular RBAC extension
+  roleId String?
+  role   Role?   @relation(fields: [roleId], references: [id])
+
+  sessions Session[]
+  accounts Account[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verifications")
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id       String @id @default(cuid())
+  resource String
+  action   String
+  label    String
+
+  roles RolePermission[]
+
+  @@unique([resource, action])
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ---------------------------------------------------------------------------
+// Shared building blocks
+// ---------------------------------------------------------------------------
+
+model Media {
+  id         String   @id @default(cuid())
+  publicId   String   @unique
+  url        String
+  width      Int?
+  height     Int?
+  format     String?
+  bytes      Int?
+  altText    String?
+  createdAt  DateTime @default(now())
+
+  serviceHero      Service[]      @relation("ServiceHeroMedia")
+  technologyLogo   Technology[]
+  testimonialAvatar Testimonial[]
+  teamMemberAvatar TeamMember[]
+  affiliateToolLogo AffiliateTool[]
+  ogImages         SeoMeta[]
+
+  @@map("media")
+}
+
+model SeoMeta {
+  id              String   @id @default(cuid())
+  metaTitle       String
+  metaDescription String
+  keywords        String[]
+  canonicalUrl    String?
+  ogTitle         String?
+  ogDescription   String?
+  ogImageId       String?
+  twitterCard     String   @default("summary_large_image")
+  structuredData  Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  ogImage Media? @relation(fields: [ogImageId], references: [id])
+
+  service       Service?
+  project       Project?
+  homePage      HomePageContent?
+  aboutPage     AboutPageContent?
+
+  @@map("seo_meta")
+}
+
+model Technology {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  slug      String       @unique
+  category  TechCategory
+  logoId    String?
+  order     Int          @default(0)
+  isEnabled Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  logo     Media?    @relation(fields: [logoId], references: [id])
+  services Service[] @relation("ServiceTechnologies")
+  projects Project[] @relation("ProjectTechStack")
+
+  @@map("technologies")
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  author    String
+  role      String?
+  company   String?
+  avatarId  String?
+  quote     String
+  rating    Int      @default(5)
+  status    ContentStatus @default(PUBLISHED)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  avatar   Media?    @relation(fields: [avatarId], references: [id])
+  services Service[]
+  projects Project[] @relation("ProjectTestimonials")
+
+  @@map("testimonials")
+}
+
+model Faq {
+  id        String     @id @default(cuid())
+  question  String
+  answer    String
+  context   FaqContext @default(GENERAL)
+  order     Int        @default(0)
+  status    ContentStatus @default(PUBLISHED)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  services Service[]
+
+  @@map("faqs")
+}
+
+// ---------------------------------------------------------------------------
+// Services
+// ---------------------------------------------------------------------------
+
+model ServiceCategory {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  order     Int       @default(0)
+  isEnabled Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  services  Service[]
+
+  @@map("service_categories")
+}
+
+model Service {
+  id          String        @id @default(cuid())
+  categoryId  String?
+  name        String
+  slug        String        @unique
+  tagline     String
+  description String
+  benefits    String[]
+  process     Json // ordered [{ title, description }]
+  deliverables String[]
+  timeline    String
+  heroMediaId String?
+  status      ContentStatus @default(DRAFT)
+  isFeatured  Boolean       @default(false)
+  order       Int           @default(0)
+  seoId       String?       @unique
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  category      ServiceCategory? @relation(fields: [categoryId], references: [id])
+  heroMedia     Media?           @relation("ServiceHeroMedia", fields: [heroMediaId], references: [id])
+  seo           SeoMeta?         @relation(fields: [seoId], references: [id])
+  technologies  Technology[]     @relation("ServiceTechnologies")
+  pricingPlans  PricingPlan[]
+  faqs          Faq[]
+  testimonials  Testimonial[]
+
+  relatedFrom Service[] @relation("RelatedServices")
+  relatedTo   Service[] @relation("RelatedServices")
+
+  @@map("services")
+}
+
+model PricingPlan {
+  id            String      @id @default(cuid())
+  serviceId     String
+  name          String // Starter | Professional | Business | Custom Quote
+  regularPrice  Float? // required unless isCustomQuote (enforced in the route handler)
+  discountPrice Float? // optional; must be less than regularPrice when present
+  billingType   BillingType @default(ONE_TIME)
+  priceLabel    String? // e.g. "Starting from"
+  currency      String? // ISO 4217 code; null = use the site's global currency setting
+  features      String[]
+  isFeatured    Boolean  @default(false) // Custom Quote card
+  isCustomQuote Boolean  @default(false)
+  ctaLabel      String   @default("Get Started")
+  ctaHref       String   @default("/contact")
+  order         Int      @default(0)
+
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("pricing_plans")
+}
+
+// ---------------------------------------------------------------------------
+// Portfolio
+// ---------------------------------------------------------------------------
+
+model ProjectCategory {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  order     Int       @default(0)
+  isEnabled Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  projects  Project[]
+
+  @@map("project_categories")
+}
+
+model Project {
+  id             String        @id @default(cuid())
+  categoryId     String?
+  title          String
+  slug           String        @unique
+  client         String?
+  summary        String
+  overview       String
+  problem        String
+  research       String
+  strategy       String
+  planning       String
+  wireframesNote String?
+  designNotes    String
+  developmentNotes String
+  challenges     String
+  solutions      String
+  results        Json // ordered [{ label, value }]
+  liveUrl        String?
+  githubUrl      String?
+  videoUrl       String?
+  videoPublicId  String?
+  timelineStart  DateTime?
+  timelineEnd    DateTime?
+  status         ContentStatus @default(DRAFT)
+  isFeatured     Boolean       @default(false)
+  order          Int           @default(0)
+  seoId          String?       @unique
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  category     ProjectCategory? @relation(fields: [categoryId], references: [id])
+  seo          SeoMeta?         @relation(fields: [seoId], references: [id])
+  techStack    Technology[]     @relation("ProjectTechStack")
+  gallery      ProjectImage[]
+  testimonials Testimonial[]    @relation("ProjectTestimonials")
+
+  relatedFrom Project[] @relation("RelatedProjects")
+  relatedTo   Project[] @relation("RelatedProjects")
+
+  @@map("projects")
+}
+
+model ProjectImage {
+  id        String  @id @default(cuid())
+  projectId String
+  url       String
+  publicId  String
+  width     Int?
+  height    Int?
+  caption   String?
+  order     Int     @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("project_images")
+}
+
+// ---------------------------------------------------------------------------
+// About / Team
+// ---------------------------------------------------------------------------
+
+model TeamMember {
+  id        String        @id @default(cuid())
+  name      String
+  role      String
+  bio       String
+  avatarId  String?
+  socials   Json? // { twitter, linkedin, github, website }
+  order     Int           @default(0)
+  status    ContentStatus @default(PUBLISHED)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  avatar Media? @relation(fields: [avatarId], references: [id])
+  skills Skill[]
+
+  @@map("team_members")
+}
+
+model Skill {
+  id           String  @id @default(cuid())
+  name         String  @unique
+  proficiency  Int     @default(80) // 0-100
+  order        Int     @default(0)
+
+  teamMembers TeamMember[]
+
+  @@map("skills")
+}
+
+model CoreValue {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  icon        String // lucide icon name
+  order       Int    @default(0)
+
+  @@map("core_values")
+}
+
+model TimelineEvent {
+  id          String   @id @default(cuid())
+  year        String
+  title       String
+  description String
+  order       Int      @default(0)
+
+  @@map("timeline_events")
+}
+
+model Certification {
+  id       String  @id @default(cuid())
+  name     String
+  issuer   String
+  year     String
+  url      String?
+  order    Int     @default(0)
+
+  @@map("certifications")
+}
+
+// ---------------------------------------------------------------------------
+// Affiliate Tools
+// ---------------------------------------------------------------------------
+
+model AffiliateCategory {
+  id        String          @id @default(cuid())
+  slug      String          @unique
+  name      String
+  order     Int             @default(0)
+  isEnabled Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
+  tools     AffiliateTool[]
+
+  @@map("affiliate_categories")
+}
+
+model AffiliateTool {
+  id             String        @id @default(cuid())
+  categoryId     String
+  name           String
+  slug           String        @unique
+  logoId         String?
+  description    String
+  benefits       String[]
+  specialOffer   String?
+  disclosureNote String?
+  ctaLabel       String        @default("Visit Site")
+  ctaUrl         String
+  status         ContentStatus @default(PUBLISHED)
+  isFeatured     Boolean       @default(false)
+  order          Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  category AffiliateCategory @relation(fields: [categoryId], references: [id])
+  logo     Media?            @relation(fields: [logoId], references: [id])
+
+  @@map("affiliate_tools")
+}
+
+// ---------------------------------------------------------------------------
+// Contact / leads (seed of future CRM)
+// ---------------------------------------------------------------------------
+
+model ContactSubmission {
+  id        String           @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  country   String
+  city      String
+  budget    String?
+  message   String
+  source    String? // which page/CTA
+  status    SubmissionStatus @default(NEW)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@map("contact_submissions")
+}
+
+// ---------------------------------------------------------------------------
+// Navigation / Footer / Settings
+// ---------------------------------------------------------------------------
+
+model NavItem {
+  id       String      @id @default(cuid())
+  label    String
+  href     String
+  location NavLocation
+  parentId String?
+  order    Int         @default(0)
+
+  parent   NavItem?  @relation("NavItemChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children NavItem[] @relation("NavItemChildren")
+
+  @@map("nav_items")
+}
+
+model SiteSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+
+  @@map("site_settings")
+}
+
+// ---------------------------------------------------------------------------
+// Singleton page content (Home / About have bespoke, purposeful structure —
+// not generic blocks)
+// ---------------------------------------------------------------------------
+
+model HomePageContent {
+  id             String   @id @default(cuid())
+  heroHeadline   String
+  heroSubheadline String
+  heroCtaLabel   String
+  heroCtaHref    String
+  stats          Json // ordered [{ label, value, suffix }]
+  seoId          String?  @unique
+  updatedAt      DateTime @updatedAt
+
+  seo SeoMeta? @relation(fields: [seoId], references: [id])
+
+  @@map("home_page_content")
+}
+
+model AboutPageContent {
+  id              String   @id @default(cuid())
+  story           String
+  mission         String
+  vision          String
+  philosophy      String
+  yearsExperience Int      @default(0)
+  projectsShipped Int      @default(0)
+  seoId           String?  @unique
+  updatedAt       DateTime @updatedAt
+
+  seo SeoMeta? @relation(fields: [seoId], references: [id])
+
+  @@map("about_page_content")
+}

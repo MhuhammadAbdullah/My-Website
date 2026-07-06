@@ -1,0 +1,38 @@
+import { Router } from "express";
+import { servicesRouter } from "./services.routes.js";
+import { projectsRouter } from "./projects.routes.js";
+import { testimonialsRouter } from "./testimonials.routes.js";
+import { faqsRouter } from "./faqs.routes.js";
+import { teamRouter } from "./team.routes.js";
+import { affiliateRouter } from "./affiliate.routes.js";
+import { contactRouter } from "./contact.routes.js";
+import { navRouter } from "./nav.routes.js";
+import { settingsRouter } from "./settings.routes.js";
+import { mediaRouter } from "./media.routes.js";
+import { categoriesRouter } from "./categories.routes.js";
+import { rolesRouter, permissionsRouter, usersRouter } from "./roles.routes.js";
+import { pagesRouter } from "./pages.routes.js";
+import { skillsRouter } from "./skills.routes.js";
+import { coreValuesRouter, timelineEventsRouter, certificationsRouter } from "./about-content.routes.js";
+
+export const apiRouter = Router();
+
+apiRouter.use("/services", servicesRouter);
+apiRouter.use("/projects", projectsRouter);
+apiRouter.use("/testimonials", testimonialsRouter);
+apiRouter.use("/faqs", faqsRouter);
+apiRouter.use("/team", teamRouter);
+apiRouter.use("/affiliate", affiliateRouter);
+apiRouter.use("/contact", contactRouter);
+apiRouter.use("/navigation", navRouter);
+apiRouter.use("/settings", settingsRouter);
+apiRouter.use("/media", mediaRouter);
+apiRouter.use("/categories", categoriesRouter);
+apiRouter.use("/roles", rolesRouter);
+apiRouter.use("/permissions", permissionsRouter);
+apiRouter.use("/users", usersRouter);
+apiRouter.use("/pages", pagesRouter);
+apiRouter.use("/skills", skillsRouter);
+apiRouter.use("/core-values", coreValuesRouter);
+apiRouter.use("/timeline-events", timelineEventsRouter);
+apiRouter.use("/certifications", certificationsRouter);

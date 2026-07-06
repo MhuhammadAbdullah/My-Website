@@ -1,0 +1,11 @@
+@import "@agency/ui/styles.css";
+
+@source "../../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../src/**/*.{ts,tsx}";
+
+:root {
+  --font-heading: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-serif-emphasis: var(--font-playfair), ui-serif, Georgia, serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}

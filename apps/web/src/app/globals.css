@@ -1,0 +1,25 @@
+@import "@agency/ui/styles.css";
+
+@source "../../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../src/**/*.{ts,tsx}";
+
+/* Wire the tokens in @agency/ui/styles.css to this app's next/font-loaded,
+   self-hosted font files instead of relying on a system/CDN "Manrope". */
+:root {
+  --font-heading: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-serif-emphasis: var(--font-playfair), ui-serif, Georgia, serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+/* Manrope's `latin` subset has no ₨ glyph, so it falls back to a system font
+   for that character only. Pin the fallback stack explicitly and use a
+   weight that font actually has, instead of letting the browser synthesize
+   a bold from it (the cause of the blurry/uneven look). */
+.currency-symbol {
+  font-family: ui-sans-serif, "Segoe UI", "Noto Sans", Arial, sans-serif;
+  font-weight: inherit;
+  font-size: 1.1em;
+  line-height: 1;
+  letter-spacing: normal;
+}

@@ -1,0 +1,185 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import { Award, Github, Linkedin, Twitter } from "lucide-react";
+import { Badge, Container, Section, Heading, Reveal, Progress, Avatar, AvatarFallback, AvatarImage } from "@agency/ui";
+import { getAboutContent, getAboutTeamData, getTechnologies } from "@/lib/api";
+import { FaqSection } from "@/components/marketing/faq-section";
+import { getFaqs } from "@/lib/api";
+import { CtaSection } from "@/components/marketing/cta-section";
+import { PageHeading } from "@/components/marketing/page-heading";
+import { cloudinaryTransform } from "@/lib/cloudinary";
+
+export const metadata: Metadata = {
+  title: "About",
+  description: "The story, mission, values, and team behind Calibre Digital.",
+};
+
+const socialIcons = { twitter: Twitter, linkedin: Linkedin, github: Github } as const;
+
+export default async function AboutPage() {
+  const [about, teamData, technologies, faqs] = await Promise.all([
+    getAboutContent(),
+    getAboutTeamData(),
+    getTechnologies(),
+    getFaqs("GENERAL"),
+  ]);
+
+  return (
+    <>
+      <Section className="pb-0">
+        <Container>
+          <PageHeading breadcrumb={[{ label: "Home", href: "/" }, { label: "About" }]}>
+            <Heading level={1} display>
+              Our **story**, in plain terms.
+            </Heading>
+            <p className="mt-5 text-body-lg text-body">{about.story}</p>
+          </PageHeading>
+        </Container>
+      </Section>
+
+      <Section>
+        <Container className="grid gap-6 sm:grid-cols-3">
+          <div className="rounded-2xl border border-neutral-200 p-6">
+            <Heading level={3}>Mission</Heading>
+            <p className="mt-2 text-body-sm text-body">{about.mission}</p>
+          </div>
+          <div className="rounded-2xl border border-neutral-200 p-6">
+            <Heading level={3}>Vision</Heading>
+            <p className="mt-2 text-body-sm text-body">{about.vision}</p>
+          </div>
+          <div className="rounded-2xl bg-neutral-950 p-6 text-white">
+            <Heading level={3} className="text-white">
+              Philosophy
+            </Heading>
+            <p className="mt-2 text-body-sm text-neutral-300">{about.philosophy}</p>
+          </div>
+        </Container>
+      </Section>
+
+      <Section className="bg-neutral-50">
+        <Container>
+          <Heading level={2} className="text-center">
+            Core **values**
+          </Heading>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {teamData.values.map((value, i) => (
+              <Reveal key={value.id} delay={i * 0.06} className="rounded-2xl border border-neutral-200 p-6">
+                <Award className="size-6 text-accent-500" />
+                <h3 className="mt-4 text-h4 font-semibold text-heading">{value.title}</h3>
+                <p className="mt-2 text-body-sm text-body">{value.description}</p>
+              </Reveal>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      <Section>
+        <Container>
+          <Heading level={2}>Our **timeline**</Heading>
+          <ol className="mt-10 space-y-8 border-l border-neutral-200 pl-8">
+            {teamData.timeline.map((event) => (
+              <li key={event.id} className="relative">
+                <span className="absolute -left-[2.35rem] top-1 flex size-4 items-center justify-center rounded-full bg-accent-500 ring-4 ring-background" />
+                <p className="font-mono text-label text-accent-600">{event.year}</p>
+                <h3 className="mt-1 text-h4 font-semibold text-heading">{event.title}</h3>
+                <p className="mt-1 text-body-sm text-body">{event.description}</p>
+              </li>
+            ))}
+          </ol>
+        </Container>
+      </Section>
+
+      <Section className="bg-neutral-50">
+        <Container>
+          <Heading level={2} className="text-center">
+            Meet the **team**
+          </Heading>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {teamData.team.map((member) => (
+              <div key={member.id} className="rounded-2xl border border-neutral-200 bg-background p-6 text-center">
+                <Avatar className="mx-auto size-20 sm:size-24 lg:size-28">
+                  {member.avatar && (
+                    <AvatarImage
+                      src={cloudinaryTransform(member.avatar.url, "f_auto,q_auto,w_224,h_224,c_fill,g_face")}
+                      alt={member.name}
+                    />
+                  )}
+                  <AvatarFallback className="text-h3 font-semibold">{member.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <h3 className="mt-5 font-semibold text-heading">{member.name}</h3>
+                <p className="text-body-sm text-neutral-500">{member.role}</p>
+                <p className="mt-2 text-body-sm text-body">{member.bio}</p>
+                {member.socials && (
+                  <div className="mt-4 flex justify-center gap-2">
+                    {Object.entries(member.socials).map(([key, href]) => {
+                      const Icon = socialIcons[key as keyof typeof socialIcons];
+                      if (!Icon || !href) return null;
+                      return (
+                        <a key={key} href={href} target="_blank" rel="noreferrer" className="text-neutral-400 hover:text-heading">
+                          <Icon className="size-4" />
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </Container>
+      </Section>
+
+      <Section>
+        <Container className="grid gap-12 lg:grid-cols-2">
+          <div>
+            <Heading level={2}>Skills</Heading>
+            <div className="mt-6 space-y-5">
+              {Array.from(new Map(teamData.team.flatMap((m) => m.skills).map((s) => [s.id, s])).values()).map((skill) => (
+                <div key={skill.id}>
+                  <div className="mb-1.5 flex justify-between text-body-sm">
+                    <span className="text-heading">{skill.name}</span>
+                    <span className="text-neutral-400">{skill.proficiency}%</span>
+                  </div>
+                  <Progress value={skill.proficiency} label={skill.name} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Heading level={2}>Certifications</Heading>
+            <ul className="mt-6 space-y-4">
+              {teamData.certifications.map((cert) => (
+                <li key={cert.id} className="rounded-2xl border border-neutral-200 p-4">
+                  <p className="font-medium text-heading">{cert.name}</p>
+                  <p className="text-body-sm text-neutral-500">{cert.issuer} · {cert.year}</p>
+                </li>
+              ))}
+            </ul>
+
+            <Heading level={2} className="mt-10">
+              Technologies
+            </Heading>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {technologies.map((tech) => (
+                <Badge key={tech.id} variant="neutral">
+                  {tech.name}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </Container>
+      </Section>
+
+      <Section className="bg-neutral-50">
+        <Container>
+          <FaqSection faqs={faqs} />
+        </Container>
+      </Section>
+
+      <Section>
+        <Container>
+          <CtaSection />
+        </Container>
+      </Section>
+    </>
+  );
+}
