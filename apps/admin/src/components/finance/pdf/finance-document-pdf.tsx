@@ -4,7 +4,7 @@ import type { PdfContext } from "./pdf-context";
 export interface PdfLineItem {
   name: string;
   description?: string | null;
-  quantity: number;
+  pricingType: string;
   unitPrice: number;
   discountType: "PERCENT" | "FIXED";
   discountValue: number;
@@ -23,7 +23,6 @@ export interface PdfClient {
 export interface PdfDocumentData {
   kind: "QUOTATION" | "INVOICE";
   number: string;
-  status: string;
   issueDate: string;
   secondDate: string;
   secondDateLabel: string;
@@ -73,9 +72,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: "#e5e7eb",
   },
-  colName: { width: "34%" },
-  colQty: { width: "10%", textAlign: "right" },
-  colPrice: { width: "16%", textAlign: "right" },
+  colName: { width: "30%" },
+  colPricingType: { width: "16%", textAlign: "right" },
+  colPrice: { width: "14%", textAlign: "right" },
   colDiscount: { width: "14%", textAlign: "right" },
   colTax: { width: "10%", textAlign: "right" },
   colTotal: { width: "16%", textAlign: "right" },
@@ -96,6 +95,10 @@ const styles = StyleSheet.create({
   section: { marginTop: 20 },
   sectionLabel: { fontSize: 8, textTransform: "uppercase", letterSpacing: 0.5, color: "#9ca3af", marginBottom: 4 },
   sectionBody: { fontSize: 8.5, color: "#374151", lineHeight: 1.5 },
+  bankGrid: { flexDirection: "row", flexWrap: "wrap" },
+  bankRow: { width: "50%", flexDirection: "row", marginTop: 4 },
+  bankLabel: { width: 90, fontSize: 8.5, color: "#6b7280" },
+  bankValue: { fontSize: 8.5, color: "#374151", fontWeight: 700 },
   signatureRow: { marginTop: 40, flexDirection: "row", justifyContent: "flex-end" },
   signatureBlock: { width: 200, textAlign: "center" },
   signatureLine: { borderTopWidth: 1, borderTopColor: "#9ca3af", marginBottom: 4, paddingTop: 4 },
@@ -124,6 +127,29 @@ function formatMoney(value: number, currency: string) {
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+// Bank details are stored as free-form JSON, so any key is rendered here if
+// present -- new fields added to Finance Settings later (e.g. "branch")
+// appear on the PDF automatically without a template change.
+const BANK_FIELD_LABELS: Record<string, string> = {
+  bankName: "Bank Name",
+  accountName: "Account Name",
+  accountNumber: "Account Number",
+  iban: "IBAN",
+  swiftCode: "SWIFT / BIC",
+  branch: "Branch",
+};
+
+function bankingDetailsRows(details: Record<string, unknown>): { label: string; value: string }[] {
+  const rows: { label: string; value: string }[] = [];
+  const orderedKeys = [...Object.keys(BANK_FIELD_LABELS), ...Object.keys(details).filter((k) => !(k in BANK_FIELD_LABELS))];
+  for (const key of orderedKeys) {
+    const value = details[key];
+    if (typeof value !== "string" || !value.trim()) continue;
+    rows.push({ label: BANK_FIELD_LABELS[key] ?? key, value });
+  }
+  return rows;
 }
 
 export function FinanceDocumentPdf({ data, branding }: { data: PdfDocumentData; branding: PdfContext }) {
@@ -161,10 +187,6 @@ export function FinanceDocumentPdf({ data, branding }: { data: PdfDocumentData; 
                 <Text style={styles.metaLabel}>{data.secondDateLabel}: </Text>
                 {formatDate(data.secondDate)}
               </Text>
-              <Text>
-                <Text style={styles.metaLabel}>Status: </Text>
-                {data.status}
-              </Text>
             </View>
           </View>
         </View>
@@ -188,9 +210,9 @@ export function FinanceDocumentPdf({ data, branding }: { data: PdfDocumentData; 
 
         <View style={styles.table}>
           <View style={styles.tableHeaderRow}>
-            <Text style={[styles.colName, styles.thText]}>Item</Text>
-            <Text style={[styles.colQty, styles.thText]}>Qty</Text>
-            <Text style={[styles.colPrice, styles.thText]}>Unit price</Text>
+            <Text style={[styles.colName, styles.thText]}>Service</Text>
+            <Text style={[styles.colPricingType, styles.thText]}>Billing</Text>
+            <Text style={[styles.colPrice, styles.thText]}>Amount</Text>
             <Text style={[styles.colDiscount, styles.thText]}>Discount</Text>
             <Text style={[styles.colTax, styles.thText]}>Tax</Text>
             <Text style={[styles.colTotal, styles.thText]}>Total</Text>
@@ -201,7 +223,7 @@ export function FinanceDocumentPdf({ data, branding }: { data: PdfDocumentData; 
                 <Text>{item.name}</Text>
                 {item.description && <Text style={styles.itemDescription}>{item.description}</Text>}
               </View>
-              <Text style={styles.colQty}>{item.quantity}</Text>
+              <Text style={styles.colPricingType}>{item.pricingType}</Text>
               <Text style={styles.colPrice}>{formatMoney(item.unitPrice, currency)}</Text>
               <Text style={styles.colDiscount}>
                 {item.discountValue > 0 ? (item.discountType === "PERCENT" ? `${item.discountValue}%` : formatMoney(item.discountValue, currency)) : "—"}
@@ -243,10 +265,28 @@ export function FinanceDocumentPdf({ data, branding }: { data: PdfDocumentData; 
           )}
         </View>
 
-        {data.notes && (
+        {branding.bankingDetails &&
+          (() => {
+            const rows = bankingDetailsRows(branding.bankingDetails);
+            return rows.length > 0 ? (
+              <View style={styles.section}>
+                <Text style={styles.sectionLabel}>Bank details</Text>
+                <View style={styles.bankGrid}>
+                  {rows.map((row) => (
+                    <View key={row.label} style={styles.bankRow}>
+                      <Text style={styles.bankLabel}>{row.label}</Text>
+                      <Text style={styles.bankValue}>{row.value}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ) : null;
+          })()}
+
+        {branding.paymentInstructions && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Notes</Text>
-            <Text style={styles.sectionBody}>{data.notes}</Text>
+            <Text style={styles.sectionLabel}>Payment instructions</Text>
+            <Text style={styles.sectionBody}>{branding.paymentInstructions}</Text>
           </View>
         )}
 
@@ -257,10 +297,17 @@ export function FinanceDocumentPdf({ data, branding }: { data: PdfDocumentData; 
           </View>
         )}
 
-        {branding.paymentInstructions && data.kind === "INVOICE" && (
+        {data.notes && (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Payment instructions</Text>
-            <Text style={styles.sectionBody}>{branding.paymentInstructions}</Text>
+            <Text style={styles.sectionLabel}>Notes</Text>
+            <Text style={styles.sectionBody}>{data.notes}</Text>
+          </View>
+        )}
+
+        {branding.footerNotes && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Footer notes</Text>
+            <Text style={styles.sectionBody}>{branding.footerNotes}</Text>
           </View>
         )}
 
@@ -273,7 +320,7 @@ export function FinanceDocumentPdf({ data, branding }: { data: PdfDocumentData; 
         <Text
           style={styles.footer}
           fixed
-          render={({ pageNumber, totalPages }) => `${branding.footerNotes || branding.companyName}    ·    Page ${pageNumber} of ${totalPages}`}
+          render={({ pageNumber, totalPages }) => `${branding.companyName}    ·    Page ${pageNumber} of ${totalPages}`}
         />
       </Page>
     </Document>

@@ -5,13 +5,18 @@ import type {
   AffiliateToolRead,
   FaqRead,
   HomeContentRead,
+  HomeProcessStepRead,
+  HomeStatRead,
+  HomeWhyReasonRead,
   NavItemRead,
+  PageSeoRead,
   PaginatedResponse,
   ProjectDetail,
   ProjectListItem,
   ServiceDetail,
   ServiceListItem,
   SiteSettings,
+  SkillRead,
   TeamMemberRead,
   TechnologyRead,
   TestimonialRead,
@@ -60,6 +65,8 @@ export const getFaqs = (context?: string) =>
 
 export const getTeam = () => apiFetch<{ items: TeamMemberRead[] }>("/team").then((r) => r.items);
 
+export const getSkills = () => apiFetch<{ items: SkillRead[] }>("/skills").then((r) => r.items);
+
 export const getTechnologies = () =>
   apiFetch<{ items: TechnologyRead[] }>("/categories/technologies").then((r) => r.items);
 
@@ -97,6 +104,17 @@ export const getAffiliateTools = (
 };
 
 export const getHomeContent = () => apiFetch<{ item: HomeContentRead }>("/pages/home").then((r) => r.item);
+
+export const getHomeStats = () => apiFetch<{ items: HomeStatRead[] }>("/home-stats").then((r) => r.items);
+
+export const getHomeProcessSteps = () =>
+  apiFetch<{ items: HomeProcessStepRead[] }>("/home-process-steps").then((r) => r.items);
+
+export const getHomeWhyReasons = () =>
+  apiFetch<{ items: HomeWhyReasonRead[] }>("/home-why-reasons").then((r) => r.items);
+
+export const getPageSeo = (page: "services" | "portfolio" | "affiliate-tools" | "contact") =>
+  apiFetch<{ item: PageSeoRead | null }>(`/page-seo/${page}`).then((r) => r.item);
 
 export const getAboutContent = () => apiFetch<{ item: AboutContentRead }>("/pages/about").then((r) => r.item);
 

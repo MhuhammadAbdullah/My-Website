@@ -19,6 +19,7 @@ import {
   toast,
 } from "@agency/ui";
 import { useAsyncData } from "@/lib/use-resource";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import type { createResourceClient } from "@/lib/api";
 import { ResourceForm, type FormValues } from "./resource-form";
 import type { ColumnConfig, FieldConfig } from "./types";
@@ -56,6 +57,7 @@ export function ResourceManager<T extends { id: string }>({
   const [editing, setEditing] = React.useState<T | null>(null);
   const [values, setValues] = React.useState<FormValues>(defaultValues);
   const [saving, setSaving] = React.useState(false);
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
 
   function openCreate() {
     setEditing(null);
@@ -88,15 +90,17 @@ export function ResourceManager<T extends { id: string }>({
     }
   }
 
-  async function handleDelete(item: T) {
-    if (!confirm(`Delete this ${title.toLowerCase().replace(/s$/, "")}? This can't be undone.`)) return;
-    try {
-      await resourceClient.remove(item.id);
-      toast.success("Deleted");
-      reload();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
-    }
+  function handleDelete(item: T) {
+    const label = title.toLowerCase().replace(/s$/, "");
+    confirmDelete({
+      title: `Delete this ${label}?`,
+      description: "This action cannot be undone.",
+      onConfirm: async () => {
+        await resourceClient.remove(item.id);
+        toast.success("Deleted");
+        reload();
+      },
+    });
   }
 
   return (
@@ -161,14 +165,14 @@ export function ResourceManager<T extends { id: string }>({
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className="flex max-h-[85vh] w-full max-w-lg flex-col p-0">
+          <DialogHeader className="mb-0 shrink-0 border-b border-neutral-200 px-5 py-4">
             <DialogTitle>{editing ? `Edit ${title.toLowerCase().replace(/s$/, "")}` : `New ${title.toLowerCase().replace(/s$/, "")}`}</DialogTitle>
           </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto pr-1">
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
             <ResourceForm fields={fields} values={values} onChange={setValues} />
           </div>
-          <div className="mt-6 flex justify-end gap-3">
+          <div className="flex shrink-0 justify-end gap-3 border-t border-neutral-200 px-5 py-3">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
@@ -178,6 +182,8 @@ export function ResourceManager<T extends { id: string }>({
           </div>
         </DialogContent>
       </Dialog>
+
+      {ConfirmDialog}
     </div>
   );
 }

@@ -15,19 +15,17 @@ export interface PdfContext {
   bankingDetails: Record<string, unknown> | null;
 }
 
-let cached: PdfContext | null = null;
-
-// Branding + finance defaults change rarely, so a single in-memory cache per
-// admin session avoids two extra network round-trips on every PDF download.
+// Always fetched fresh (no module-level caching) -- Finance Settings can be
+// edited at any time from the admin panel, and a stale in-memory cache would
+// keep serving old banking details / payment instructions to every PDF
+// generated in the same session until a full page reload cleared it.
 export async function getPdfContext(): Promise<PdfContext> {
-  if (cached) return cached;
-
   const [settings, financeSettings] = await Promise.all([
     request<{ settings: SiteSettings }>("/settings").then((r) => r.settings),
     request<{ item: FinanceSettingsInput }>("/finance/settings").then((r) => r.item),
   ]);
 
-  cached = {
+  return {
     companyName: settings.branding?.brandName || settings.company_name || "Company",
     logoUrl: settings.branding?.logoUrl ?? null,
     displayMode: settings.branding?.displayMode ?? "TEXT",
@@ -39,5 +37,4 @@ export async function getPdfContext(): Promise<PdfContext> {
     termsAndConditions: financeSettings.termsAndConditions ?? "",
     bankingDetails: (financeSettings.bankingDetails as Record<string, unknown> | null) ?? null,
   };
-  return cached;
 }

@@ -17,6 +17,7 @@ import {
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "@agency/ui";
+import { formatMoney } from "@/lib/currency";
 
 export interface ChartsResponse {
   monthlyRevenue: { label: string; revenue: number }[];
@@ -58,7 +59,9 @@ function ChartCard({ title, loading, empty, children }: { title: string; loading
   );
 }
 
-export function DashboardCharts({ data, loading }: { data: ChartsResponse | null; loading: boolean }) {
+export function DashboardCharts({ data, loading, currency }: { data: ChartsResponse | null; loading: boolean; currency: string }) {
+  const tooltipFormatter = (value: number) => formatMoney(value, currency, { maximumFractionDigits: 0 });
+
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <ChartCard title="Revenue over time" loading={loading} empty={data?.monthlyRevenue.every((d) => d.revenue === 0)}>
@@ -67,7 +70,7 @@ export function DashboardCharts({ data, loading }: { data: ChartsResponse | null
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
             <XAxis dataKey="label" fontSize={11} tickLine={false} axisLine={false} />
             <YAxis fontSize={11} tickLine={false} axisLine={false} width={48} />
-            <Tooltip />
+            <Tooltip formatter={tooltipFormatter} />
             <Bar dataKey="revenue" fill={PALETTE[0]} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
@@ -79,7 +82,7 @@ export function DashboardCharts({ data, loading }: { data: ChartsResponse | null
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
             <XAxis dataKey="label" fontSize={11} tickLine={false} axisLine={false} />
             <YAxis fontSize={11} tickLine={false} axisLine={false} width={48} />
-            <Tooltip />
+            <Tooltip formatter={tooltipFormatter} />
             <Line type="monotone" dataKey="outstanding" stroke={PALETTE[3]} strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
@@ -91,7 +94,7 @@ export function DashboardCharts({ data, loading }: { data: ChartsResponse | null
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
             <XAxis type="number" fontSize={11} tickLine={false} axisLine={false} />
             <YAxis type="category" dataKey="label" fontSize={10} tickLine={false} axisLine={false} width={110} />
-            <Tooltip />
+            <Tooltip formatter={tooltipFormatter} />
             <Bar dataKey="revenue" fill={PALETTE[1]} radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
@@ -103,7 +106,7 @@ export function DashboardCharts({ data, loading }: { data: ChartsResponse | null
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
             <XAxis type="number" fontSize={11} tickLine={false} axisLine={false} />
             <YAxis type="category" dataKey="label" fontSize={10} tickLine={false} axisLine={false} width={110} />
-            <Tooltip />
+            <Tooltip formatter={tooltipFormatter} />
             <Bar dataKey="revenue" fill={PALETTE[4]} radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
@@ -149,7 +152,7 @@ export function DashboardCharts({ data, loading }: { data: ChartsResponse | null
                 <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip formatter={tooltipFormatter} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
           </PieChart>
         </ResponsiveContainer>

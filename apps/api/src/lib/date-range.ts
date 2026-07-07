@@ -35,6 +35,64 @@ function startOfMonth(d: Date) {
 function startOfYear(d: Date) {
   return new Date(d.getFullYear(), 0, 1);
 }
+function startOfQuarter(d: Date) {
+  return new Date(d.getFullYear(), Math.floor(d.getMonth() / 3) * 3, 1);
+}
+function addDays(d: Date, days: number) {
+  const x = new Date(d);
+  x.setDate(x.getDate() + days);
+  return x;
+}
+
+export type ReportDateRangePreset =
+  | "today"
+  | "yesterday"
+  | "last7days"
+  | "last30days"
+  | "thisMonth"
+  | "lastMonth"
+  | "thisQuarter"
+  | "thisYear"
+  | "custom";
+
+// Reports has its own resolver (rather than reusing resolveDateRange above)
+// because it needs a wider preset list *and* an "all time" default (no
+// filtering at all) when nothing is selected -- resolveDateRange always
+// falls back to "this month" for the dashboard chart, which isn't the right
+// default for a full financial report.
+export function resolveReportDateRange(preset: string | undefined, fromStr?: string, toStr?: string): DateRange | null {
+  const now = new Date();
+  switch (preset) {
+    case "today":
+      return { start: startOfDay(now), end: endOfDay(now) };
+    case "yesterday": {
+      const yesterday = addDays(now, -1);
+      return { start: startOfDay(yesterday), end: endOfDay(yesterday) };
+    }
+    case "last7days":
+      return { start: startOfDay(addDays(now, -6)), end: endOfDay(now) };
+    case "last30days":
+      return { start: startOfDay(addDays(now, -29)), end: endOfDay(now) };
+    case "thisMonth":
+      return { start: startOfMonth(now), end: endOfDay(now) };
+    case "lastMonth": {
+      const lastMonthEnd = new Date(startOfMonth(now).getTime() - 1);
+      return { start: startOfMonth(lastMonthEnd), end: endOfDay(lastMonthEnd) };
+    }
+    case "thisQuarter":
+      return { start: startOfQuarter(now), end: endOfDay(now) };
+    case "thisYear":
+      return { start: startOfYear(now), end: endOfDay(now) };
+    case "custom": {
+      if (!fromStr && !toStr) return null;
+      const start = fromStr ? startOfDay(new Date(fromStr)) : startOfMonth(now);
+      const end = toStr ? endOfDay(new Date(toStr)) : endOfDay(now);
+      return { start, end };
+    }
+    default:
+      return null;
+  }
+}
 
 export function resolveDateRange(preset: string | undefined, fromStr?: string, toStr?: string): DateRange {
   const now = new Date();

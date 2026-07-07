@@ -163,7 +163,7 @@ export default function SettingsPage() {
 
       <div className="mt-8 grid max-w-2xl gap-5">
         {field("company_name", "Company name")}
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid gap-5 sm:grid-cols-2">
           {field("contact_email", "Contact email")}
           {field("contact_phone", "Contact phone")}
         </div>
@@ -186,7 +186,7 @@ export default function SettingsPage() {
         </div>
         {field("whatsapp_number", "WhatsApp number")}
         {field("address", "Address")}
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid gap-5 sm:grid-cols-2">
           {field("business_hours_weekday", "Hours (Mon–Fri)")}
           {field("business_hours_weekend", "Hours (Sat–Sun)")}
         </div>

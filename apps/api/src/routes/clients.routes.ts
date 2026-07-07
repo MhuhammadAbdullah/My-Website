@@ -77,12 +77,29 @@ clientsRouter.get(
       return;
     }
 
-    const [totalQuotations, totalInvoices, paidRevenue, pendingRevenue, overdueInvoices, recentPayments] = await Promise.all([
+    const [totalQuotations, totalInvoices, paymentsRevenue, pendingRevenue, overdueInvoices, recentPayments] = await Promise.all([
       prisma.quotation.count({ where: { clientId } }),
       prisma.invoice.count({ where: { clientId } }),
-      prisma.invoice.aggregate({ where: { clientId, status: "PAID" }, _sum: { grandTotal: true } }),
+      // Revenue actually received -- summed from the Payments table (not
+      // invoice.grandTotal) so partially-paid invoices count only the
+      // amount actually paid, not the full invoice value. Draft/cancelled
+      // invoices are excluded even though payments shouldn't exist on them.
+      prisma.payment.aggregate({
+        where: { invoice: { clientId, status: { notIn: ["DRAFT", "CANCELLED"] } } },
+        _sum: { amount: true },
+      }),
       prisma.invoice.aggregate({ where: { clientId, status: { in: ["SENT", "PARTIALLY_PAID", "OVERDUE"] } }, _sum: { balance: true } }),
-      prisma.invoice.count({ where: { clientId, status: "OVERDUE" } }),
+      // Overdue is derived, not the (rarely, manually set) OVERDUE status --
+      // an invoice is overdue once its due date has passed and it still has
+      // a balance owed, regardless of whether anyone flipped its status.
+      prisma.invoice.count({
+        where: {
+          clientId,
+          status: { in: ["SENT", "PARTIALLY_PAID", "OVERDUE"] },
+          dueDate: { lt: new Date() },
+          balance: { gt: 0 },
+        },
+      }),
       prisma.payment.findMany({
         where: { invoice: { clientId } },
         include: { invoice: { select: { id: true, invoiceNumber: true } } },
@@ -95,7 +112,7 @@ clientsRouter.get(
       client,
       totalQuotations,
       totalInvoices,
-      totalRevenue: paidRevenue._sum.grandTotal?.toNumber() ?? 0,
+      totalRevenue: paymentsRevenue._sum.amount?.toNumber() ?? 0,
       totalPending: pendingRevenue._sum.balance?.toNumber() ?? 0,
       overdueInvoices,
       recentPayments,

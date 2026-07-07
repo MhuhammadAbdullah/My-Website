@@ -29,6 +29,7 @@ import {
 import { CURRENCY_OPTIONS, DEFAULT_CURRENCY } from "@agency/types";
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { LineItemsEditor, EMPTY_LINE_ITEM, type LineItemRow } from "@/components/finance/line-items-editor";
 import { RecordPaymentDialog } from "@/components/finance/record-payment-dialog";
 import { buildPdfData } from "@/components/finance/pdf/map-to-pdf-data";
@@ -140,6 +141,7 @@ export default function InvoiceDetailPage() {
   });
   const [saving, setSaving] = React.useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = React.useState(false);
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
 
   React.useEffect(() => {
     if (invoice) {
@@ -209,15 +211,16 @@ export default function InvoiceDetailPage() {
     }
   }
 
-  async function handleDeletePayment(paymentId: string) {
-    if (!confirm("Delete this payment? The invoice balance will be recalculated.")) return;
-    try {
-      await request(`/finance/payments/${paymentId}`, { method: "DELETE" });
-      toast.success("Payment deleted");
-      reload();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
-    }
+  function handleDeletePayment(paymentId: string) {
+    confirmDelete({
+      title: "Delete this payment?",
+      description: "The invoice balance will be recalculated. This action cannot be undone.",
+      onConfirm: async () => {
+        await request(`/finance/payments/${paymentId}`, { method: "DELETE" });
+        toast.success("Payment deleted");
+        reload();
+      },
+    });
   }
 
   async function handleDownloadPdf() {
@@ -227,7 +230,6 @@ export default function InvoiceDetailPage() {
         buildPdfData({
           kind: "INVOICE",
           number: invoice.invoiceNumber,
-          status: invoice.status,
           issueDate: invoice.issueDate,
           secondDate: invoice.dueDate,
           secondDateLabel: "Due date",
@@ -284,7 +286,7 @@ export default function InvoiceDetailPage() {
       </div>
 
       {!isNew && invoice && (
-        <div className="mt-4 grid max-w-3xl grid-cols-3 gap-3">
+        <div className="mt-4 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-neutral-200 p-3">
             <p className="text-body-sm text-neutral-500">Total</p>
             <p className="text-h5 font-semibold text-heading">{formatMoney(invoice.grandTotal, invoice.currency)}</p>
@@ -419,6 +421,8 @@ export default function InvoiceDetailPage() {
           }}
         />
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

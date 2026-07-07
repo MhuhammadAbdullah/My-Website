@@ -9,7 +9,10 @@ export const Tabs = TabsPrimitive.Root;
 export function TabsList({ className, ...props }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>) {
   return (
     <TabsPrimitive.List
-      className={cn("inline-flex items-center gap-1 rounded-full bg-neutral-100 p-1", className)}
+      className={cn(
+        "flex max-w-full flex-nowrap items-center gap-1 overflow-x-auto overscroll-x-contain rounded-full bg-neutral-100 p-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        className,
+      )}
       {...props}
     />
   );
@@ -19,7 +22,7 @@ export function TabsTrigger({ className, ...props }: React.ComponentPropsWithout
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        "rounded-full px-4 py-2 text-body-sm font-medium text-body transition-colors duration-fast data-[state=active]:bg-background data-[state=active]:text-heading data-[state=active]:shadow-soft-sm",
+        "shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-body-sm font-medium text-body transition-colors duration-fast data-[state=active]:bg-background data-[state=active]:text-heading data-[state=active]:shadow-soft-sm",
         className,
       )}
       {...props}

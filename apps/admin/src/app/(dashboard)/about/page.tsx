@@ -1,18 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { Button, Heading, Input, Label, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, toast } from "@agency/ui";
+import { Button, Heading, Label, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, toast } from "@agency/ui";
 import { request, createResourceClient } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { ResourceManager } from "@/components/resource-manager/resource-manager";
+import { AboutSkillsManager } from "@/components/about/about-skills-manager";
+import { AboutSeoForm } from "@/components/about/about-seo-form";
 
 interface AboutContent {
   story: string;
   mission: string;
   vision: string;
   philosophy: string;
-  yearsExperience: number;
-  projectsShipped: number;
 }
 
 function AboutStoryForm() {
@@ -25,8 +25,6 @@ function AboutStoryForm() {
     mission: "",
     vision: "",
     philosophy: "",
-    yearsExperience: 0,
-    projectsShipped: 0,
   });
   const [saving, setSaving] = React.useState(false);
 
@@ -42,8 +40,6 @@ function AboutStoryForm() {
         mission: content.mission,
         vision: content.vision,
         philosophy: content.philosophy,
-        yearsExperience: content.yearsExperience,
-        projectsShipped: content.projectsShipped,
       });
     }
   }, [content]);
@@ -80,24 +76,9 @@ function AboutStoryForm() {
         <Label>Development philosophy</Label>
         <Textarea value={form.philosophy} onChange={(e) => setForm({ ...form, philosophy: e.target.value })} />
       </div>
-      <div className="grid grid-cols-2 gap-5">
-        <div>
-          <Label>Years of experience</Label>
-          <Input
-            type="number"
-            value={form.yearsExperience}
-            onChange={(e) => setForm({ ...form, yearsExperience: Number(e.target.value) })}
-          />
-        </div>
-        <div>
-          <Label>Projects shipped</Label>
-          <Input
-            type="number"
-            value={form.projectsShipped}
-            onChange={(e) => setForm({ ...form, projectsShipped: Number(e.target.value) })}
-          />
-        </div>
-      </div>
+      <p className="-mt-2 text-body-sm text-neutral-400">
+        Years in business and projects shipped are managed from Home Page → Statistics, so they stay in sync everywhere they're shown.
+      </p>
       <Button onClick={handleSave} disabled={saving} className="w-fit">
         {saving ? "Saving…" : "Save changes"}
       </Button>
@@ -124,12 +105,17 @@ export default function AboutContentPage() {
       <Tabs defaultValue="story" className="mt-6">
         <TabsList>
           <TabsTrigger value="story">Story</TabsTrigger>
+          <TabsTrigger value="skills">Skills</TabsTrigger>
           <TabsTrigger value="values">Core Values</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
           <TabsTrigger value="certifications">Certifications</TabsTrigger>
+          <TabsTrigger value="seo">SEO</TabsTrigger>
         </TabsList>
         <TabsContent value="story">
           <AboutStoryForm />
+        </TabsContent>
+        <TabsContent value="skills">
+          <AboutSkillsManager />
         </TabsContent>
         <TabsContent value="values">
           <ResourceManager
@@ -183,6 +169,9 @@ export default function AboutContentPage() {
             ]}
             defaultValues={{ name: "", issuer: "", year: "", url: "", order: 0 }}
           />
+        </TabsContent>
+        <TabsContent value="seo">
+          <AboutSeoForm />
         </TabsContent>
       </Tabs>
     </div>

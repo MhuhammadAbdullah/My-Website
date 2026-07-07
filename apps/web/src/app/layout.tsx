@@ -8,15 +8,24 @@ import { SiteFooter } from "@/components/site-footer";
 import { env } from "@/lib/env";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
-  title: {
-    default: "Calibre Digital — Premium Web Design & Engineering",
-    template: "%s | Calibre Digital",
-  },
-  description:
-    "Calibre Digital designs and engineers premium web products for startups and teams who refuse to ship something average.",
-};
+// Dynamic (not a static `export const metadata`) so the template suffix
+// tracks the actual configured brand name from Settings instead of a
+// hardcoded string that goes stale the moment the site is rebranded --
+// every child page's title was getting "| Calibre Digital" appended
+// regardless of what the business is actually called today.
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings().catch(() => null);
+  const brandName = resolveBranding(settings ?? {}, "Calibre Digital").name;
+
+  return {
+    metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
+    title: {
+      default: `${brandName} — Premium Web Design & Engineering`,
+      template: `%s | ${brandName}`,
+    },
+    description: `${brandName} designs and engineers premium web products for startups and teams who refuse to ship something average.`,
+  };
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [headerNav, footerNav, settings] = await Promise.all([

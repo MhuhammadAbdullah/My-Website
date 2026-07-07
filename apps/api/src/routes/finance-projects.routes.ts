@@ -16,14 +16,16 @@ financeProjectsRouter.get(
   asyncHandler(async (req, res) => {
     const projectId = req.params.id;
 
-    const [totalQuoted, totalInvoiced, totalOutstanding, quotationsCount, invoicesCount, invoicesForPaid] = await Promise.all([
-      prisma.quotation.aggregate({ where: { projectId }, _sum: { grandTotal: true } }),
-      prisma.invoice.aggregate({ where: { projectId }, _sum: { grandTotal: true } }),
-      prisma.invoice.aggregate({ where: { projectId, status: { in: ["SENT", "PARTIALLY_PAID", "OVERDUE"] } }, _sum: { balance: true } }),
-      prisma.quotation.count({ where: { projectId } }),
-      prisma.invoice.count({ where: { projectId } }),
-      prisma.invoice.findMany({ where: { projectId }, select: { amountPaid: true } }),
-    ]);
+    const [totalQuoted, totalInvoiced, totalOutstanding, quotationsCount, invoicesCount, invoicesForPaid, financeSettings] =
+      await Promise.all([
+        prisma.quotation.aggregate({ where: { projectId }, _sum: { grandTotal: true } }),
+        prisma.invoice.aggregate({ where: { projectId }, _sum: { grandTotal: true } }),
+        prisma.invoice.aggregate({ where: { projectId, status: { in: ["SENT", "PARTIALLY_PAID", "OVERDUE"] } }, _sum: { balance: true } }),
+        prisma.quotation.count({ where: { projectId } }),
+        prisma.invoice.count({ where: { projectId } }),
+        prisma.invoice.findMany({ where: { projectId }, select: { amountPaid: true } }),
+        prisma.financeSettings.findFirst(),
+      ]);
 
     const totalReceived = invoicesForPaid.reduce((sum, inv) => sum + inv.amountPaid.toNumber(), 0);
 
@@ -34,6 +36,7 @@ financeProjectsRouter.get(
       totalOutstanding: totalOutstanding._sum.balance?.toNumber() ?? 0,
       quotationsCount,
       invoicesCount,
+      defaultCurrency: financeSettings?.defaultCurrency ?? "PKR",
     });
   }),
 );

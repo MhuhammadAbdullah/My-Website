@@ -35,6 +35,7 @@ import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-li
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { usePaginatedList } from "@/lib/use-paginated-list";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { GalleryField, VideoField, type GalleryImageItem, type VideoItem } from "./media-fields";
 import { ProjectFinanceDialog } from "@/components/finance/project-finance-dialog";
 
@@ -213,12 +214,12 @@ function ProjectEditor({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[85vh] w-full max-w-2xl flex-col p-0">
+        <DialogHeader className="mb-0 shrink-0 border-b border-neutral-200 px-5 py-4">
           <DialogTitle>{project ? "Edit project" : "New project"}</DialogTitle>
         </DialogHeader>
-        <div className="max-h-[70vh] space-y-5 overflow-y-auto pr-2">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>Title *</Label>
               <Input
@@ -239,7 +240,7 @@ function ProjectEditor({
               <FieldError>{errors.slug}</FieldError>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>Client</Label>
               <Input value={form.client} onChange={(e) => setForm({ ...form, client: e.target.value })} />
@@ -289,7 +290,7 @@ function ProjectEditor({
             );
           })}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>Live URL</Label>
               <Input value={form.liveUrl} onChange={(e) => setForm({ ...form, liveUrl: e.target.value })} />
@@ -333,7 +334,7 @@ function ProjectEditor({
             </div>
             <div className="mt-2 space-y-2">
               {results.map((r, i) => (
-                <div key={i} className="grid grid-cols-[2fr_1fr_auto] gap-2">
+                <div key={i} className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_1fr_auto]">
                   <Input placeholder="Label" value={r.label} onChange={(e) => setResults(results.map((res, idx) => (idx === i ? { ...res, label: e.target.value } : res)))} />
                   <Input placeholder="Value" value={r.value} onChange={(e) => setResults(results.map((res, idx) => (idx === i ? { ...res, value: e.target.value } : res)))} />
                   <Button variant="ghost" size="icon" onClick={() => setResults(results.filter((_, idx) => idx !== i))}>
@@ -344,7 +345,7 @@ function ProjectEditor({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>Status</Label>
               <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
@@ -365,7 +366,7 @@ function ProjectEditor({
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="flex shrink-0 justify-end gap-3 border-t border-neutral-200 px-5 py-3">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
@@ -409,16 +410,18 @@ export default function PortfolioPage() {
 
   const [editing, setEditing] = React.useState<Project | null | undefined>(undefined);
   const [viewingFinance, setViewingFinance] = React.useState<Project | null>(null);
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
 
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this project?")) return;
-    try {
-      await request(`/projects/${id}`, { method: "DELETE" });
-      toast.success("Deleted");
-      list.reload();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
-    }
+  function handleDelete(id: string) {
+    confirmDelete({
+      title: "Delete this project?",
+      description: "This action cannot be undone.",
+      onConfirm: async () => {
+        await request(`/projects/${id}`, { method: "DELETE" });
+        toast.success("Deleted");
+        list.reload();
+      },
+    });
   }
 
   return (
@@ -535,6 +538,8 @@ export default function PortfolioPage() {
           onClose={() => setViewingFinance(null)}
         />
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

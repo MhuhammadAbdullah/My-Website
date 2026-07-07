@@ -8,6 +8,7 @@ import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-li
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { RecordPaymentDialog } from "@/components/finance/record-payment-dialog";
 
 interface PaymentListItem {
@@ -60,16 +61,18 @@ export default function PaymentsPage() {
     [],
   );
   const payableInvoices = (invoices ?? []).filter((inv) => Number(inv.balance) > 0);
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
 
-  async function handleDelete(item: PaymentListItem) {
-    if (!confirm("Delete this payment? The invoice balance will be recalculated.")) return;
-    try {
-      await request(`/finance/payments/${item.id}`, { method: "DELETE" });
-      toast.success("Payment deleted");
-      list.reload();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
-    }
+  function handleDelete(item: PaymentListItem) {
+    confirmDelete({
+      title: "Delete this payment?",
+      description: "The invoice balance will be recalculated. This action cannot be undone.",
+      onConfirm: async () => {
+        await request(`/finance/payments/${item.id}`, { method: "DELETE" });
+        toast.success("Payment deleted");
+        list.reload();
+      },
+    });
   }
 
   return (
@@ -178,6 +181,8 @@ export default function PaymentsPage() {
           }}
         />
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

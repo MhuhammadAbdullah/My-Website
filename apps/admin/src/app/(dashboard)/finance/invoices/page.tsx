@@ -7,9 +7,11 @@ import { Badge, Button, Heading, Pagination, Skeleton, Table, TableBody, TableCe
 import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-list-toolbar";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { request } from "@/lib/api";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { RecordPaymentDialog } from "@/components/finance/record-payment-dialog";
 import { buildPdfData } from "@/components/finance/pdf/map-to-pdf-data";
 import { downloadFinancePdf } from "@/components/finance/pdf/download-pdf";
+import type { PricingType } from "@agency/types";
 
 interface InvoiceListItem {
   id: string;
@@ -25,7 +27,6 @@ interface InvoiceListItem {
 
 interface InvoiceDetailForPdf {
   invoiceNumber: string;
-  status: string;
   issueDate: string;
   dueDate: string;
   currency: string;
@@ -43,7 +44,7 @@ interface InvoiceDetailForPdf {
   items: {
     name: string;
     description: string | null;
-    quantity: string;
+    pricingType: PricingType;
     unitPrice: string;
     discountType: "PERCENT" | "FIXED";
     discountValue: string;
@@ -82,6 +83,7 @@ export default function InvoicesPage() {
     filterKeys: ["status"],
   });
   const [payingInvoiceId, setPayingInvoiceId] = React.useState<string | null>(null);
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
 
   async function handleDownloadPdf(item: InvoiceListItem) {
     try {
@@ -90,7 +92,6 @@ export default function InvoicesPage() {
         buildPdfData({
           kind: "INVOICE",
           number: full.invoiceNumber,
-          status: full.status,
           issueDate: full.issueDate,
           secondDate: full.dueDate,
           secondDateLabel: "Due date",
@@ -124,15 +125,16 @@ export default function InvoicesPage() {
     }
   }
 
-  async function handleDelete(item: InvoiceListItem) {
-    if (!confirm(`Delete invoice ${item.invoiceNumber}? This can't be undone.`)) return;
-    try {
-      await request(`/finance/invoices/${item.id}`, { method: "DELETE" });
-      toast.success("Deleted");
-      list.reload();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
-    }
+  function handleDelete(item: InvoiceListItem) {
+    confirmDelete({
+      title: `Delete invoice ${item.invoiceNumber}?`,
+      description: "This action cannot be undone.",
+      onConfirm: async () => {
+        await request(`/finance/invoices/${item.id}`, { method: "DELETE" });
+        toast.success("Deleted");
+        list.reload();
+      },
+    });
   }
 
   const payingInvoice = (list.data ?? []).find((i) => i.id === payingInvoiceId);
@@ -266,6 +268,8 @@ export default function InvoicesPage() {
           }}
         />
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

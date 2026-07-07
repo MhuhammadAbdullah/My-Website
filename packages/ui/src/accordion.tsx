@@ -6,6 +6,9 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "./lib/cn";
 
 export const Accordion = AccordionPrimitive.Root;
+export const AccordionHeader = AccordionPrimitive.Header;
+export const AccordionTriggerPrimitive = AccordionPrimitive.Trigger;
+export const AccordionContentPrimitive = AccordionPrimitive.Content;
 
 export function AccordionItem({ className, ...props }: React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>) {
   return (

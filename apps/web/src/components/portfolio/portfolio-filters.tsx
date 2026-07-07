@@ -38,12 +38,12 @@ export function PortfolioFilters({
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex min-w-0 gap-2 overflow-x-auto overscroll-x-contain scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button
           type="button"
           onClick={() => updateParams({ category: null })}
           className={cn(
-            "rounded-full px-4 py-2 text-body-sm font-medium transition-colors",
+            "shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-body-sm font-medium transition-colors",
             !activeCategory ? "bg-heading text-white" : "bg-neutral-100 text-body hover:bg-neutral-200",
           )}
         >
@@ -55,7 +55,7 @@ export function PortfolioFilters({
             type="button"
             onClick={() => updateParams({ category: category.slug })}
             className={cn(
-              "rounded-full px-4 py-2 text-body-sm font-medium transition-colors",
+              "shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-body-sm font-medium transition-colors",
               activeCategory === category.slug
                 ? "bg-heading text-white"
                 : "bg-neutral-100 text-body hover:bg-neutral-200",

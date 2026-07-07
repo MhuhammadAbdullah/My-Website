@@ -181,7 +181,7 @@ export default function FinanceSettingsPage() {
 
         <div className="mt-4 border-t border-neutral-200 pt-6">
           <Heading level={3}>Banking details</Heading>
-          <p className="mt-1 text-body-sm text-neutral-500">Shown on invoices as payment instructions (follow-up: PDF rendering).</p>
+          <p className="mt-1 text-body-sm text-neutral-500">Shown in a "Bank details" section on generated quotation and invoice PDFs.</p>
           <div className="mt-5 grid gap-5 sm:grid-cols-2">
             <div>
               <Label>Bank name</Label>

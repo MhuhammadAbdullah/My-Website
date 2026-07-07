@@ -7,8 +7,34 @@ export type QuotationStatus = z.infer<typeof quotationStatusSchema>;
 export const invoiceStatusSchema = z.enum(["DRAFT", "SENT", "PARTIALLY_PAID", "PAID", "OVERDUE", "CANCELLED"]);
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>;
 
-export const pricingTypeSchema = z.enum(["FIXED", "HOURLY", "MONTHLY"]);
+export const pricingTypeSchema = z.enum([
+  "FIXED",
+  "ONE_TIME",
+  "HOURLY",
+  "DAILY",
+  "WEEKLY",
+  "MONTHLY",
+  "QUARTERLY",
+  "YEARLY",
+  "RETAINER",
+  "CUSTOM",
+]);
 export type PricingType = z.infer<typeof pricingTypeSchema>;
+
+// Client-facing display labels -- used on quotation/invoice PDFs and the
+// admin line-item editor so both stay in sync with the enum.
+export const PRICING_TYPE_LABELS: Record<PricingType, string> = {
+  FIXED: "Fixed Price",
+  ONE_TIME: "One-time",
+  HOURLY: "Hourly",
+  DAILY: "Daily",
+  WEEKLY: "Weekly",
+  MONTHLY: "Monthly",
+  QUARTERLY: "Quarterly",
+  YEARLY: "Yearly",
+  RETAINER: "Retainer",
+  CUSTOM: "Custom",
+};
 
 export const discountTypeSchema = z.enum(["PERCENT", "FIXED"]);
 export type DiscountType = z.infer<typeof discountTypeSchema>;

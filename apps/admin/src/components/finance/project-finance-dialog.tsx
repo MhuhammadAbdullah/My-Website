@@ -3,6 +3,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Skeleton } from "@agency/ui";
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
+import { formatMoney } from "@/lib/currency";
+import { DEFAULT_CURRENCY } from "@agency/types";
 
 interface ProjectFinanceSummary {
   totalQuoted: number;
@@ -11,10 +13,7 @@ interface ProjectFinanceSummary {
   totalOutstanding: number;
   quotationsCount: number;
   invoicesCount: number;
-}
-
-function formatMoney(value: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+  defaultCurrency: string;
 }
 
 export function ProjectFinanceDialog({ projectId, projectTitle, onClose }: { projectId: string; projectTitle: string; onClose: () => void }) {
@@ -37,24 +36,32 @@ export function ProjectFinanceDialog({ projectId, projectTitle, onClose }: { pro
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-neutral-200 p-3">
               <p className="text-body-sm text-neutral-500">Total quoted</p>
-              <p className="mt-1 text-h5 font-semibold text-heading">{formatMoney(data.totalQuoted)}</p>
+              <p className="mt-1 text-h5 font-semibold text-heading">
+                {formatMoney(data.totalQuoted, data.defaultCurrency ?? DEFAULT_CURRENCY, { maximumFractionDigits: 0 })}
+              </p>
               <p className="text-body-sm text-neutral-400">{data.quotationsCount} quotation(s)</p>
             </div>
             <div className="rounded-xl border border-neutral-200 p-3">
               <p className="text-body-sm text-neutral-500">Total invoiced</p>
-              <p className="mt-1 text-h5 font-semibold text-heading">{formatMoney(data.totalInvoiced)}</p>
+              <p className="mt-1 text-h5 font-semibold text-heading">
+                {formatMoney(data.totalInvoiced, data.defaultCurrency ?? DEFAULT_CURRENCY, { maximumFractionDigits: 0 })}
+              </p>
               <p className="text-body-sm text-neutral-400">{data.invoicesCount} invoice(s)</p>
             </div>
             <div className="rounded-xl border border-neutral-200 p-3">
               <p className="text-body-sm text-neutral-500">Total received</p>
-              <p className="mt-1 text-h5 font-semibold text-success-600">{formatMoney(data.totalReceived)}</p>
+              <p className="mt-1 text-h5 font-semibold text-success-600">
+                {formatMoney(data.totalReceived, data.defaultCurrency ?? DEFAULT_CURRENCY, { maximumFractionDigits: 0 })}
+              </p>
             </div>
             <div className="rounded-xl border border-neutral-200 p-3">
               <p className="text-body-sm text-neutral-500">Outstanding</p>
-              <p className="mt-1 text-h5 font-semibold text-warning-600">{formatMoney(data.totalOutstanding)}</p>
+              <p className="mt-1 text-h5 font-semibold text-warning-600">
+                {formatMoney(data.totalOutstanding, data.defaultCurrency ?? DEFAULT_CURRENCY, { maximumFractionDigits: 0 })}
+              </p>
             </div>
           </div>
         )}

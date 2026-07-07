@@ -20,6 +20,8 @@ import {
 import { Heading, Card, CardContent, Skeleton } from "@agency/ui";
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
+import { formatMoney } from "@/lib/currency";
+import { DEFAULT_CURRENCY } from "@agency/types";
 import { DateRangeFilter, type DateRangeValue } from "@/components/finance/date-range-filter";
 import { DashboardCharts, type ChartsResponse } from "@/components/finance/dashboard-charts";
 
@@ -41,10 +43,7 @@ interface FinanceStats {
   totalClients: number;
   paymentsThisMonth: number;
   averageInvoiceValue: number;
-}
-
-function formatMoney(value: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+  defaultCurrency: string;
 }
 
 function StatCard({
@@ -104,6 +103,7 @@ export default function DashboardPage() {
     () => request<FinanceStats>("/finance/dashboard"),
     [],
   );
+  const currency = finance?.defaultCurrency ?? DEFAULT_CURRENCY;
 
   const [range, setRange] = React.useState<DateRangeValue>({ preset: "month", from: "", to: "" });
 
@@ -135,16 +135,45 @@ export default function DashboardPage() {
         Finance overview
       </Heading>
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total revenue" value={formatMoney(finance?.totalRevenue ?? 0)} icon={DollarSign} loading={financeLoading} tone="success" />
-        <StatCard label="Pending revenue" value={formatMoney(finance?.pendingRevenue ?? 0)} icon={Clock} loading={financeLoading} tone="warning" />
-        <StatCard label="Outstanding payments" value={formatMoney(finance?.outstandingPayments ?? 0)} icon={AlertTriangle} loading={financeLoading} tone="error" />
-        <StatCard label="Payments received this month" value={formatMoney(finance?.paymentsThisMonth ?? 0)} icon={TrendingUp} loading={financeLoading} tone="success" />
+        <StatCard
+          label="Total revenue"
+          value={formatMoney(finance?.totalRevenue ?? 0, currency, { maximumFractionDigits: 0 })}
+          icon={DollarSign}
+          loading={financeLoading}
+          tone="success"
+        />
+        <StatCard
+          label="Pending revenue"
+          value={formatMoney(finance?.pendingRevenue ?? 0, currency, { maximumFractionDigits: 0 })}
+          icon={Clock}
+          loading={financeLoading}
+          tone="warning"
+        />
+        <StatCard
+          label="Outstanding payments"
+          value={formatMoney(finance?.outstandingPayments ?? 0, currency, { maximumFractionDigits: 0 })}
+          icon={AlertTriangle}
+          loading={financeLoading}
+          tone="error"
+        />
+        <StatCard
+          label="Payments received this month"
+          value={formatMoney(finance?.paymentsThisMonth ?? 0, currency, { maximumFractionDigits: 0 })}
+          icon={TrendingUp}
+          loading={financeLoading}
+          tone="success"
+        />
         <StatCard label="Total quotations" value={finance?.totalQuotations ?? 0} icon={FileText} loading={financeLoading} />
         <StatCard label="Total invoices" value={finance?.totalInvoices ?? 0} icon={Receipt} loading={financeLoading} />
         <StatCard label="Paid invoices" value={finance?.paidInvoices ?? 0} icon={CheckCircle2} loading={financeLoading} tone="success" />
         <StatCard label="Overdue invoices" value={finance?.overdueInvoices ?? 0} icon={AlertTriangle} loading={financeLoading} tone="error" />
         <StatCard label="Number of clients" value={finance?.totalClients ?? 0} icon={Building2} loading={financeLoading} />
-        <StatCard label="Average invoice value" value={formatMoney(finance?.averageInvoiceValue ?? 0)} icon={Wallet} loading={financeLoading} />
+        <StatCard
+          label="Average invoice value"
+          value={formatMoney(finance?.averageInvoiceValue ?? 0, currency, { maximumFractionDigits: 0 })}
+          icon={Wallet}
+          loading={financeLoading}
+        />
       </div>
 
       <div className="mt-10 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
@@ -156,7 +185,7 @@ export default function DashboardPage() {
         <DateRangeFilter value={range} onChange={setRange} />
       </div>
       <div className="mt-4">
-        <DashboardCharts data={charts} loading={chartsLoading} />
+        <DashboardCharts data={charts} loading={chartsLoading} currency={currency} />
       </div>
     </div>
   );

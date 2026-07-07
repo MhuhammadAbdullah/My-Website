@@ -21,7 +21,7 @@ function renderWithEmphasis(text: string) {
   const parts = text.split(/\*\*(.+?)\*\*/g);
   return parts.map((part, i) =>
     i % 2 === 1 ? (
-      <em key={i} data-serif-emphasis className="not-italic sm:italic">
+      <em key={i} data-serif-emphasis>
         {part}
       </em>
     ) : (

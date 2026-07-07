@@ -84,8 +84,15 @@ enum InvoiceStatus {
 
 enum PricingType {
   FIXED
+  ONE_TIME
   HOURLY
+  DAILY
+  WEEKLY
   MONTHLY
+  QUARTERLY
+  YEARLY
+  RETAINER
+  CUSTOM
 }
 
 enum DiscountType {
@@ -241,27 +248,60 @@ model Media {
   testimonialAvatar Testimonial[]
   teamMemberAvatar TeamMember[]
   affiliateToolLogo AffiliateTool[]
-  ogImages         SeoMeta[]
+  ogImages         SeoMeta[]      @relation("SeoOgImage")
+  twitterImages    SeoMeta[]      @relation("SeoTwitterImage")
+  homeHeroBackgrounds HomePageContent[]
   paymentAttachments Payment[]
+  pageSeoImages    PageSeo[]
 
   @@map("media")
 }
 
-model SeoMeta {
+// Generic SEO settings for pages that aren't backed by their own content
+// model (Services/Portfolio/Affiliate Tools/Contact are static route
+// components, unlike Home/About which have HomePageContent/AboutPageContent
+// to hang a `seo` relation off of). `page` is a plain string key, not a
+// Prisma enum, so a new page can be added purely at the application level
+// (route + a new key) without a schema migration. One "social image" covers
+// both Open Graph and Twitter Card, per product decision to keep the admin
+// form simple -- the frontend derives both from it plus metaTitle/
+// metaDescription rather than storing four separate fields.
+model PageSeo {
   id              String   @id @default(cuid())
+  page            String   @unique
   metaTitle       String
   metaDescription String
-  keywords        String[]
+  keywords        String[] @default([])
+  socialImageId   String?
   canonicalUrl    String?
-  ogTitle         String?
-  ogDescription   String?
-  ogImageId       String?
-  twitterCard     String   @default("summary_large_image")
-  structuredData  Json?
-  createdAt       DateTime @default(now())
+  robots          String   @default("index, follow")
   updatedAt       DateTime @updatedAt
 
-  ogImage Media? @relation(fields: [ogImageId], references: [id])
+  socialImage Media? @relation(fields: [socialImageId], references: [id])
+
+  @@map("page_seo")
+}
+
+model SeoMeta {
+  id                 String   @id @default(cuid())
+  metaTitle          String
+  metaDescription    String
+  keywords           String[]
+  canonicalUrl       String?
+  ogTitle            String?
+  ogDescription      String?
+  ogImageId          String?
+  twitterCard        String   @default("summary_large_image")
+  twitterTitle       String?
+  twitterDescription String?
+  twitterImageId     String?
+  robots             String   @default("index, follow")
+  structuredData     Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  ogImage      Media? @relation("SeoOgImage", fields: [ogImageId], references: [id])
+  twitterImage Media? @relation("SeoTwitterImage", fields: [twitterImageId], references: [id])
 
   service       Service?
   project       Project?
@@ -497,10 +537,11 @@ model TeamMember {
 }
 
 model Skill {
-  id           String  @id @default(cuid())
-  name         String  @unique
-  proficiency  Int     @default(80) // 0-100
-  order        Int     @default(0)
+  id          String  @id @default(cuid())
+  name        String  @unique
+  proficiency Int     @default(80) // 0-100
+  order       Int     @default(0)
+  isEnabled   Boolean @default(true)
 
   teamMembers TeamMember[]
 
@@ -632,30 +673,90 @@ model SiteSetting {
 // ---------------------------------------------------------------------------
 
 model HomePageContent {
-  id             String   @id @default(cuid())
-  heroHeadline   String
-  heroSubheadline String
-  heroCtaLabel   String
-  heroCtaHref    String
-  stats          Json // ordered [{ label, value, suffix }]
-  seoId          String?  @unique
-  updatedAt      DateTime @updatedAt
+  id     String @id @default(cuid())
 
-  seo SeoMeta? @relation(fields: [seoId], references: [id])
+  // Hero
+  heroBadgeText         String?
+  heroHeadline          String
+  heroSubheadline       String
+  heroDescription       String?
+  heroBackgroundImageId String?
+  heroCtaLabel          String
+  heroCtaHref           String
+  heroCtaNewTab         Boolean @default(false)
+
+  // Hero secondary CTA ("View our work")
+  heroSecondaryCtaEnabled Boolean @default(true)
+  heroSecondaryCtaLabel   String?
+  heroSecondaryCtaHref    String?
+  heroSecondaryCtaNewTab  Boolean @default(false)
+
+  // Contact CTA (the single CTA block at the bottom of the home page)
+  contactCtaHeading    String?
+  contactCtaDescription String?
+  contactCtaButtonText String?
+  contactCtaButtonHref String?
+
+  seoId     String?  @unique
+  updatedAt DateTime @updatedAt
+
+  heroBackgroundImage Media?     @relation(fields: [heroBackgroundImageId], references: [id])
+  seo                 SeoMeta?   @relation(fields: [seoId], references: [id])
 
   @@map("home_page_content")
 }
 
+// Lets a stat double as the single source of truth for a specific homepage
+// callout (e.g. the About preview's "Years in business" figure) instead of
+// that figure being entered a second time somewhere else. @unique so at most
+// one stat can claim a given role.
+enum HomeStatHighlight {
+  YEARS_IN_BUSINESS
+  PROJECTS_SHIPPED
+}
+
+model HomeStat {
+  id           String             @id @default(cuid())
+  number       String
+  suffix       String?
+  title        String
+  description  String?
+  order        Int                @default(0)
+  isEnabled    Boolean            @default(true)
+  highlightKey HomeStatHighlight? @unique
+
+  @@map("home_stats")
+}
+
+model HomeProcessStep {
+  id          String  @id @default(cuid())
+  title       String
+  description String
+  order       Int     @default(0)
+  isEnabled   Boolean @default(true)
+
+  @@map("home_process_steps")
+}
+
+model HomeWhyReason {
+  id          String  @id @default(cuid())
+  icon        String
+  title       String
+  description String
+  order       Int     @default(0)
+  isEnabled   Boolean @default(true)
+
+  @@map("home_why_reasons")
+}
+
 model AboutPageContent {
-  id              String   @id @default(cuid())
-  story           String
-  mission         String
-  vision          String
-  philosophy      String
-  yearsExperience Int      @default(0)
-  projectsShipped Int      @default(0)
-  seoId           String?  @unique
-  updatedAt       DateTime @updatedAt
+  id        String   @id @default(cuid())
+  story     String
+  mission   String
+  vision    String
+  philosophy String
+  seoId     String?  @unique
+  updatedAt DateTime @updatedAt
 
   seo SeoMeta? @relation(fields: [seoId], references: [id])
 

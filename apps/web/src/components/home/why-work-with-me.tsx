@@ -1,16 +1,21 @@
-import { Gem, MessageSquareWarning, Target, Handshake } from "lucide-react";
+import type { ComponentType } from "react";
+import * as Icons from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Heading, Reveal } from "@agency/ui";
+import type { HomeWhyReasonRead } from "@/lib/types";
 
-const icons = { Gem, MessageSquareWarning, Target, Handshake } as const;
+// Icon is stored as a lucide-react icon name string (chosen via the admin's
+// icon picker), so it's resolved dynamically here rather than through a fixed
+// map -- falls back to a generic icon if a name doesn't match (e.g. was
+// renamed/removed from a future lucide-react version).
+function resolveIcon(name: string): ComponentType<{ className?: string }> {
+  const icon = (Icons as unknown as Record<string, ComponentType<{ className?: string }> | undefined>)[name];
+  return icon ?? Sparkles;
+}
 
-const reasons = [
-  { title: "Craft over speed", description: "We'd rather ship a week later than ship something we're not proud of.", icon: "Gem" },
-  { title: "Say the hard thing early", description: "If your idea has a flaw, you'll hear it in week one, not week ten.", icon: "MessageSquareWarning" },
-  { title: "Own the outcome", description: "We measure success by your metrics, not our deliverables checklist.", icon: "Target" },
-  { title: "Build for handoff", description: "Every project ends with you fully able to run without us.", icon: "Handshake" },
-] satisfies { title: string; description: string; icon: keyof typeof icons }[];
+export function WhyWorkWithMe({ reasons }: { reasons: HomeWhyReasonRead[] }) {
+  if (reasons.length === 0) return null;
 
-export function WhyWorkWithMe() {
   return (
     <div>
       <Reveal>
@@ -20,13 +25,9 @@ export function WhyWorkWithMe() {
       </Reveal>
       <div className="mt-12 grid gap-6 sm:grid-cols-2">
         {reasons.map((reason, i) => {
-          const Icon = icons[reason.icon];
+          const Icon = resolveIcon(reason.icon);
           return (
-            <Reveal
-              key={reason.title}
-              delay={i * 0.06}
-              className="flex gap-4 rounded-2xl border border-neutral-200 p-6"
-            >
+            <Reveal key={reason.id} delay={i * 0.06} className="flex gap-4 rounded-2xl border border-neutral-200 p-6">
               <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
                 <Icon className="size-5" />
               </div>

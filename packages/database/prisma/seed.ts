@@ -473,8 +473,6 @@ async function main() {
       mission: "To give ambitious teams software that looks and performs like it was built in-house by a senior team — because it was.",
       vision: "A world where small teams can ship products with the polish of companies ten times their size.",
       philosophy: "Design and engineering are one discipline here, not a handoff between two departments.",
-      yearsExperience: 6,
-      projectsShipped: 50,
     },
   });
 
@@ -483,18 +481,45 @@ async function main() {
     update: {},
     create: {
       id: "singleton-home",
+      heroBadgeText: "Now booking Q3 projects",
       heroHeadline: "Software that feels inevitable.",
       heroSubheadline: "Calibre Digital designs and engineers premium web products for startups and teams who refuse to ship something average.",
       heroCtaLabel: "Start a project",
       heroCtaHref: "/contact",
-      stats: [
-        { label: "Projects shipped", value: "50", suffix: "+" },
-        { label: "Client retention", value: "92", suffix: "%" },
-        { label: "Avg. Lighthouse score", value: "97", suffix: "" },
-        { label: "Years in business", value: "6", suffix: "" },
-      ],
+      heroSecondaryCtaLabel: "View Our Work",
+      heroSecondaryCtaHref: "/portfolio",
     },
   });
+
+  const homeStatSeed: Array<{ title: string; number: string; suffix: string; highlightKey?: "YEARS_IN_BUSINESS" | "PROJECTS_SHIPPED" }> = [
+    { title: "Projects shipped", number: "50", suffix: "+", highlightKey: "PROJECTS_SHIPPED" },
+    { title: "Client retention", number: "92", suffix: "%" },
+    { title: "Avg. Lighthouse score", number: "97", suffix: "" },
+    { title: "Years in business", number: "6", suffix: "", highlightKey: "YEARS_IN_BUSINESS" },
+  ];
+  for (const [i, s] of homeStatSeed.entries()) {
+    await prisma.homeStat.create({ data: { ...s, order: i } });
+  }
+
+  const homeProcessStepSeed = [
+    { title: "Discovery", description: "We map your audience, competitors, and the outcome that actually matters." },
+    { title: "Design", description: "Wireframes, then high-fidelity screens in a system built for your brand." },
+    { title: "Build", description: "Type-safe, tested implementation — weekly demos against real staging data." },
+    { title: "Launch & support", description: "QA, performance pass, guided handoff, and a 30-day warranty period." },
+  ];
+  for (const [i, s] of homeProcessStepSeed.entries()) {
+    await prisma.homeProcessStep.create({ data: { ...s, order: i } });
+  }
+
+  const homeWhyReasonSeed = [
+    { title: "Craft over speed", description: "We'd rather ship a week later than ship something we're not proud of.", icon: "Gem" },
+    { title: "Say the hard thing early", description: "If your idea has a flaw, you'll hear it in week one, not week ten.", icon: "MessageSquareWarning" },
+    { title: "Own the outcome", description: "We measure success by your metrics, not our deliverables checklist.", icon: "Target" },
+    { title: "Build for handoff", description: "Every project ends with you fully able to run without us.", icon: "Handshake" },
+  ];
+  for (const [i, r] of homeWhyReasonSeed.entries()) {
+    await prisma.homeWhyReason.create({ data: { ...r, order: i } });
+  }
 
   // ---------------------------------------------------------------------
   // Affiliate tools

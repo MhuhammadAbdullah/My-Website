@@ -2,15 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail, MapPin, MessageCircle, Clock, CalendarClock } from "lucide-react";
 import { Container, Section, Heading, Reveal } from "@agency/ui";
-import { getFaqs, getSettings } from "@/lib/api";
+import { getFaqs, getPageSeo, getSettings } from "@/lib/api";
 import { ContactForm } from "@/components/contact/contact-form";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { PageHeading } from "@/components/marketing/page-heading";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: "Start a project with Calibre Digital — get a response within one business day.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSeo("contact").catch(() => null);
+  return buildPageMetadata({
+    seo,
+    fallbackTitle: "Contact",
+    fallbackDescription: "Start a project with Calibre Digital — get a response within one business day.",
+  });
+}
 
 export default async function ContactPage() {
   const [settings, faqs] = await Promise.all([getSettings(), getFaqs("CONTACT")]);

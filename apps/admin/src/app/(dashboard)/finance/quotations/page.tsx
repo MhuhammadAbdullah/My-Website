@@ -6,8 +6,10 @@ import { Badge, Button, Heading, Pagination, Skeleton, Table, TableBody, TableCe
 import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-list-toolbar";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { request } from "@/lib/api";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { buildPdfData } from "@/components/finance/pdf/map-to-pdf-data";
 import { downloadFinancePdf } from "@/components/finance/pdf/download-pdf";
+import type { PricingType } from "@agency/types";
 
 interface QuotationListItem {
   id: string;
@@ -23,7 +25,6 @@ interface QuotationListItem {
 
 interface QuotationDetailForPdf {
   quoteNumber: string;
-  status: string;
   issueDate: string;
   expiryDate: string;
   currency: string;
@@ -39,7 +40,7 @@ interface QuotationDetailForPdf {
   items: {
     name: string;
     description: string | null;
-    quantity: string;
+    pricingType: PricingType;
     unitPrice: string;
     discountType: "PERCENT" | "FIXED";
     discountValue: string;
@@ -76,6 +77,7 @@ export default function QuotationsPage() {
     defaultSortOrder: "desc",
     filterKeys: ["status", "isArchived"],
   });
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
 
   async function handleDuplicate(item: QuotationListItem) {
     try {
@@ -117,7 +119,6 @@ export default function QuotationsPage() {
         buildPdfData({
           kind: "QUOTATION",
           number: full.quoteNumber,
-          status: full.status,
           issueDate: full.issueDate,
           secondDate: full.expiryDate,
           secondDateLabel: "Expiry date",
@@ -139,15 +140,16 @@ export default function QuotationsPage() {
     }
   }
 
-  async function handleDelete(item: QuotationListItem) {
-    if (!confirm(`Delete quotation ${item.quoteNumber}? This can't be undone.`)) return;
-    try {
-      await request(`/finance/quotations/${item.id}`, { method: "DELETE" });
-      toast.success("Deleted");
-      list.reload();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
-    }
+  function handleDelete(item: QuotationListItem) {
+    confirmDelete({
+      title: `Delete quotation ${item.quoteNumber}?`,
+      description: "This action cannot be undone.",
+      onConfirm: async () => {
+        await request(`/finance/quotations/${item.id}`, { method: "DELETE" });
+        toast.success("Deleted");
+        list.reload();
+      },
+    });
   }
 
   return (
@@ -268,6 +270,8 @@ export default function QuotationsPage() {
           <Pagination page={list.page} totalPages={list.meta?.totalPages ?? 1} onPageChange={list.setPage} />
         </div>
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

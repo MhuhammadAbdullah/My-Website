@@ -1,9 +1,10 @@
+import { PRICING_TYPE_LABELS, type PricingType } from "@agency/types";
 import type { PdfDocumentData } from "./finance-document-pdf";
 
 interface SourceItem {
   name: string;
   description?: string | null;
-  quantity: number | string;
+  pricingType: PricingType;
   unitPrice: number | string;
   discountType: "PERCENT" | "FIXED";
   discountValue: number | string;
@@ -22,7 +23,6 @@ interface SourceClient {
 export function buildPdfData(params: {
   kind: "QUOTATION" | "INVOICE";
   number: string;
-  status: string;
   issueDate: string;
   secondDate: string;
   secondDateLabel: string;
@@ -43,7 +43,6 @@ export function buildPdfData(params: {
   return {
     kind: params.kind,
     number: params.number,
-    status: params.status,
     issueDate: params.issueDate,
     secondDate: params.secondDate,
     secondDateLabel: params.secondDateLabel,
@@ -53,7 +52,7 @@ export function buildPdfData(params: {
     items: params.items.map((item) => ({
       name: item.name,
       description: item.description,
-      quantity: Number(item.quantity),
+      pricingType: PRICING_TYPE_LABELS[item.pricingType] ?? item.pricingType,
       unitPrice: Number(item.unitPrice),
       discountType: item.discountType,
       discountValue: Number(item.discountValue),

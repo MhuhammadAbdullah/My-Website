@@ -1,25 +1,50 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Award, Github, Linkedin, Twitter } from "lucide-react";
 import { Badge, Container, Section, Heading, Reveal, Progress, Avatar, AvatarFallback, AvatarImage } from "@agency/ui";
-import { getAboutContent, getAboutTeamData, getTechnologies } from "@/lib/api";
+import { getAboutContent, getAboutTeamData, getSkills, getTechnologies } from "@/lib/api";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { getFaqs } from "@/lib/api";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { cloudinaryTransform } from "@/lib/cloudinary";
 
-export const metadata: Metadata = {
-  title: "About",
-  description: "The story, mission, values, and team behind Calibre Digital.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const about = await getAboutContent().catch(() => null);
+  const seo = about?.seo;
+  if (!seo) {
+    return { title: "About", description: "The story, mission, values, and team behind Calibre Digital." };
+  }
+
+  return {
+    // `absolute` opts out of the root layout's title template ("%s | Brand")
+    // -- an admin-configured meta title is meant to be used exactly as
+    // entered, not have the site name silently appended to it.
+    title: { absolute: seo.metaTitle },
+    description: seo.metaDescription,
+    keywords: seo.keywords.length > 0 ? seo.keywords : undefined,
+    alternates: seo.canonicalUrl ? { canonical: seo.canonicalUrl } : undefined,
+    robots: seo.robots,
+    openGraph: {
+      title: seo.ogTitle ?? seo.metaTitle,
+      description: seo.ogDescription ?? seo.metaDescription,
+      images: seo.ogImage ? [{ url: seo.ogImage.url }] : undefined,
+    },
+    twitter: {
+      card: (seo.twitterCard as "summary" | "summary_large_image") ?? "summary_large_image",
+      title: seo.twitterTitle ?? seo.ogTitle ?? seo.metaTitle,
+      description: seo.twitterDescription ?? seo.ogDescription ?? seo.metaDescription,
+      images: seo.twitterImage ? [seo.twitterImage.url] : seo.ogImage ? [seo.ogImage.url] : undefined,
+    },
+  };
+}
 
 const socialIcons = { twitter: Twitter, linkedin: Linkedin, github: Github } as const;
 
 export default async function AboutPage() {
-  const [about, teamData, technologies, faqs] = await Promise.all([
+  const [about, teamData, skills, technologies, faqs] = await Promise.all([
     getAboutContent(),
     getAboutTeamData(),
+    getSkills(),
     getTechnologies(),
     getFaqs("GENERAL"),
   ]);
@@ -133,7 +158,7 @@ export default async function AboutPage() {
           <div>
             <Heading level={2}>Skills</Heading>
             <div className="mt-6 space-y-5">
-              {Array.from(new Map(teamData.team.flatMap((m) => m.skills).map((s) => [s.id, s])).values()).map((skill) => (
+              {skills.map((skill) => (
                 <div key={skill.id}>
                   <div className="mb-1.5 flex justify-between text-body-sm">
                     <span className="text-heading">{skill.name}</span>

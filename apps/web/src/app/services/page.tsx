@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import { Container, Section, Heading, Reveal } from "@agency/ui";
-import { getServices } from "@/lib/api";
+import { getPageSeo, getServices } from "@/lib/api";
 import { ServiceCard } from "@/components/marketing/service-card";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { PageHeading } from "@/components/marketing/page-heading";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Services",
-  description: "Web development, product design, and growth engineering services from Calibre Digital.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSeo("services").catch(() => null);
+  return buildPageMetadata({
+    seo,
+    fallbackTitle: "Services",
+    fallbackDescription: "Web development, product design, and growth engineering services from Calibre Digital.",
+  });
+}
 
 export default async function ServicesPage() {
   const services = await getServices();

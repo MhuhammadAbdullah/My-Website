@@ -186,7 +186,6 @@ export default function QuotationDetailPage() {
         buildPdfData({
           kind: "QUOTATION",
           number: quotation.quoteNumber,
-          status: quotation.status,
           issueDate: quotation.issueDate,
           secondDate: quotation.expiryDate,
           secondDateLabel: "Expiry date",

@@ -60,6 +60,16 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     return;
   }
 
+  // The DB pooler dropped the connection or was briefly unreachable (P1001,
+  // thrown as PrismaClientInitializationError) — transient, not a bug in the
+  // request. A clear "try again" message beats a bare "Internal server
+  // error" for something the caller can actually act on.
+  if (err instanceof Prisma.PrismaClientInitializationError || (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P1001")) {
+    console.error("Database unreachable on", req.method, req.path, err.message);
+    res.status(503).json({ error: "The database is temporarily unavailable. Please try again in a moment." });
+    return;
+  }
+
   console.error(err);
   res.status(500).json({ error: "Internal server error" });
 }

@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
 import { Info } from "lucide-react";
 import { Container, Section, Heading, Reveal } from "@agency/ui";
-import { getAffiliateCategories, getAffiliateTools } from "@/lib/api";
+import { getAffiliateCategories, getAffiliateTools, getPageSeo } from "@/lib/api";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { AffiliateFilters } from "@/components/affiliate/affiliate-filters";
 import { AffiliateToolCard } from "@/components/affiliate/affiliate-tool-card";
 import { AffiliatePagination } from "@/components/affiliate/affiliate-pagination";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Affiliate Tools",
-  description: "The hosting, domain, email, design, and productivity tools Calibre Digital actually uses and recommends.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSeo("affiliate-tools").catch(() => null);
+  return buildPageMetadata({
+    seo,
+    fallbackTitle: "Affiliate Tools",
+    fallbackDescription: "The hosting, domain, email, design, and productivity tools Calibre Digital actually uses and recommends.",
+  });
+}
 
 export default async function AffiliateToolsPage({
   searchParams,

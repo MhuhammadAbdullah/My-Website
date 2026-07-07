@@ -18,7 +18,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!project) return {};
 
   return {
-    title: project.seo?.metaTitle ?? project.title,
+    // `absolute` opts out of the root layout's title template when a real
+    // SEO meta title is configured, so it's used exactly as entered instead
+    // of having the site name appended. The plain-title fallback keeps the
+    // template (e.g. "ProjectName | Brand") since it's not a full SEO title.
+    title: project.seo?.metaTitle ? { absolute: project.seo.metaTitle } : project.title,
     description: project.seo?.metaDescription ?? project.summary,
     alternates: { canonical: `${env.NEXT_PUBLIC_SITE_URL}/portfolio/${project.slug}` },
     openGraph: {

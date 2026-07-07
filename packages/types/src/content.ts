@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { contentStatusSchema, faqContextSchema, paginationQuerySchema } from "./common";
+import { contentStatusSchema, faqContextSchema, hrefSchema, paginationQuerySchema, seoMetaSchema } from "./common";
 
 export const testimonialSchema = z.object({
   id: z.string().optional(),
@@ -24,6 +24,19 @@ export const faqSchema = z.object({
   order: z.number().int().default(0),
 });
 export type FaqInput = z.infer<typeof faqSchema>;
+
+// Skills -- a flat, reorderable list (like CoreValue), shared globally rather
+// than per-team-member: proficiency lives on the Skill itself so the About
+// page's progress bars and a team member's skill tags both read the same
+// number instead of it being entered twice.
+export const skillSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(1, "Skill name is required").max(60),
+  proficiency: z.coerce.number().int().min(0, "Progress must be between 0 and 100").max(100, "Progress must be between 0 and 100"),
+  order: z.coerce.number().int().default(0),
+  isEnabled: z.boolean().default(true),
+});
+export type SkillInput = z.infer<typeof skillSchema>;
 
 export const teamMemberSchema = z.object({
   id: z.string().optional(),
@@ -99,35 +112,93 @@ export const navItemSchema = z.object({
 });
 export type NavItemInput = z.infer<typeof navItemSchema>;
 
-export const homeStatSchema = z.object({
-  label: z.string().min(1),
-  value: z.string().min(1),
-  suffix: z.string().default(""),
-});
+// Optionally links a stat to a specific About-preview callout (see
+// HomeStatHighlight in schema.prisma) so that figure has one source of truth
+// instead of being entered again on the About page.
+export const homeStatHighlightSchema = z.enum(["YEARS_IN_BUSINESS", "PROJECTS_SHIPPED"]);
+export type HomeStatHighlight = z.infer<typeof homeStatHighlightSchema>;
 
-// Deliberately omits `id`/`seoId`/`updatedAt`/`seo` -- the admin form's GET
-// response includes those (via `include: { seo: true }`), and a naive
-// round-trip of that full object back into a PUT body used to send a raw
-// `seo` object where Prisma expects a nested-write shape (`connect`/`update`/
-// etc.), which threw PrismaClientValidationError on every save. Parsing
-// through this schema strips those fields back out before they ever reach
-// Prisma, in addition to actually validating the real fields.
+// Homepage statistic -- its own CRUD resource (like CoreValue/TimelineEvent),
+// not an embedded array, so it gets create/update/delete/reorder for free
+// from createCrudRouter.
+export const homeStatSchema = z.object({
+  id: z.string().optional(),
+  title: z.string().min(1, "Title is required").max(80),
+  number: z.string().min(1, "Number is required").max(20),
+  suffix: z.string().max(10).nullable().optional(),
+  description: z.string().max(200).nullable().optional(),
+  order: z.number().int().default(0),
+  isEnabled: z.boolean().default(true),
+  highlightKey: homeStatHighlightSchema.nullable().optional(),
+});
+export type HomeStatInput = z.infer<typeof homeStatSchema>;
+
+// "How we work" process steps -- flat, reorderable CRUD (like CoreValue).
+export const homeProcessStepSchema = z.object({
+  id: z.string().optional(),
+  title: z.string().min(1, "Title is required").max(60),
+  description: z.string().min(1, "Description is required").max(300),
+  order: z.number().int().default(0),
+  isEnabled: z.boolean().default(true),
+});
+export type HomeProcessStepInput = z.infer<typeof homeProcessStepSchema>;
+
+// "Why work with us" reasons -- flat, reorderable CRUD (like CoreValue), plus
+// an icon (lucide-react icon name, chosen via the admin's icon picker).
+export const homeWhyReasonSchema = z.object({
+  id: z.string().optional(),
+  icon: z.string().min(1, "Icon is required"),
+  title: z.string().min(1, "Title is required").max(60),
+  description: z.string().min(1, "Description is required").max(300),
+  order: z.number().int().default(0),
+  isEnabled: z.boolean().default(true),
+});
+export type HomeWhyReasonInput = z.infer<typeof homeWhyReasonSchema>;
+
+const buttonTextSchema = z.string().max(40, "Button text must be 40 characters or fewer");
+
+// Deliberately omits `id`/`seoId`/`updatedAt` -- the admin form's GET response
+// includes those (via `include: { seo: true }`), and a naive round-trip of
+// that full object back into a PUT body used to send a raw `seo` object where
+// Prisma expects a nested-write shape (`connect`/`update`/etc.), which threw
+// PrismaClientValidationError on every save. Parsing through this schema
+// strips those fields back out before they ever reach Prisma, in addition to
+// actually validating the real fields. `seo` itself is handled separately by
+// the route (see pages.routes.ts) since it's a nested relation, not a column.
 export const homePageContentSchema = z.object({
+  heroBadgeText: z.string().max(60).nullable().optional(),
   heroHeadline: z.string().min(1, "Hero headline is required"),
   heroSubheadline: z.string().min(1, "Hero subheadline is required"),
-  heroCtaLabel: z.string().min(1, "CTA label is required"),
-  heroCtaHref: z.string().min(1, "CTA link is required"),
-  stats: z.array(homeStatSchema).default([]),
+  heroDescription: z.string().nullable().optional(),
+  heroBackgroundImageId: z.string().nullable().optional(),
+  heroCtaLabel: buttonTextSchema.min(1, "CTA label is required"),
+  heroCtaHref: hrefSchema,
+  heroCtaNewTab: z.boolean().default(false),
+
+  heroSecondaryCtaEnabled: z.boolean().default(true),
+  heroSecondaryCtaLabel: buttonTextSchema.nullable().optional(),
+  heroSecondaryCtaHref: hrefSchema.nullable().optional(),
+  heroSecondaryCtaNewTab: z.boolean().default(false),
+
+  contactCtaHeading: z.string().nullable().optional(),
+  contactCtaDescription: z.string().nullable().optional(),
+  contactCtaButtonText: buttonTextSchema.nullable().optional(),
+  contactCtaButtonHref: hrefSchema.nullable().optional(),
+
+  seo: seoMetaSchema.partial().optional(),
 });
 export type HomePageContentInput = z.infer<typeof homePageContentSchema>;
 
 // Same leaked-relation issue as homePageContentSchema above, for /pages/about.
+// yearsExperience/projectsShipped intentionally omitted -- those figures now
+// come from Home Page Statistics (HomeStat.highlightKey) so there's one
+// source of truth instead of two numbers that can drift apart. `seo` is
+// handled the same way as homePageContentSchema (see pages.routes.ts).
 export const aboutPageContentSchema = z.object({
   story: z.string().min(1, "Story is required"),
   mission: z.string().min(1, "Mission is required"),
   vision: z.string().min(1, "Vision is required"),
   philosophy: z.string().min(1, "Philosophy is required"),
-  yearsExperience: z.coerce.number().int().min(0),
-  projectsShipped: z.coerce.number().int().min(0),
+  seo: seoMetaSchema.partial().optional(),
 });
 export type AboutPageContentInput = z.infer<typeof aboutPageContentSchema>;

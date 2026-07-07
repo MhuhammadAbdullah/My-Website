@@ -82,7 +82,12 @@ export interface SeoRead {
   canonicalUrl: string | null;
   ogTitle: string | null;
   ogDescription: string | null;
+  ogImage: MediaRead | null;
   twitterCard: string;
+  twitterTitle: string | null;
+  twitterDescription: string | null;
+  twitterImage: MediaRead | null;
+  robots: string;
 }
 
 export interface ProjectImageRead {
@@ -125,6 +130,12 @@ export interface ProjectDetail extends ProjectListItem {
   seo: SeoRead | null;
 }
 
+export interface SkillRead {
+  id: string;
+  name: string;
+  proficiency: number;
+}
+
 export interface TeamMemberRead {
   id: string;
   name: string;
@@ -132,7 +143,7 @@ export interface TeamMemberRead {
   bio: string;
   avatar: MediaRead | null;
   socials: Record<string, string> | null;
-  skills: { id: string; name: string; proficiency: number }[];
+  skills: SkillRead[];
 }
 
 export interface AffiliateToolRead {
@@ -156,12 +167,45 @@ export interface AffiliateCategoryRead {
   tools: AffiliateToolRead[];
 }
 
+export interface HomeStatRead {
+  id: string;
+  number: string;
+  suffix: string | null;
+  title: string;
+  description: string | null;
+  highlightKey: "YEARS_IN_BUSINESS" | "PROJECTS_SHIPPED" | null;
+}
+
+export interface HomeProcessStepRead {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export interface HomeWhyReasonRead {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+}
+
 export interface HomeContentRead {
+  heroBadgeText: string | null;
   heroHeadline: string;
   heroSubheadline: string;
+  heroDescription: string | null;
+  heroBackgroundImage: MediaRead | null;
   heroCtaLabel: string;
   heroCtaHref: string;
-  stats: { label: string; value: string; suffix: string }[];
+  heroCtaNewTab: boolean;
+  heroSecondaryCtaEnabled: boolean;
+  heroSecondaryCtaLabel: string | null;
+  heroSecondaryCtaHref: string | null;
+  heroSecondaryCtaNewTab: boolean;
+  contactCtaHeading: string | null;
+  contactCtaDescription: string | null;
+  contactCtaButtonText: string | null;
+  contactCtaButtonHref: string | null;
   seo: SeoRead | null;
 }
 
@@ -170,9 +214,19 @@ export interface AboutContentRead {
   mission: string;
   vision: string;
   philosophy: string;
-  yearsExperience: number;
-  projectsShipped: number;
   seo: SeoRead | null;
+}
+
+// SEO for pages with no content model of their own (Services, Portfolio,
+// Affiliate Tools, Contact) -- one social image covers both Open Graph and
+// Twitter Card, unlike SeoRead above which has separate og/twitter fields.
+export interface PageSeoRead {
+  metaTitle: string;
+  metaDescription: string;
+  keywords: string[];
+  socialImage: MediaRead | null;
+  canonicalUrl: string | null;
+  robots: string;
 }
 
 export interface SiteSettings {

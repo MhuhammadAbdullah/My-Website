@@ -23,6 +23,7 @@ import {
 import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-list-toolbar";
 import { request } from "@/lib/api";
 import { usePaginatedList } from "@/lib/use-paginated-list";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { slugify } from "@agency/utils";
 
 interface CategoryItem {
@@ -52,6 +53,7 @@ function CategoryList({ endpoint, paramPrefix, label }: { endpoint: string; para
   const [editName, setEditName] = React.useState("");
   const [editSlug, setEditSlug] = React.useState("");
   const [editSaving, setEditSaving] = React.useState(false);
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
 
   async function handleCreate() {
     if (!name.trim()) return;
@@ -71,15 +73,16 @@ function CategoryList({ endpoint, paramPrefix, label }: { endpoint: string; para
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm(`Delete this ${label.toLowerCase()}?`)) return;
-    try {
-      await request(`${endpoint}/${id}`, { method: "DELETE" });
-      toast.success("Deleted");
-      list.reload();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
-    }
+  function handleDelete(id: string) {
+    confirmDelete({
+      title: `Delete this ${label.toLowerCase()}?`,
+      description: "This action cannot be undone.",
+      onConfirm: async () => {
+        await request(`${endpoint}/${id}`, { method: "DELETE" });
+        toast.success("Deleted");
+        list.reload();
+      },
+    });
   }
 
   async function handleToggleEnabled(item: CategoryItem, checked: boolean) {
@@ -204,6 +207,8 @@ function CategoryList({ endpoint, paramPrefix, label }: { endpoint: string; para
           </div>
         </DialogContent>
       </Dialog>
+
+      {ConfirmDialog}
     </div>
   );
 }

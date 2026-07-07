@@ -3,10 +3,11 @@
 import { Plus, Trash2 } from "lucide-react";
 import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@agency/ui";
 import { computeDocumentTotals, type FinanceLineItemInput } from "@agency/utils";
+import { PRICING_TYPE_LABELS, pricingTypeSchema, type PricingType } from "@agency/types";
 
 export interface LineItemRow extends FinanceLineItemInput {
   description: string;
-  pricingType: "FIXED" | "HOURLY" | "MONTHLY";
+  pricingType: PricingType;
 }
 
 export const EMPTY_LINE_ITEM: LineItemRow = {
@@ -90,14 +91,16 @@ export function LineItemsEditor({
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 <div>
                   <Label>Pricing type</Label>
-                  <Select value={item.pricingType} onValueChange={(v) => updateItem(index, { pricingType: v as LineItemRow["pricingType"] })}>
+                  <Select value={item.pricingType} onValueChange={(v) => updateItem(index, { pricingType: v as PricingType })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="FIXED">Fixed</SelectItem>
-                      <SelectItem value="HOURLY">Hourly</SelectItem>
-                      <SelectItem value="MONTHLY">Monthly</SelectItem>
+                      {pricingTypeSchema.options.map((value) => (
+                        <SelectItem key={value} value={value}>
+                          {PRICING_TYPE_LABELS[value]}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

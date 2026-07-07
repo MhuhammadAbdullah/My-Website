@@ -27,7 +27,12 @@ const client = createResourceClient<TeamMember>("/team");
 const statusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED"].map((v) => ({ value: v, label: v.charAt(0) + v.slice(1).toLowerCase() }));
 
 export default function TeamPage() {
-  const { data: skills } = useAsyncData<Skill[]>(() => request<{ items: Skill[] }>("/skills").then((r) => r.items), []);
+  // /admin (not the public /skills list) so a disabled skill -- hidden from
+  // the About page's progress bars -- can still be assigned to a member here.
+  const { data: skills } = useAsyncData<Skill[]>(
+    () => request<{ items: Skill[] }>("/skills/admin?limit=100").then((r) => r.items),
+    [],
+  );
 
   return (
     <PaginatedResourceManager

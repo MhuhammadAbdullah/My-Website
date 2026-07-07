@@ -22,6 +22,10 @@ import {
   Building2,
   SlidersHorizontal,
   FileBarChart,
+  Layers,
+  Landmark,
+  Globe,
+  Lock,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -31,17 +35,49 @@ export interface AdminNavItem {
 }
 
 export interface AdminNavGroup {
+  key: string;
   label: string;
+  icon: LucideIcon;
   items: AdminNavItem[];
+}
+
+export function getPageTitle(pathname: string): string {
+  const allItems = adminNavGroups.flatMap((group) => group.items);
+
+  const exact = allItems.find((item) => item.href === pathname);
+  if (exact) return exact.label;
+
+  const prefixMatches = allItems
+    .filter((item) => item.href !== "/" && pathname.startsWith(`${item.href}/`))
+    .sort((a, b) => b.href.length - a.href.length);
+  if (prefixMatches[0]) return prefixMatches[0].label;
+
+  const segment = pathname.split("/").filter(Boolean).pop();
+  if (!segment) return "Dashboard";
+  return segment.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+export function findGroupKeyForPath(pathname: string): string | null {
+  for (const group of adminNavGroups) {
+    const isActive = group.items.some(
+      (item) => item.href === pathname || (item.href !== "/" && pathname.startsWith(`${item.href}/`)),
+    );
+    if (isActive) return group.key;
+  }
+  return null;
 }
 
 export const adminNavGroups: AdminNavGroup[] = [
   {
+    key: "overview",
     label: "Overview",
+    icon: LayoutDashboard,
     items: [{ label: "Dashboard", href: "/", icon: LayoutDashboard }],
   },
   {
+    key: "content",
     label: "Content",
+    icon: Layers,
     items: [
       { label: "Home Page", href: "/home", icon: Home },
       { label: "About Page", href: "/about", icon: Compass },
@@ -55,7 +91,9 @@ export const adminNavGroups: AdminNavGroup[] = [
     ],
   },
   {
+    key: "finance",
     label: "Finance",
+    icon: Landmark,
     items: [
       { label: "Quotations", href: "/finance/quotations", icon: FileText },
       { label: "Invoices", href: "/finance/invoices", icon: Receipt },
@@ -66,7 +104,9 @@ export const adminNavGroups: AdminNavGroup[] = [
     ],
   },
   {
+    key: "site",
     label: "Site",
+    icon: Globe,
     items: [
       { label: "Navigation", href: "/navigation", icon: Compass },
       { label: "Footer", href: "/footer", icon: PanelBottom },
@@ -76,7 +116,9 @@ export const adminNavGroups: AdminNavGroup[] = [
     ],
   },
   {
+    key: "access",
     label: "Access",
+    icon: Lock,
     items: [
       { label: "Users", href: "/users", icon: Users },
       { label: "Roles", href: "/roles", icon: ShieldCheck },

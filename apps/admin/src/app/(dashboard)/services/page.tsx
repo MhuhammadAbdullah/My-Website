@@ -36,6 +36,7 @@ import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-li
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { usePaginatedList } from "@/lib/use-paginated-list";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 
 const billingTypeOptions = [
   { value: "ONE_TIME", label: "One-time" },
@@ -271,12 +272,12 @@ function ServiceEditor({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[85vh] w-full max-w-2xl flex-col p-0">
+        <DialogHeader className="mb-0 shrink-0 border-b border-neutral-200 px-5 py-4">
           <DialogTitle>{service ? "Edit service" : "New service"}</DialogTitle>
         </DialogHeader>
-        <div className="max-h-[70vh] space-y-6 overflow-y-auto pr-2">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>Name</Label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -295,7 +296,7 @@ function ServiceEditor({
             <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <Label>Category</Label>
               <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
@@ -378,7 +379,7 @@ function ServiceEditor({
             </div>
             <div className="mt-2 space-y-2">
               {process.map((step, i) => (
-                <div key={i} className="grid grid-cols-[1fr_2fr_auto] gap-2">
+                <div key={i} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_2fr_auto]">
                   <Input
                     placeholder="Title"
                     value={step.title}
@@ -461,7 +462,7 @@ function ServiceEditor({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-3 sm:grid-cols-2">
                       <div>
                         <Label>Regular price {!plan.isCustomQuote && "*"}</Label>
                         <Input
@@ -492,7 +493,7 @@ function ServiceEditor({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid gap-3 sm:grid-cols-3">
                       <div>
                         <Label>Billing type</Label>
                         <Select value={plan.billingType} onValueChange={(v) => setPlans(plans.map((p, idx) => (idx === i ? { ...p, billingType: v } : p)))}>
@@ -544,7 +545,7 @@ function ServiceEditor({
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-3 sm:grid-cols-2">
                       <div>
                         <Label>CTA label</Label>
                         <Input
@@ -566,7 +567,7 @@ function ServiceEditor({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>SEO meta title</Label>
               <Input value={form.metaTitle} onChange={(e) => setForm({ ...form, metaTitle: e.target.value })} />
@@ -578,7 +579,7 @@ function ServiceEditor({
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="flex shrink-0 justify-end gap-3 border-t border-neutral-200 px-5 py-3">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
@@ -621,16 +622,18 @@ export default function ServicesPage() {
   });
 
   const [editing, setEditing] = React.useState<Service | null | undefined>(undefined);
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
 
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this service?")) return;
-    try {
-      await request(`/services/${id}`, { method: "DELETE" });
-      toast.success("Deleted");
-      list.reload();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong");
-    }
+  function handleDelete(id: string) {
+    confirmDelete({
+      title: "Delete this service?",
+      description: "This action cannot be undone.",
+      onConfirm: async () => {
+        await request(`/services/${id}`, { method: "DELETE" });
+        toast.success("Deleted");
+        list.reload();
+      },
+    });
   }
 
   return (
@@ -733,6 +736,8 @@ export default function ServicesPage() {
           }}
         />
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

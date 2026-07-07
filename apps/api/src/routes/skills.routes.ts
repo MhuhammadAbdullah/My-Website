@@ -1,41 +1,18 @@
-import { Router } from "express";
 import { prisma } from "@agency/database";
-import { asyncHandler } from "../middleware/async-handler.js";
-import { requireAuth, requirePermission } from "../middleware/require-auth.js";
+import { skillSchema } from "@agency/types";
+import { createCrudRouter } from "../lib/create-crud-router.js";
 
-export const skillsRouter = Router();
-
-skillsRouter.get(
-  "/",
-  asyncHandler(async (_req, res) => {
-    res.json({ items: await prisma.skill.findMany({ orderBy: { order: "asc" } }) });
-  }),
-);
-
-skillsRouter.post(
-  "/",
-  requireAuth,
-  requirePermission("team", "create"),
-  asyncHandler(async (req, res) => {
-    res.status(201).json({ item: await prisma.skill.create({ data: req.body }) });
-  }),
-);
-
-skillsRouter.patch(
-  "/:id",
-  requireAuth,
-  requirePermission("team", "update"),
-  asyncHandler(async (req, res) => {
-    res.json({ item: await prisma.skill.update({ where: { id: req.params.id }, data: req.body }) });
-  }),
-);
-
-skillsRouter.delete(
-  "/:id",
-  requireAuth,
-  requirePermission("team", "delete"),
-  asyncHandler(async (req, res) => {
-    await prisma.skill.delete({ where: { id: req.params.id } });
-    res.status(204).send();
-  }),
-);
+// Skills are global (shared across team members via the many-to-many
+// relation, not per-member proficiency), so they're a flat, reorderable list
+// like CoreValue -- managed from the About page's Skills tab. Disabled
+// skills are excluded from the public list (About page progress bars) but
+// stay visible in the admin (e.g. team-member skill assignment).
+export const skillsRouter = createCrudRouter({
+  resource: "team",
+  delegate: prisma.skill,
+  schema: skillSchema,
+  publicFindManyArgs: { where: { isEnabled: true } },
+  searchFields: ["name"],
+  sortableFields: ["name", "order"],
+  defaultSort: "order",
+});

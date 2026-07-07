@@ -27,24 +27,41 @@ financeDashboardRouter.get(
       totalClients,
       paymentsThisMonth,
       invoiceValueAgg,
+      financeSettings,
     ] = await Promise.all([
-      prisma.invoice.aggregate({ where: { status: "PAID" }, _sum: { grandTotal: true } }),
+      // Revenue actually received -- summed from the Payments table (not
+      // invoice.grandTotal) so partially-paid invoices count only the
+      // amount actually paid. See apps/api/src/routes/clients.routes.ts
+      // for the same calculation on the per-client summary.
+      prisma.payment.aggregate({
+        where: { invoice: { status: { notIn: ["DRAFT", "CANCELLED"] } } },
+        _sum: { amount: true },
+      }),
       prisma.invoice.aggregate({ where: { status: { in: ["SENT", "PARTIALLY_PAID"] } }, _sum: { balance: true } }),
-      prisma.invoice.aggregate({ where: { status: "OVERDUE" }, _sum: { balance: true } }),
+      // Overdue is derived, not the (rarely, manually set) OVERDUE status --
+      // an invoice is overdue once its due date has passed and it still has
+      // a balance owed, regardless of whether anyone flipped its status.
+      prisma.invoice.aggregate({
+        where: { status: { in: ["SENT", "PARTIALLY_PAID", "OVERDUE"] }, dueDate: { lt: now }, balance: { gt: 0 } },
+        _sum: { balance: true },
+      }),
       prisma.invoice.count(),
       prisma.invoice.count({ where: { status: "PAID" } }),
-      prisma.invoice.count({ where: { status: "OVERDUE" } }),
+      prisma.invoice.count({
+        where: { status: { in: ["SENT", "PARTIALLY_PAID", "OVERDUE"] }, dueDate: { lt: now }, balance: { gt: 0 } },
+      }),
       prisma.quotation.count(),
       prisma.client.count({ where: { isArchived: false } }),
       prisma.payment.aggregate({ where: { paymentDate: { gte: monthStart } }, _sum: { amount: true } }),
       prisma.invoice.aggregate({ where: { status: { not: "CANCELLED" } }, _sum: { grandTotal: true }, _count: true }),
+      prisma.financeSettings.findFirst(),
     ]);
 
     const invoiceCount = invoiceValueAgg._count;
     const averageInvoiceValue = invoiceCount > 0 ? (invoiceValueAgg._sum.grandTotal?.toNumber() ?? 0) / invoiceCount : 0;
 
     res.json({
-      totalRevenue: paidRevenue._sum.grandTotal?.toNumber() ?? 0,
+      totalRevenue: paidRevenue._sum.amount?.toNumber() ?? 0,
       pendingRevenue: pendingRevenue._sum.balance?.toNumber() ?? 0,
       outstandingPayments: outstandingPayments._sum.balance?.toNumber() ?? 0,
       totalInvoices,
@@ -54,6 +71,7 @@ financeDashboardRouter.get(
       totalClients,
       paymentsThisMonth: paymentsThisMonth._sum.amount?.toNumber() ?? 0,
       averageInvoiceValue,
+      defaultCurrency: financeSettings?.defaultCurrency ?? "PKR",
     });
   }),
 );

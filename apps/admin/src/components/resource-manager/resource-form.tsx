@@ -37,13 +37,13 @@ export function ResourceForm({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="grid gap-5 sm:grid-cols-2">
       {fields.map((field) => {
         const value = values[field.key];
 
         if (field.type === "checkbox") {
           return (
-            <div key={field.key} className="flex items-center gap-2.5">
+            <div key={field.key} className="flex items-center gap-2.5 sm:col-span-2">
               <Checkbox checked={Boolean(value)} onCheckedChange={(checked) => setField(field.key, checked === true)} />
               <Label className="mb-0">{field.label}</Label>
             </div>
@@ -52,7 +52,7 @@ export function ResourceForm({
 
         if (field.type === "textarea") {
           return (
-            <div key={field.key}>
+            <div key={field.key} className="sm:col-span-2">
               <Label>{field.label}</Label>
               <Textarea value={(value as string) ?? ""} onChange={(e) => setField(field.key, e.target.value)} />
             </div>
@@ -97,7 +97,7 @@ export function ResourceForm({
         if (field.type === "multiselect") {
           const selected = new Set((value as string[]) ?? []);
           return (
-            <div key={field.key}>
+            <div key={field.key} className="sm:col-span-2">
               <Label>{field.label}</Label>
               <div className="flex flex-wrap gap-2">
                 {field.options.map((option) => {
@@ -124,39 +124,42 @@ export function ResourceForm({
 
         if (field.type === "multiselect-search") {
           return (
-            <MultiSelectSearchField
-              key={field.key}
-              label={field.label}
-              options={field.options}
-              placeholder={field.placeholder}
-              value={(value as string[]) ?? []}
-              onChange={(next) => setField(field.key, next)}
-            />
+            <div key={field.key} className="sm:col-span-2">
+              <MultiSelectSearchField
+                label={field.label}
+                options={field.options}
+                placeholder={field.placeholder}
+                value={(value as string[]) ?? []}
+                onChange={(next) => setField(field.key, next)}
+              />
+            </div>
           );
         }
 
         if (field.type === "tags") {
           return (
-            <TagsField
-              key={field.key}
-              label={field.label}
-              placeholder={field.placeholder}
-              value={(value as string[]) ?? []}
-              onChange={(tags) => setField(field.key, tags)}
-            />
+            <div key={field.key} className="sm:col-span-2">
+              <TagsField
+                label={field.label}
+                placeholder={field.placeholder}
+                value={(value as string[]) ?? []}
+                onChange={(tags) => setField(field.key, tags)}
+              />
+            </div>
           );
         }
 
         if (field.type === "image") {
           const previewKey = field.previewUrlKey ?? `${field.key}Url`;
           return (
-            <ImageField
-              key={field.key}
-              label={field.label}
-              previewId={(value as string) ?? null}
-              previewUrl={(values[previewKey] as string) ?? null}
-              onChange={(next) => onChange({ ...values, [field.key]: next.id, [previewKey]: next.url })}
-            />
+            <div key={field.key} className="sm:col-span-2">
+              <ImageField
+                label={field.label}
+                previewId={(value as string) ?? null}
+                previewUrl={(values[previewKey] as string) ?? null}
+                onChange={(next) => onChange({ ...values, [field.key]: next.id, [previewKey]: next.url })}
+              />
+            </div>
           );
         }
 

@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
 import { Container, Section, Heading } from "@agency/ui";
-import { getProjectCategories, getProjects } from "@/lib/api";
+import { getPageSeo, getProjectCategories, getProjects } from "@/lib/api";
 import { ProjectCard } from "@/components/marketing/project-card";
 import { PortfolioFilters } from "@/components/portfolio/portfolio-filters";
 import { PortfolioPagination } from "@/components/portfolio/portfolio-pagination";
 import { PageHeading } from "@/components/marketing/page-heading";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Portfolio",
-  description: "Case studies from SaaS platforms, e-commerce storefronts, marketing sites, and internal tools.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSeo("portfolio").catch(() => null);
+  return buildPageMetadata({
+    seo,
+    fallbackTitle: "Portfolio",
+    fallbackDescription: "Case studies from SaaS platforms, e-commerce storefronts, marketing sites, and internal tools.",
+  });
+}
 
 export default async function PortfolioPage({
   searchParams,

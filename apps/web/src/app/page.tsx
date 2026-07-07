@@ -4,6 +4,9 @@ import {
   getAboutContent,
   getFaqs,
   getHomeContent,
+  getHomeProcessSteps,
+  getHomeStats,
+  getHomeWhyReasons,
   getProjects,
   getServices,
   getTechnologies,
@@ -24,23 +27,44 @@ import { Reveal, Heading } from "@agency/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
   const home = await getHomeContent().catch(() => null);
-  if (!home?.seo) return {};
+  const seo = home?.seo;
+  if (!seo) return {};
 
   return {
-    title: home.seo.metaTitle,
-    description: home.seo.metaDescription,
+    // `absolute` opts out of the root layout's title template ("%s | Brand")
+    // -- an admin-configured meta title is meant to be used exactly as
+    // entered, not have the site name silently appended to it.
+    title: { absolute: seo.metaTitle },
+    description: seo.metaDescription,
+    keywords: seo.keywords.length > 0 ? seo.keywords : undefined,
+    alternates: seo.canonicalUrl ? { canonical: seo.canonicalUrl } : undefined,
+    robots: seo.robots,
+    openGraph: {
+      title: seo.ogTitle ?? seo.metaTitle,
+      description: seo.ogDescription ?? seo.metaDescription,
+      images: seo.ogImage ? [{ url: seo.ogImage.url }] : undefined,
+    },
+    twitter: {
+      card: (seo.twitterCard as "summary" | "summary_large_image") ?? "summary_large_image",
+      title: seo.twitterTitle ?? seo.ogTitle ?? seo.metaTitle,
+      description: seo.twitterDescription ?? seo.ogDescription ?? seo.metaDescription,
+      images: seo.twitterImage ? [seo.twitterImage.url] : seo.ogImage ? [seo.ogImage.url] : undefined,
+    },
   };
 }
 
 export default async function HomePage() {
-  const [home, about, services, projectsPage, technologies, testimonials, faqs] = await Promise.all([
+  const [home, stats, about, services, projectsPage, technologies, testimonials, faqs, processSteps, whyReasons] = await Promise.all([
     getHomeContent(),
+    getHomeStats(),
     getAboutContent(),
     getServices(),
     getProjects({ pageSize: 3 }),
     getTechnologies(),
     getTestimonials(),
     getFaqs("GENERAL"),
+    getHomeProcessSteps(),
+    getHomeWhyReasons(),
   ]);
 
   return (
@@ -48,12 +72,12 @@ export default async function HomePage() {
       <Hero content={home} />
 
       <Container>
-        <Stats stats={home.stats} />
+        <Stats stats={stats} />
       </Container>
 
       <Section>
         <Container>
-          <AboutPreview about={about} />
+          <AboutPreview about={about} stats={stats} />
         </Container>
       </Section>
 
@@ -71,7 +95,7 @@ export default async function HomePage() {
 
       <Section className="bg-neutral-50">
         <Container>
-          <Process />
+          <Process steps={processSteps} />
         </Container>
       </Section>
 
@@ -83,7 +107,7 @@ export default async function HomePage() {
 
       <Section className="bg-neutral-50">
         <Container>
-          <WhyWorkWithMe />
+          <WhyWorkWithMe reasons={whyReasons} />
         </Container>
       </Section>
 
@@ -112,7 +136,12 @@ export default async function HomePage() {
 
       <Section>
         <Container>
-          <CtaSection />
+          <CtaSection
+            headline={home.contactCtaHeading ?? undefined}
+            subheadline={home.contactCtaDescription ?? undefined}
+            ctaLabel={home.contactCtaButtonText ?? undefined}
+            ctaHref={home.contactCtaButtonHref ?? undefined}
+          />
         </Container>
       </Section>
     </>
