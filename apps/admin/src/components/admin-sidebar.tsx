@@ -118,7 +118,7 @@ export function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNa
       setExpandedGroup(activeGroup);
       window.localStorage.setItem(GROUP_STORAGE_KEY, activeGroup);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [pathname]);
 
   function handleValueChange(value: string) {

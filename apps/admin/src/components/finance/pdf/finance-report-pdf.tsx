@@ -92,7 +92,7 @@ export function FinanceReportPdf({ data, branding }: { data: FinanceReportPdfDat
         <View style={styles.headerRow}>
           <View>
             {branding.displayMode === "LOGO" && branding.logoUrl ? (
-              // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf Image has no alt prop
+               
               <Image src={branding.logoUrl} style={styles.logo} />
             ) : (
               <Text style={styles.brandName}>{branding.companyName}</Text>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { Badge } from "@agency/ui";
 import { PaginatedResourceManager } from "@/components/resource-manager/paginated-resource-manager";
 import { createResourceClient, request } from "@/lib/api";
@@ -28,7 +29,7 @@ const client = createResourceClient<AffiliateTool>("/affiliate/tools");
 
 const statusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED"].map((v) => ({ value: v, label: v.charAt(0) + v.slice(1).toLowerCase() }));
 
-export default function AffiliatePage() {
+function AffiliatePageInner() {
   const { data: categories } = useAsyncData<AffiliateCategory[]>(
     () => request<{ items: AffiliateCategory[] }>("/affiliate/categories").then((r) => r.items),
     [],
@@ -111,5 +112,13 @@ export default function AffiliatePage() {
         order: 0,
       }}
     />
+  );
+}
+
+export default function AffiliatePage() {
+  return (
+    <Suspense fallback={null}>
+      <AffiliatePageInner />
+    </Suspense>
   );
 }

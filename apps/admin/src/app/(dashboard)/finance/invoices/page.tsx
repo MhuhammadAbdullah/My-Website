@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { Plus, Copy, Trash2, Wallet, Download } from "lucide-react";
 import { Badge, Button, Heading, Pagination, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, toast } from "@agency/ui";
@@ -75,7 +76,7 @@ function formatMoney(value: string, currency: string) {
   }
 }
 
-export default function InvoicesPage() {
+function InvoicesPageInner() {
   const list = usePaginatedList<InvoiceListItem>({
     endpoint: "/finance/invoices/admin",
     defaultSortBy: "createdAt",
@@ -271,5 +272,13 @@ export default function InvoicesPage() {
 
       {ConfirmDialog}
     </div>
+  );
+}
+
+export default function InvoicesPage() {
+  return (
+    <Suspense fallback={null}>
+      <InvoicesPageInner />
+    </Suspense>
   );
 }

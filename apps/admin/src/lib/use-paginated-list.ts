@@ -121,7 +121,7 @@ export function usePaginatedList<T>({
       })
       .catch((err) => setError(err instanceof ApiError ? err.message : "Something went wrong"))
       .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [endpoint, queryString]);
 
   React.useEffect(() => {

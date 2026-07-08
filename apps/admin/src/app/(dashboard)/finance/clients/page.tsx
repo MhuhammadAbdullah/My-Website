@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { PaginatedResourceManager } from "@/components/resource-manager/paginated-resource-manager";
 import { createResourceClient } from "@/lib/api";
@@ -21,7 +22,7 @@ const client = createResourceClient<Client>("/finance/clients");
 
 const currencyComboboxOptions = CURRENCY_OPTIONS.map((c) => ({ value: c.code, label: `${c.code} — ${c.label}` }));
 
-export default function FinanceClientsPage() {
+function FinanceClientsPageInner() {
   return (
     <PaginatedResourceManager
       title="Clients"
@@ -82,5 +83,13 @@ export default function FinanceClientsPage() {
         isArchived: false,
       }}
     />
+  );
+}
+
+export default function FinanceClientsPage() {
+  return (
+    <Suspense fallback={null}>
+      <FinanceClientsPageInner />
+    </Suspense>
   );
 }

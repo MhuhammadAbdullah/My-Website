@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import { Plus, Trash2, Pencil, Wallet } from "lucide-react";
 import {
   Badge,
@@ -391,7 +392,7 @@ const portfolioStatusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED"].map((v) => ({
   label: v.charAt(0) + v.slice(1).toLowerCase(),
 }));
 
-export default function PortfolioPage() {
+function PortfolioPageInner() {
   const { data: categories } = useAsyncData<Category[]>(
     () => request<{ items: Category[] }>("/categories/projects").then((r) => r.items),
     [],
@@ -541,5 +542,13 @@ export default function PortfolioPage() {
 
       {ConfirmDialog}
     </div>
+  );
+}
+
+export default function PortfolioPage() {
+  return (
+    <Suspense fallback={null}>
+      <PortfolioPageInner />
+    </Suspense>
   );
 }

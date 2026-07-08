@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { Badge } from "@agency/ui";
 import { PaginatedResourceManager } from "@/components/resource-manager/paginated-resource-manager";
 import { createResourceClient, request } from "@/lib/api";
@@ -28,7 +29,7 @@ const client = createResourceClient<Testimonial>("/testimonials");
 
 const statusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED"].map((v) => ({ value: v, label: v.charAt(0) + v.slice(1).toLowerCase() }));
 
-export default function TestimonialsPage() {
+function TestimonialsPageInner() {
   // limit=100: this populates a searchable dropdown of every project, not a
   // paginated table — /admin now paginates at 10 by default.
   const { data: projects } = useAsyncData<Project[]>(
@@ -99,5 +100,13 @@ export default function TestimonialsPage() {
         projectIds: item.projects.map((p) => p.id),
       })}
     />
+  );
+}
+
+export default function TestimonialsPage() {
+  return (
+    <Suspense fallback={null}>
+      <TestimonialsPageInner />
+    </Suspense>
   );
 }

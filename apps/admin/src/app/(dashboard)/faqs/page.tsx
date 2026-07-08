@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { Badge } from "@agency/ui";
 import { PaginatedResourceManager } from "@/components/resource-manager/paginated-resource-manager";
 import { createResourceClient } from "@/lib/api";
@@ -22,7 +23,7 @@ const contextOptions = ["GENERAL", "SERVICE", "PORTFOLIO", "CONTACT", "AFFILIATE
 
 const statusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED"].map((v) => ({ value: v, label: v.charAt(0) + v.slice(1).toLowerCase() }));
 
-export default function FaqsPage() {
+function FaqsPageInner() {
   return (
     <PaginatedResourceManager
       title="FAQs"
@@ -61,5 +62,13 @@ export default function FaqsPage() {
       ]}
       defaultValues={{ question: "", answer: "", context: "GENERAL", status: "PUBLISHED", order: 0 }}
     />
+  );
+}
+
+export default function FaqsPage() {
+  return (
+    <Suspense fallback={null}>
+      <FaqsPageInner />
+    </Suspense>
   );
 }

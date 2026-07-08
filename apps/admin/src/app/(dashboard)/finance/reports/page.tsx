@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import { Heading, Skeleton } from "@agency/ui";
 import { Pagination } from "@agency/ui";
 import { ListSummary } from "@/components/admin-list-toolbar";
@@ -39,7 +40,7 @@ const FILTER_KEYS = [
 
 const currencyFilterOptions = [{ value: "", label: "All currencies" }, ...CURRENCY_OPTIONS.map((c) => ({ value: c.code, label: c.code }))];
 
-export default function FinanceReportsPage() {
+function FinanceReportsPageInner() {
   const list = usePaginatedList<ReportRow>({
     endpoint: "/finance/reports",
     defaultSortBy: "date",
@@ -145,5 +146,13 @@ export default function FinanceReportsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function FinanceReportsPage() {
+  return (
+    <Suspense fallback={null}>
+      <FinanceReportsPageInner />
+    </Suspense>
   );
 }

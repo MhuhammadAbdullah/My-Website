@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { Plus, Trash2 } from "lucide-react";
 import { Button, Heading, Pagination, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, toast } from "@agency/ui";
@@ -47,7 +48,7 @@ function formatMoney(value: string, currency: string) {
   }
 }
 
-export default function PaymentsPage() {
+function PaymentsPageInner() {
   const list = usePaginatedList<PaymentListItem>({
     endpoint: "/finance/payments/admin",
     defaultSortBy: "paymentDate",
@@ -184,5 +185,13 @@ export default function PaymentsPage() {
 
       {ConfirmDialog}
     </div>
+  );
+}
+
+export default function PaymentsPage() {
+  return (
+    <Suspense fallback={null}>
+      <PaymentsPageInner />
+    </Suspense>
   );
 }

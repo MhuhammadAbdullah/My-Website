@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { Plus, Copy, ArrowRightLeft, Archive, ArchiveRestore, Trash2, Download } from "lucide-react";
 import { Badge, Button, Heading, Pagination, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, toast } from "@agency/ui";
@@ -70,7 +71,7 @@ function formatMoney(value: string, currency: string) {
   }
 }
 
-export default function QuotationsPage() {
+function QuotationsPageInner() {
   const list = usePaginatedList<QuotationListItem>({
     endpoint: "/finance/quotations/admin",
     defaultSortBy: "createdAt",
@@ -273,5 +274,13 @@ export default function QuotationsPage() {
 
       {ConfirmDialog}
     </div>
+  );
+}
+
+export default function QuotationsPage() {
+  return (
+    <Suspense fallback={null}>
+      <QuotationsPageInner />
+    </Suspense>
   );
 }

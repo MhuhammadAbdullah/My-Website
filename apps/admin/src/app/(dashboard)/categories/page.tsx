@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import {
   Button,
@@ -213,7 +214,7 @@ function CategoryList({ endpoint, paramPrefix, label }: { endpoint: string; para
   );
 }
 
-export default function CategoriesPage() {
+function CategoriesPageInner() {
   return (
     <div>
       <Heading level={2}>Categories</Heading>
@@ -242,5 +243,13 @@ export default function CategoriesPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+export default function CategoriesPage() {
+  return (
+    <Suspense fallback={null}>
+      <CategoriesPageInner />
+    </Suspense>
   );
 }

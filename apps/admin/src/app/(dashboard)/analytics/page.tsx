@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import { Trash2 } from "lucide-react";
 import {
   Badge,
@@ -50,7 +51,7 @@ const sortOptions = [
   { value: "updatedAt", label: "Date updated" },
 ];
 
-export default function AnalyticsPage() {
+function AnalyticsPageInner() {
   const list = usePaginatedList<Submission>({
     endpoint: "/contact",
     defaultSortBy: "createdAt",
@@ -279,5 +280,13 @@ export default function AnalyticsPage() {
 
       {ConfirmDialog}
     </div>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <Suspense fallback={null}>
+      <AnalyticsPageInner />
+    </Suspense>
   );
 }

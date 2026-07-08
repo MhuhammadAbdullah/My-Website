@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import {
   Badge,
@@ -604,7 +605,7 @@ const statusFilterOptions = ["DRAFT", "PUBLISHED", "ARCHIVED"].map((v) => ({
   label: v.charAt(0) + v.slice(1).toLowerCase(),
 }));
 
-export default function ServicesPage() {
+function ServicesPageInner() {
   const { data: categories } = useAsyncData<Category[]>(
     () => request<{ items: Category[] }>("/categories/services").then((r) => r.items),
     [],
@@ -739,5 +740,13 @@ export default function ServicesPage() {
 
       {ConfirmDialog}
     </div>
+  );
+}
+
+export default function ServicesPage() {
+  return (
+    <Suspense fallback={null}>
+      <ServicesPageInner />
+    </Suspense>
   );
 }
