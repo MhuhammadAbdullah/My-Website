@@ -22,9 +22,15 @@ import type {
   TestimonialRead,
 } from "./types";
 
+// A hung request (e.g. a cold-starting backend) would otherwise block static
+// generation indefinitely instead of failing fast enough for callers'
+// withFallback() wrappers to kick in.
+const API_TIMEOUT_MS = 10_000;
+
 async function apiFetch<T>(path: string, init?: RequestInit & { next?: NextFetchRequestConfig }): Promise<T> {
   const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/v1${path}`, {
     next: { revalidate: 300 },
+    signal: AbortSignal.timeout(API_TIMEOUT_MS),
     ...init,
   });
 

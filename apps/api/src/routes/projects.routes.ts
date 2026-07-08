@@ -15,7 +15,14 @@ const projectPublicInclude = {
   gallery: { orderBy: { order: "asc" as const } },
   testimonials: { where: { status: "PUBLISHED" as const }, include: { avatar: true } },
   seo: true,
-  relatedTo: { where: { status: "PUBLISHED" as const } },
+  // Rendered on the frontend via <ProjectCard>, which reads .gallery[0] and
+  // .category off each related project (see ProjectListItem) -- without
+  // these nested includes those fields come back undefined, not just empty,
+  // and ProjectCard crashes reading .gallery[0] off undefined.
+  relatedTo: {
+    where: { status: "PUBLISHED" as const },
+    include: { category: true, gallery: { take: 1, orderBy: { order: "asc" as const } } },
+  },
 };
 
 projectsRouter.get(

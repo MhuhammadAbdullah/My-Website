@@ -4,6 +4,8 @@ import { Badge, Container, Section, Heading, Reveal, Progress, Avatar, AvatarFal
 import { getAboutContent, getAboutTeamData, getSkills, getTechnologies } from "@/lib/api";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { getFaqs } from "@/lib/api";
+import { withFallback } from "@/lib/safe-fetch";
+import { EMPTY_ABOUT_CONTENT, EMPTY_ABOUT_TEAM_DATA } from "@/lib/fallbacks";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { cloudinaryTransform } from "@/lib/cloudinary";
@@ -42,11 +44,11 @@ const socialIcons = { twitter: Twitter, linkedin: Linkedin, github: Github } as 
 
 export default async function AboutPage() {
   const [about, teamData, skills, technologies, faqs] = await Promise.all([
-    getAboutContent(),
-    getAboutTeamData(),
-    getSkills(),
-    getTechnologies(),
-    getFaqs("GENERAL"),
+    withFallback(getAboutContent(), EMPTY_ABOUT_CONTENT, "about content"),
+    withFallback(getAboutTeamData(), EMPTY_ABOUT_TEAM_DATA, "about team data"),
+    withFallback(getSkills(), [], "skills"),
+    withFallback(getTechnologies(), [], "technologies"),
+    withFallback(getFaqs("GENERAL"), [], "faqs"),
   ]);
 
   return (

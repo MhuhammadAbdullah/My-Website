@@ -12,6 +12,8 @@ import {
   getTechnologies,
   getTestimonials,
 } from "@/lib/api";
+import { withFallback } from "@/lib/safe-fetch";
+import { EMPTY_HOME_CONTENT, EMPTY_ABOUT_CONTENT, emptyPage } from "@/lib/fallbacks";
 import { Hero } from "@/components/home/hero";
 import { Stats } from "@/components/home/stats";
 import { AboutPreview } from "@/components/home/about-preview";
@@ -55,16 +57,16 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const [home, stats, about, services, projectsPage, technologies, testimonials, faqs, processSteps, whyReasons] = await Promise.all([
-    getHomeContent(),
-    getHomeStats(),
-    getAboutContent(),
-    getServices(),
-    getProjects({ pageSize: 3 }),
-    getTechnologies(),
-    getTestimonials(),
-    getFaqs("GENERAL"),
-    getHomeProcessSteps(),
-    getHomeWhyReasons(),
+    withFallback(getHomeContent(), EMPTY_HOME_CONTENT, "home content"),
+    withFallback(getHomeStats(), [], "home stats"),
+    withFallback(getAboutContent(), EMPTY_ABOUT_CONTENT, "about content"),
+    withFallback(getServices(), [], "services"),
+    withFallback(getProjects({ pageSize: 3 }), emptyPage(1, 3), "featured projects"),
+    withFallback(getTechnologies(), [], "technologies"),
+    withFallback(getTestimonials(), [], "testimonials"),
+    withFallback(getFaqs("GENERAL"), [], "faqs"),
+    withFallback(getHomeProcessSteps(), [], "home process steps"),
+    withFallback(getHomeWhyReasons(), [], "home why-work-with-me reasons"),
   ]);
 
   return (

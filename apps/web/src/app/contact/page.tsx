@@ -4,6 +4,7 @@ import { Mail, MapPin, MessageCircle, Clock, CalendarClock } from "lucide-react"
 import { Container, Section, Heading, Reveal } from "@agency/ui";
 import { resolveGoogleMapsEmbedSrc } from "@agency/utils";
 import { getFaqs, getPageSeo, getSettings } from "@/lib/api";
+import { withFallback } from "@/lib/safe-fetch";
 import { ContactForm } from "@/components/contact/contact-form";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { PageHeading } from "@/components/marketing/page-heading";
@@ -19,7 +20,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactPage() {
-  const [settings, faqs] = await Promise.all([getSettings(), getFaqs("CONTACT")]);
+  const [settings, faqs] = await Promise.all([
+    withFallback(getSettings(), {}, "site settings"),
+    withFallback(getFaqs("CONTACT"), [], "faqs"),
+  ]);
   const hours = settings.business_hours ?? {};
   const mapSrc = resolveGoogleMapsEmbedSrc(settings.google_maps_embed_code, settings.google_maps_embed);
 

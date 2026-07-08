@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Container, Section, Heading, Reveal } from "@agency/ui";
 import { getPageSeo, getServices } from "@/lib/api";
+import { withFallback } from "@/lib/safe-fetch";
 import { ServiceCard } from "@/components/marketing/service-card";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { PageHeading } from "@/components/marketing/page-heading";
@@ -16,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ServicesPage() {
-  const services = await getServices();
+  const services = await withFallback(getServices(), [], "services");
 
   return (
     <>

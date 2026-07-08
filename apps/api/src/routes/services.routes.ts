@@ -17,7 +17,14 @@ const servicePublicInclude = {
   pricingPlans: { orderBy: { order: "asc" as const } },
   faqs: true,
   testimonials: true,
-  relatedTo: { where: { status: "PUBLISHED" as const } },
+  // Rendered on the frontend via <ServiceCard>, which reads .category and
+  // .pricingPlans off each related service (see ServiceListItem) -- without
+  // these nested includes those fields come back undefined, not just empty,
+  // and ServiceCard's cheapestPlan() crashes calling .filter() on undefined.
+  relatedTo: {
+    where: { status: "PUBLISHED" as const },
+    include: { category: true, heroMedia: true, pricingPlans: { orderBy: { order: "asc" as const } } },
+  },
 };
 
 // Pricing fields validate against each other (regularPrice required unless
@@ -123,6 +130,10 @@ servicesRouter.get(
       item: {
         ...item,
         pricingPlans: item.pricingPlans.map((p) => ({ ...p, currency: p.currency ?? globalCurrency })),
+        relatedTo: item.relatedTo.map((related) => ({
+          ...related,
+          pricingPlans: related.pricingPlans.map((p) => ({ ...p, currency: p.currency ?? globalCurrency })),
+        })),
       },
     });
   }),
@@ -141,7 +152,7 @@ servicesRouter.post(
       technologies: { connect: technologyIds.map((id) => ({ id })) },
       faqs: { connect: faqIds.map((id) => ({ id })) },
       relatedTo: { connect: relatedServiceIds.map((id) => ({ id })) },
-      pricingPlans: { create: pricingPlans.map(({ id, ...p }) => p) },
+      pricingPlans: { create: pricingPlans.map(({ id: _id, ...p }) => p) },
       seoId: seoRecord.id,
     };
     const item = await prisma.service.create({ data: createData });
@@ -194,7 +205,7 @@ servicesRouter.patch(
     if (pricingPlans) {
       await prisma.pricingPlan.deleteMany({ where: { serviceId } });
       await prisma.pricingPlan.createMany({
-        data: pricingPlans.map(({ id, ...p }) => ({ ...p, serviceId })),
+        data: pricingPlans.map(({ id: _id, ...p }) => ({ ...p, serviceId })),
       });
     }
 

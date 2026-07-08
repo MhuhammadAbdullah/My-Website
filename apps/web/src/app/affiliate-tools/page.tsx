@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Info } from "lucide-react";
 import { Container, Section, Heading, Reveal } from "@agency/ui";
 import { getAffiliateCategories, getAffiliateTools, getPageSeo } from "@/lib/api";
+import { withFallback } from "@/lib/safe-fetch";
+import { emptyPage } from "@/lib/fallbacks";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { AffiliateFilters } from "@/components/affiliate/affiliate-filters";
 import { AffiliateToolCard } from "@/components/affiliate/affiliate-tool-card";
@@ -35,16 +37,20 @@ export default async function AffiliateToolsPage({
   const pageSize = Number(params.pageSize ?? 12);
 
   const [toolsPage, categories] = await Promise.all([
-    getAffiliateTools({
-      page,
-      pageSize,
-      category: params.category,
-      search: params.search,
-      featured: params.featured === "true" ? true : undefined,
-      sortBy: params.sortBy as "order" | "name" | "createdAt" | undefined,
-      sortOrder: params.sortOrder as "asc" | "desc" | undefined,
-    }),
-    getAffiliateCategories(),
+    withFallback(
+      getAffiliateTools({
+        page,
+        pageSize,
+        category: params.category,
+        search: params.search,
+        featured: params.featured === "true" ? true : undefined,
+        sortBy: params.sortBy as "order" | "name" | "createdAt" | undefined,
+        sortOrder: params.sortOrder as "asc" | "desc" | undefined,
+      }),
+      emptyPage(page, pageSize),
+      "affiliate tools",
+    ),
+    withFallback(getAffiliateCategories(), [], "affiliate categories"),
   ]);
 
   return (

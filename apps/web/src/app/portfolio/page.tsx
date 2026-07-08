@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Container, Section, Heading } from "@agency/ui";
 import { getPageSeo, getProjectCategories, getProjects } from "@/lib/api";
+import { withFallback } from "@/lib/safe-fetch";
+import { emptyPage } from "@/lib/fallbacks";
 import { ProjectCard } from "@/components/marketing/project-card";
 import { PortfolioFilters } from "@/components/portfolio/portfolio-filters";
 import { PortfolioPagination } from "@/components/portfolio/portfolio-pagination";
@@ -25,8 +27,12 @@ export default async function PortfolioPage({
   const page = Number(params.page ?? 1);
 
   const [projectsPage, categories] = await Promise.all([
-    getProjects({ page, pageSize: 6, category: params.category, search: params.search }),
-    getProjectCategories(),
+    withFallback(
+      getProjects({ page, pageSize: 6, category: params.category, search: params.search }),
+      emptyPage(page, 6),
+      "projects",
+    ),
+    withFallback(getProjectCategories(), [], "project categories"),
   ]);
 
   return (

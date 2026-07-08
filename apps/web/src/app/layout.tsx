@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Toaster } from "@agency/ui";
 import { manrope, playfairDisplay, ibmPlexMono } from "@/lib/fonts";
 import { getNav, getSettings } from "@/lib/api";
+import { withFallback } from "@/lib/safe-fetch";
 import { resolveBranding } from "@/lib/branding";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -29,9 +30,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [headerNav, footerNav, settings] = await Promise.all([
-    getNav("HEADER"),
-    getNav("FOOTER"),
-    getSettings(),
+    withFallback(getNav("HEADER"), [], "header navigation"),
+    withFallback(getNav("FOOTER"), [], "footer navigation"),
+    withFallback(getSettings(), {}, "site settings"),
   ]);
 
   const branding = resolveBranding(settings, "Calibre Digital");
