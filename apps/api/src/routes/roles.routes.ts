@@ -74,6 +74,13 @@ permissionsRouter.get(
 usersRouter.use(requireAuth);
 
 usersRouter.get(
+  "/me",
+  asyncHandler(async (req, res) => {
+    res.json({ permissions: Array.from(req.user?.permissions ?? []) });
+  }),
+);
+
+usersRouter.get(
   "/",
   requirePermission("users", "view"),
   asyncHandler(async (_req, res) => {

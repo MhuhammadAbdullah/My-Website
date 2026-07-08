@@ -8,6 +8,7 @@ export interface SiteSettings {
   socials?: Record<string, string>;
   calendly_url?: string;
   google_maps_embed?: string;
+  google_maps_embed_code?: string;
   currency?: string;
   branding?: {
     brandName: string;

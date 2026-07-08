@@ -620,6 +620,7 @@ async function main() {
     },
     { key: "calendly_url", value: "https://calendly.com/calibre-digital/intro-call" },
     { key: "google_maps_embed", value: "https://www.google.com/maps/embed?pb=placeholder" },
+    { key: "google_maps_embed_code", value: "" },
     { key: "currency", value: "PKR" },
     { key: "branding", value: { brandName: AGENCY_NAME, logoMediaId: null, logoUrl: null, displayMode: "TEXT" } },
   ];

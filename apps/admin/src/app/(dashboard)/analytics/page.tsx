@@ -1,7 +1,11 @@
 "use client";
 
+import * as React from "react";
+import { Trash2 } from "lucide-react";
 import {
   Badge,
+  Button,
+  Checkbox,
   Heading,
   Pagination,
   Select,
@@ -21,6 +25,8 @@ import {
 import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-list-toolbar";
 import { request } from "@/lib/api";
 import { usePaginatedList } from "@/lib/use-paginated-list";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
+import { usePermissions } from "@/lib/use-permissions";
 
 interface Submission {
   id: string;
@@ -51,6 +57,18 @@ export default function AnalyticsPage() {
     defaultSortOrder: "desc",
     filterKeys: ["status", "country"],
   });
+  const { can } = usePermissions();
+  const canDelete = can("settings", "delete");
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
+  const rows = list.data ?? [];
+
+  // Row selection is scoped to the current page — drop it whenever the page
+  // itself, or anything that reshuffles which rows are on it, changes.
+  React.useEffect(() => {
+    setSelected(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list.page, list.search, list.sortBy, list.sortOrder, JSON.stringify(list.filters)]);
 
   async function updateStatus(id: string, status: string) {
     try {
@@ -62,13 +80,84 @@ export default function AnalyticsPage() {
     }
   }
 
+  // After a delete, stay on the current page if it still has rows; if the
+  // deleted row(s) emptied it, step back a page (unless already on page 1).
+  function afterDelete(deletedCount: number) {
+    const remaining = rows.length - deletedCount;
+    if (remaining <= 0 && list.page > 1) {
+      list.setPage(list.page - 1);
+    } else {
+      list.reload();
+    }
+  }
+
+  function handleDelete(sub: Submission) {
+    confirmDelete({
+      title: "Delete this message?",
+      description: `Delete the message from ${sub.name}?\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        await request(`/contact/${sub.id}`, { method: "DELETE" });
+        toast.success("Message deleted");
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(sub.id);
+          return next;
+        });
+        afterDelete(1);
+      },
+    });
+  }
+
+  function handleBulkDelete() {
+    const ids = Array.from(selected);
+    confirmDelete({
+      title: `Delete ${ids.length} message${ids.length === 1 ? "" : "s"}?`,
+      description: "This action cannot be undone.",
+      onConfirm: async () => {
+        const res = await request<{ count: number }>("/contact/bulk-delete", {
+          method: "POST",
+          body: JSON.stringify({ ids }),
+        });
+        toast.success(`${res.count} message${res.count === 1 ? "" : "s"} deleted`);
+        setSelected(new Set());
+        afterDelete(ids.length);
+      },
+    });
+  }
+
+  const allSelected = rows.length > 0 && selected.size === rows.length;
+  const someSelected = selected.size > 0 && !allSelected;
+
+  function toggleAll(checked: boolean) {
+    setSelected(checked ? new Set(rows.map((r) => r.id)) : new Set());
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  const columnCount = canDelete ? 10 : 8;
+
   return (
     <div>
-      <Heading level={2}>Analytics</Heading>
-      <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
-        Contact form submissions — the leading indicator we track today. Traffic and conversion analytics are a
-        planned future module.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <Heading level={2}>Messages</Heading>
+          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+            Contact form submissions received through the website.
+          </p>
+        </div>
+        {canDelete && selected.size > 0 && (
+          <Button variant="outline" className="text-error-500" onClick={handleBulkDelete}>
+            <Trash2 className="size-4" /> Delete {selected.size} selected
+          </Button>
+        )}
+      </div>
 
       <div className="mt-6">
         <AdminListToolbar
@@ -98,6 +187,15 @@ export default function AnalyticsPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                {canDelete && (
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                      onCheckedChange={(checked) => toggleAll(checked === true)}
+                      aria-label="Select all messages"
+                    />
+                  </TableHead>
+                )}
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
@@ -106,11 +204,21 @@ export default function AnalyticsPage() {
                 <TableHead>Message</TableHead>
                 <TableHead>Received</TableHead>
                 <TableHead>Status</TableHead>
+                {canDelete && <TableHead className="text-right">Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(list.data ?? []).map((sub) => (
+              {rows.map((sub) => (
                 <TableRow key={sub.id}>
+                  {canDelete && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(sub.id)}
+                        onCheckedChange={(checked) => toggleOne(sub.id, checked === true)}
+                        aria-label={`Select message from ${sub.name}`}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>{sub.name}</TableCell>
                   <TableCell>{sub.email}</TableCell>
                   <TableCell>{sub.phone}</TableCell>
@@ -132,15 +240,27 @@ export default function AnalyticsPage() {
                       </SelectContent>
                     </Select>
                   </TableCell>
+                  {canDelete && (
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(sub)}
+                        aria-label="Delete message"
+                      >
+                        <Trash2 className="size-4 text-error-500" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
-              {(list.data ?? []).length === 0 && (
+              {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-neutral-400">
+                  <TableCell colSpan={columnCount} className="text-center text-neutral-400">
                     {list.hasActiveFilters ? (
-                      <EmptyState hasActiveFilters label="submissions" />
+                      <EmptyState hasActiveFilters label="messages" />
                     ) : (
-                      <Badge variant="neutral">No submissions yet</Badge>
+                      <Badge variant="neutral">No messages yet</Badge>
                     )}
                   </TableCell>
                 </TableRow>
@@ -156,6 +276,8 @@ export default function AnalyticsPage() {
           <Pagination page={list.page} totalPages={list.meta?.totalPages ?? 1} onPageChange={list.setPage} />
         </div>
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

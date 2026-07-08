@@ -1,5 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
+import { z } from "zod";
 import { prisma } from "@agency/database";
 import { contactSubmissionSchema } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
@@ -8,6 +9,8 @@ import { sendContactNotificationEmail } from "../lib/mailer.js";
 import { parseListQuery, paginationMeta, searchFilter, exactFilter } from "../lib/list-query.js";
 
 export const contactRouter = Router();
+
+const bulkDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1) });
 
 const contactSortableFields = ["name", "email", "status", "createdAt", "updatedAt"];
 
@@ -71,5 +74,26 @@ contactRouter.patch(
       data: { status: req.body.status },
     });
     res.json({ item });
+  }),
+);
+
+contactRouter.post(
+  "/bulk-delete",
+  requireAuth,
+  requirePermission("settings", "delete"),
+  asyncHandler(async (req, res) => {
+    const { ids } = bulkDeleteSchema.parse(req.body);
+    const { count } = await prisma.contactSubmission.deleteMany({ where: { id: { in: ids } } });
+    res.json({ count });
+  }),
+);
+
+contactRouter.delete(
+  "/:id",
+  requireAuth,
+  requirePermission("settings", "delete"),
+  asyncHandler(async (req, res) => {
+    await prisma.contactSubmission.delete({ where: { id: req.params.id } });
+    res.status(204).send();
   }),
 );

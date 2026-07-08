@@ -1,0 +1,309 @@
+$ turbo run dev
+• turbo 2.10.2
+
+   • Packages in scope: @agency/auth, @agency/config, @agency/database, @agency/types, @agency/ui, @agency/utils, admin, api, web
+   • Running dev in 9 packages
+   • Remote caching disabled
+
+@agency/database:db:generate: cache bypass, force executing ec2d7d7caa06cb77
+web:dev: cache bypass, force executing 1245b6bfc1e0bcf0
+admin:dev: cache bypass, force executing 66ad7c728fc31130
+@agency/database:db:generate: $ prisma generate
+web:dev: $ next dev --turbopack -p 3000
+admin:dev: $ next dev --turbopack -p 3001
+@agency/database:db:generate: warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+@agency/database:db:generate: For more information, see: https://pris.ly/prisma-config
+@agency/database:db:generate: 
+@agency/database:db:generate: Environment variables loaded from .env
+@agency/database:db:generate: Prisma schema loaded from prisma\schema.prisma
+web:dev:    ▲ Next.js 15.5.20 (Turbopack)
+web:dev:    - Local:        http://localhost:3000
+web:dev:    - Network:      http://192.168.100.118:3000
+web:dev:    - Environments: .env.local
+web:dev: 
+web:dev:  ✓ Starting...
+admin:dev:    ▲ Next.js 15.5.20 (Turbopack)
+admin:dev:    - Local:        http://localhost:3001
+admin:dev:    - Network:      http://192.168.100.118:3001
+admin:dev:    - Environments: .env.local
+admin:dev: 
+admin:dev:  ✓ Starting...
+@agency/database:db:generate: 
+@agency/database:db:generate: ✔ Generated Prisma Client (v6.19.3) to .\generated\client in 4.47s
+@agency/database:db:generate: 
+@agency/database:db:generate: Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+@agency/database:db:generate: 
+@agency/database:db:generate: Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+@agency/database:db:generate: 
+api:dev: cache bypass, force executing e513efa62412445f
+admin:dev:  ○ Compiling middleware ...
+web:dev:  ✓ Ready in 10.6s
+api:dev: $ tsx watch --env-file=.env src/index.ts
+admin:dev:  ✓ Compiled middleware in 3.8s
+admin:dev:  ✓ Ready in 14.5s
+api:dev: API listening on http://localhost:4000
+web:dev:  ○ Compiling / ...
+web:dev:  ✓ Compiled / in 43.9s
+web:dev:  GET / 200 in 55497ms
+web:dev:  GET / 200 in 5700ms
+admin:dev:  ○ Compiling / ...
+admin:dev:  ✓ Compiled / in 28s
+admin:dev:  GET / 200 in 31262ms
+admin:dev:  ○ Compiling /finance/quotations ...
+admin:dev:  ✓ Compiled /finance/quotations in 7.5s
+admin:dev:  GET /finance/quotations 200 in 8447ms
+admin:dev:  GET /finance/quotations 200 in 3299ms
+admin:dev:  GET /finance/quotations 200 in 856ms
+admin:dev:  GET /finance/quotations 200 in 556ms
+admin:dev:  GET /finance/quotations 200 in 496ms
+admin:dev:  ○ Compiling /finance/invoices ...
+admin:dev:  ✓ Compiled /finance/invoices in 2.9s
+admin:dev:  GET /finance/invoices 200 in 3308ms
+admin:dev:  GET /finance/invoices 200 in 1341ms
+admin:dev:  GET /finance/invoices 200 in 1471ms
+admin:dev:  GET /finance/invoices 200 in 595ms
+admin:dev:  GET /finance/invoices 200 in 373ms
+admin:dev:  GET /finance/invoices 200 in 3157ms
+api:dev: prisma:error 
+api:dev: Invalid `prisma.invoice.delete()` invocation in
+api:dev: D:\My-Website\apps\api\src\routes\invoices.routes.ts:229:26
+api:dev: 
+api:dev:   226 requireAuth,
+api:dev:   227 requirePermission("invoices", "delete"),
+api:dev:   228 asyncHandler(async (req, res) => {
+api:dev: → 229   await prisma.invoice.delete(
+api:dev: Foreign key constraint violated on the constraint: `finance_payments_invoiceId_fkey`
+admin:dev:  ○ Compiling /finance/payments ...
+admin:dev:  ✓ Compiled /finance/payments in 7.6s
+admin:dev:  GET /finance/payments 200 in 8076ms
+admin:dev:  GET /finance/invoices 200 in 571ms
+admin:dev:  ○ Compiling /finance/clients ...
+admin:dev:  ✓ Compiled /finance/clients in 3.5s
+admin:dev:  GET /finance/clients 200 in 4137ms
+admin:dev:  GET /finance/clients 200 in 516ms
+admin:dev:  GET /finance/clients?search=abaloch0033%40gmail.com 200 in 1287ms
+admin:dev:  GET /finance/clients 200 in 413ms
+admin:dev:  ○ Compiling /finance/reports ...
+admin:dev:  ✓ Compiled /finance/reports in 4.8s
+admin:dev:  GET /finance/reports 200 in 5345ms
+admin:dev:  ○ Compiling /analytics ...
+admin:dev:  ✓ Compiled /analytics in 1552ms
+admin:dev:  GET /analytics 200 in 1890ms
+admin:dev:  GET /analytics 200 in 2122ms
+api:dev: 9:57:48 AM [tsx] change in ./src\routes\contact.routes.ts Restarting...
+api:dev: c9:57:55 AM [tsx] change in ./src\routes\contact.routes.ts Restarting...
+api:dev: c9:57:59 AM [tsx] change in ./src\routes\roles.routes.ts Restarting...
+api:dev: cAPI listening on http://localhost:4000
+admin:dev:  ✓ Compiled in 4.4s
+api:dev: 9:59:42 AM [tsx] unlink in ./..\..\packages\database\generated\client\index.js Restarting...
+api:dev: c9:59:42 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
+api:dev: c9:59:43 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
+api:dev: cAPI listening on http://localhost:4000
+web:dev:  GET / 200 in 3178ms
+admin:dev:  ○ Compiling /login ...
+admin:dev:  ✓ Compiled /login in 7.2s
+admin:dev:  GET /login 200 in 8303ms
+api:dev: 10:01:48 AM [tsx] unlink in ./..\..\packages\database\generated\client\index.js Restarting...
+api:dev: c10:01:49 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
+api:dev: c10:01:49 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
+api:dev: cAPI listening on http://localhost:4000
+admin:dev:  ○ Compiling /services ...
+admin:dev:  ✓ Compiled /services in 6.6s
+admin:dev:  GET /services 200 in 8195ms
+api:dev: prisma:error 
+api:dev: Invalid `prisma.technology.findMany()` invocation in
+api:dev: D:\My-Website\apps\api\src\routes\categories.routes.ts:128:47
+api:dev: 
+api:dev:   125 categoriesRouter.get(
+api:dev:   126   "/technologies",
+api:dev:   127   asyncHandler(async (_req, res) => {
+api:dev: → 128     res.json({ items: await prisma.technology.findMany(
+api:dev: Database unreachable on GET /api/v1/categories/technologies 
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+api:dev: Invalid `prisma.technology.findMany()` invocation in
+api:dev: D:\My-Website\apps\api\src\routes\categories.routes.ts:128:47
+api:dev: 
+api:dev:   125 categoriesRouter.get(
+api:dev: prisma:error 
+api:dev: Invalid `prisma.serviceCategory.findMany()` invocation in
+api:dev: D:\My-Website\apps\api\src\routes\categories.routes.ts:47:52
+api:dev: 
+api:dev:   126   "/technologies",
+api:dev:   44 categoriesRouter.get(
+api:dev:   45   "/services",
+api:dev:   46   asyncHandler(async (_req, res) => {
+api:dev: → 47     res.json({ items: await prisma.serviceCategory.findMany(
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+api:dev: prisma:error 
+api:dev: Invalid `prisma.session.findFirst()` invocation:
+api:dev: 
+api:dev: 
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev:   127   asyncHandler(async (_req, res) => {
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+api:dev: → 128     res.json({ items: await prisma.technology.findMany(
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+api:dev: Database unreachable on GET /api/v1/categories/services 
+api:dev: Invalid `prisma.serviceCategory.findMany()` invocation in
+api:dev: D:\My-Website\apps\api\src\routes\categories.routes.ts:47:52
+api:dev: 
+api:dev:   44 categoriesRouter.get(
+api:dev:   45   "/services",
+api:dev:   46   asyncHandler(async (_req, res) => {
+api:dev: → 47     res.json({ items: await prisma.serviceCategory.findMany(
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+api:dev: [2m2026-07-08T05:04:37.588Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR PrismaClientKnownRequestError: 
+api:dev: Invalid `prisma.session.findFirst()` invocation:
+api:dev: 
+api:dev: 
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+api:dev:     at ei.handleRequestError (D:\My-Website\packages\database\generated\client\runtime\library.js:125:7268)
+api:dev:     at ei.handleAndLogRequestError (D:\My-Website\packages\database\generated\client\runtime\library.js:125:6593)
+api:dev:     at ei.request (D:\My-Website\packages\database\generated\client\runtime\library.js:125:6300)
+api:dev:     at async a (D:\My-Website\packages\database\generated\client\runtime\library.js:134:9551)
+api:dev:     at async Object.findOne (file:///D:/My-Website/node_modules/.pnpm/@better-auth+prisma-adapter_a4eecf632c0f7a98a900e0270aede8c8/node_modules/@better-auth/prisma-adapter/dist/index.mjs:191:20)
+api:dev:     at async Object.findOne (file:///D:/My-Website/node_modules/.pnpm/@better-auth+core@1.6.23_@b_5b27005f42a6b8a46b0797e8da4409c3/node_modules/@better-auth/core/dist/db/adapter/factory.mjs:557:16)
+api:dev:     at async Object.findSession (file:///D:/My-Website/node_modules/.pnpm/better-auth@1.6.23_@prisma+_6c44cdd132e11e231ea8c34054474320/node_modules/better-auth/dist/db/internal-adapter.mjs:246:19)
+api:dev:     at async file:///D:/My-Website/node_modules/.pnpm/better-auth@1.6.23_@prisma+_6c44cdd132e11e231ea8c34054474320/node_modules/better-auth/dist/api/routes/session.mjs:178:19
+api:dev:     at async wrapped (file:///D:/My-Website/node_modules/.pnpm/@better-auth+core@1.6.23_@b_5b27005f42a6b8a46b0797e8da4409c3/node_modules/@better-auth/core/dist/api/index.mjs:40:11)
+api:dev:     at async internalHandler (D:\My-Website\node_modules\.pnpm\better-call@1.3.7_zod@4.4.3\node_modules\better-call\src\endpoint.ts:623:20) {
+api:dev:   code: 'P1001',
+api:dev:   meta: {
+api:dev:     modelName: 'Session',
+api:dev:     database_location: 'aws-1-ap-southeast-1.pooler.supabase.com:6543'
+api:dev:   },
+api:dev:   clientVersion: '6.19.3'
+api:dev: }
+api:dev: Unhandled promise rejection (server staying up): [APIError: Failed to get session] {
+api:dev:   status: 'INTERNAL_SERVER_ERROR',
+api:dev:   body: { message: 'Failed to get session', code: 'FAILED_TO_GET_SESSION' },
+api:dev:   headers: {},
+api:dev:   statusCode: 500
+api:dev: }
+admin:dev:  ○ Compiling /categories ...
+admin:dev:  ✓ Compiled /categories in 3.3s
+admin:dev:  GET /categories 200 in 3668ms
+api:dev: prisma:error 
+api:dev: Invalid `delegate.count()` invocation in
+api:dev: D:\My-Website\apps\api\src\routes\categories.routes.ts:38:14
+api:dev: 
+api:dev:   35 const where = searchFilter(search, ["name"]);
+api:dev:   36 const [items, total] = await Promise.all([
+api:dev:   37   delegate.findMany({ where, orderBy: { [sortBy]: sortOrder }, skip, take: limit }),
+api:dev: → 38   delegate.count(
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+api:dev: prisma:error 
+api:dev: Invalid `delegate.count()` invocation in
+api:dev: Database unreachable on GET /api/v1/categories/services/admin 
+api:dev: D:\My-Website\apps\api\src\routes\categories.routes.ts:38:14
+api:dev: 
+api:dev:   35 const where = searchFilter(search, ["name"]);
+api:dev:   36 const [items, total] = await Promise.all([
+api:dev: Invalid `delegate.count()` invocation in
+api:dev:   37   delegate.findMany({ where, orderBy: { [sortBy]: sortOrder }, skip, take: limit }),
+api:dev: → 38   delegate.count(
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+api:dev: D:\My-Website\apps\api\src\routes\categories.routes.ts:38:14
+api:dev: 
+api:dev:   35 const where = searchFilter(search, ["name"]);
+api:dev:   36 const [items, total] = await Promise.all([
+api:dev:   37   delegate.findMany({ where, orderBy: { [sortBy]: sortOrder }, skip, take: limit }),
+api:dev: → 38   delegate.count(
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+api:dev: Database unreachable on GET /api/v1/categories/services/admin 
+api:dev: Invalid `delegate.count()` invocation in
+api:dev: D:\My-Website\apps\api\src\routes\categories.routes.ts:38:14
+api:dev: 
+api:dev:   35 const where = searchFilter(search, ["name"]);
+api:dev:   36 const [items, total] = await Promise.all([
+api:dev:   37   delegate.findMany({ where, orderBy: { [sortBy]: sortOrder }, skip, take: limit }),
+api:dev: → 38   delegate.count(
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+admin:dev:  ○ Compiling /affiliate ...
+admin:dev:  ✓ Compiled /affiliate in 4.5s
+admin:dev:  GET /affiliate 200 in 4841ms
+admin:dev:  ○ Compiling /affiliate ...
+admin:dev:  ✓ Compiled in 37.1s
+admin:dev:  ✓ Compiled /affiliate in 2.8s
+admin:dev:  GET /affiliate 200 in 9154ms
+admin:dev:  GET /affiliate 200 in 12193ms
+api:dev: 10:13:15 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
+api:dev: c10:13:15 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
+api:dev: cAPI listening on http://localhost:4000
+admin:dev:  GET /affiliate 200 in 1435ms
+admin:dev:  ○ Compiling /settings ...
+admin:dev:  ✓ Compiled /settings in 15.3s
+admin:dev:  GET /settings 200 in 16280ms
+web:dev:  GET / 200 in 9579ms
+admin:dev:  ○ Compiling /users ...
+admin:dev:  ✓ Compiled /users in 6.5s
+admin:dev:  GET /users 200 in 8291ms
+admin:dev:  GET /users 200 in 1365ms
+admin:dev:  ○ Compiling /roles ...
+admin:dev:  ✓ Compiled /roles in 3.4s
+admin:dev:  GET /roles 200 in 3840ms
+admin:dev:  ○ Compiling /permissions ...
+admin:dev:  ✓ Compiled /permissions in 2.5s
+admin:dev:  GET /permissions 200 in 2995ms
+admin:dev:  GET /permissions 200 in 554ms
+admin:dev:  ○ Compiling /footer ...
+admin:dev:  ✓ Compiled /footer in 3.3s
+admin:dev:  GET /footer 200 in 3761ms
+admin:dev:  GET /footer 200 in 458ms
+admin:dev:  GET /settings 200 in 501ms
+web:dev:  ○ Compiling /contact ...
+web:dev:  ✓ Compiled /contact in 12.1s
+web:dev:  GET /contact 200 in 13432ms
+web:dev:  GET /contact 200 in 775ms
+api:dev: 10:28:12 AM [tsx] change in ./..\..\packages\utils\src\index.ts Restarting...
+web:dev:  ✓ Compiled in 10.3s
+api:dev: c10:28:23 AM [tsx] change in ./src\routes\settings.routes.ts Restarting...
+api:dev: cAPI listening on http://localhost:4000
+web:dev:  ✓ Compiled in 536ms
+web:dev:  ✓ Compiled /contact in 463ms
+web:dev:  GET /contact 200 in 2871ms
+web:dev:  ✓ Compiled in 1561ms
+web:dev:  ✓ Compiled /contact in 192ms
+web:dev:  GET /contact 200 in 1210ms
+web:dev:  ✓ Compiled in 471ms
+web:dev:  ✓ Compiled /contact in 370ms
+web:dev:  GET /contact 200 in 1499ms
+admin:dev:  ✓ Compiled in 1583ms
+admin:dev:  ✓ Compiled in 4.5s
+admin:dev:  ✓ Compiled in 1687ms
+admin:dev:  ✓ Compiled in 2.3s
+admin:dev:  ✓ Compiled in 987ms
+admin:dev:  ✓ Compiled in 1521ms
+web:dev:  GET /contact 200 in 5559ms
+admin:dev:  GET /settings 200 in 4618ms
+web:dev:  GET /contact 200 in 3388ms
+web:dev:  GET /contact 200 in 3401ms
+web:dev:  GET /contact 200 in 3011ms
+web:dev:  GET /contact 200 in 2771ms
+web:dev:  GET /contact 200 in 3091ms
+web:dev:  GET /contact 200 in 2567ms
+web:dev:  GET /contact 200 in 3115ms
+web:dev:  GET /contact 200 in 2434ms
+web:dev:  GET /contact 200 in 1916ms
+web:dev:  ○ Compiling /affiliate-tools ...
+web:dev:  ✓ Compiled /affiliate-tools in 9.9s
+web:dev:  GET /affiliate-tools 200 in 11042ms

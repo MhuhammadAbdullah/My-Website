@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail, MapPin, MessageCircle, Clock, CalendarClock } from "lucide-react";
 import { Container, Section, Heading, Reveal } from "@agency/ui";
+import { resolveGoogleMapsEmbedSrc } from "@agency/utils";
 import { getFaqs, getPageSeo, getSettings } from "@/lib/api";
 import { ContactForm } from "@/components/contact/contact-form";
 import { FaqSection } from "@/components/marketing/faq-section";
@@ -20,6 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ContactPage() {
   const [settings, faqs] = await Promise.all([getSettings(), getFaqs("CONTACT")]);
   const hours = settings.business_hours ?? {};
+  const mapSrc = resolveGoogleMapsEmbedSrc(settings.google_maps_embed_code, settings.google_maps_embed);
 
   return (
     <>
@@ -88,10 +90,10 @@ export default async function ContactPage() {
               )}
             </div>
 
-            {settings.google_maps_embed && (
+            {mapSrc && (
               <div className="aspect-video overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100">
                 <iframe
-                  src={settings.google_maps_embed}
+                  src={mapSrc}
                   className="h-full w-full"
                   loading="lazy"
                   title="Office location"

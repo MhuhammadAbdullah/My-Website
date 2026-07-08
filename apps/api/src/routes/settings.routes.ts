@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { prisma, type Prisma } from "@agency/database";
 import { socialLinksSchema, currencySchema, brandingSchema } from "@agency/types";
+import { isGoogleMapsUrl, extractGoogleMapsEmbedSrc } from "@agency/utils";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
+import { ApiError } from "../middleware/error-handler.js";
 
 export const settingsRouter = Router();
 
@@ -12,6 +14,20 @@ const settingValidators: Record<string, (value: unknown) => Prisma.InputJsonValu
   socials: (value) => socialLinksSchema.parse(value),
   currency: (value) => currencySchema.parse(value),
   branding: (value) => brandingSchema.parse(value),
+  google_maps_embed: (value) => {
+    if (!value) return "";
+    if (typeof value !== "string" || !isGoogleMapsUrl(value)) {
+      throw new ApiError(422, "Enter a valid Google Maps URL.");
+    }
+    return value;
+  },
+  google_maps_embed_code: (value) => {
+    if (!value) return "";
+    if (typeof value !== "string" || !extractGoogleMapsEmbedSrc(value)) {
+      throw new ApiError(422, "Paste a valid Google Maps iframe embed code.");
+    }
+    return value;
+  },
 };
 
 settingsRouter.get(
