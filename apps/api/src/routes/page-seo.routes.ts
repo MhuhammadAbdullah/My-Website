@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { prisma } from "@agency/database";
+import { prisma, type Prisma } from "@agency/database";
 import { pageSeoSchema, SEO_PAGE_KEYS } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
@@ -33,11 +33,20 @@ pageSeoRouter.put(
     const page = req.params.page ?? "";
     assertKnownPage(page);
     const data = pageSeoSchema.parse(req.body);
+    const createData: Prisma.PageSeoUncheckedCreateInput = {
+      page,
+      metaTitle: data.metaTitle,
+      metaDescription: data.metaDescription,
+      keywords: data.keywords,
+      socialImageId: data.socialImageId,
+      canonicalUrl: data.canonicalUrl,
+      robots: data.robots,
+    };
 
     const item = await prisma.pageSeo.upsert({
       where: { page },
       update: data,
-      create: { page, ...data },
+      create: createData,
       include: pageSeoInclude,
     });
     res.json({ item });
