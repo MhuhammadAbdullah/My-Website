@@ -1,5 +1,5 @@
 import "./env.js";
-import { createApp } from "./app.js";
+import { createApp } from "./create-app.js";
 import { env } from "./env.js";
 
 // Safety net for the whole process. Without this, an unhandled rejection
