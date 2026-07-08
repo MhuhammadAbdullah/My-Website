@@ -50,7 +50,15 @@ affiliateRouter.post(
   requirePermission("affiliate", "create"),
   asyncHandler(async (req, res) => {
     const data = affiliateCategorySchema.parse(req.body);
-    const item = await prisma.affiliateCategory.create({ data });
+    const item = await prisma.affiliateCategory.create({
+      data: {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        order: data.order,
+        isEnabled: data.isEnabled,
+      },
+    });
     res.status(201).json({ item });
   }),
 );
@@ -154,7 +162,24 @@ affiliateRouter.post(
   requirePermission("affiliate", "create"),
   asyncHandler(async (req, res) => {
     const data = affiliateToolSchema.parse(req.body);
-    const item = await prisma.affiliateTool.create({ data, include: { category: true } });
+    const item = await prisma.affiliateTool.create({
+      data: {
+        id: data.id,
+        categoryId: data.categoryId,
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        benefits: data.benefits,
+        specialOffer: data.specialOffer,
+        disclosureNote: data.disclosureNote,
+        ctaLabel: data.ctaLabel,
+        ctaUrl: data.ctaUrl,
+        status: data.status,
+        isFeatured: data.isFeatured,
+        order: data.order,
+      },
+      include: { category: true },
+    });
     res.status(201).json({ item });
   }),
 );

@@ -22,11 +22,29 @@ pagesRouter.put(
   requirePermission("home", "update"),
   asyncHandler(async (req, res) => {
     const { seo, ...data } = homePageContentSchema.parse(req.body);
+    const homeContentData = {
+      heroBadgeText: data.heroBadgeText,
+      heroHeadline: data.heroHeadline,
+      heroSubheadline: data.heroSubheadline,
+      heroDescription: data.heroDescription,
+      heroBackgroundImageId: data.heroBackgroundImageId,
+      heroCtaLabel: data.heroCtaLabel,
+      heroCtaHref: data.heroCtaHref,
+      heroCtaNewTab: data.heroCtaNewTab,
+      heroSecondaryCtaEnabled: data.heroSecondaryCtaEnabled,
+      heroSecondaryCtaLabel: data.heroSecondaryCtaLabel,
+      heroSecondaryCtaHref: data.heroSecondaryCtaHref,
+      heroSecondaryCtaNewTab: data.heroSecondaryCtaNewTab,
+      contactCtaHeading: data.contactCtaHeading,
+      contactCtaDescription: data.contactCtaDescription,
+      contactCtaButtonText: data.contactCtaButtonText,
+      contactCtaButtonHref: data.contactCtaButtonHref,
+    };
     const existing = await prisma.homePageContent.findFirst();
 
     const item = existing
-      ? await prisma.homePageContent.update({ where: { id: existing.id }, data })
-      : await prisma.homePageContent.create({ data });
+      ? await prisma.homePageContent.update({ where: { id: existing.id }, data: homeContentData })
+      : await prisma.homePageContent.create({ data: homeContentData });
 
     // seo is updated separately via its scalar seoId FK, same reasoning as
     // projects.routes.ts: mixing a nested `seo: { update }` write into this
@@ -63,11 +81,17 @@ pagesRouter.put(
   requirePermission("home", "update"),
   asyncHandler(async (req, res) => {
     const { seo, ...data } = aboutPageContentSchema.parse(req.body);
+    const aboutContentData = {
+      story: data.story,
+      mission: data.mission,
+      vision: data.vision,
+      philosophy: data.philosophy,
+    };
     const existing = await prisma.aboutPageContent.findFirst();
 
     const item = existing
-      ? await prisma.aboutPageContent.update({ where: { id: existing.id }, data })
-      : await prisma.aboutPageContent.create({ data });
+      ? await prisma.aboutPageContent.update({ where: { id: existing.id }, data: aboutContentData })
+      : await prisma.aboutPageContent.create({ data: aboutContentData });
 
     // Same reasoning as PUT /home above: seo is a nested relation, updated
     // separately via its scalar seoId FK rather than a nested write.

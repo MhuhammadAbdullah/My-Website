@@ -126,7 +126,19 @@ clientsRouter.post(
   requirePermission("clients", "create"),
   asyncHandler(async (req, res) => {
     const data = clientSchema.parse(req.body);
-    const item = await prisma.client.create({ data });
+    const item = await prisma.client.create({
+      data: {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        company: data.company,
+        address: data.address,
+        currency: data.currency,
+        notes: data.notes,
+        isArchived: data.isArchived,
+      },
+    });
     res.status(201).json({ item });
   }),
 );
