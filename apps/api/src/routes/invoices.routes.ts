@@ -1,10 +1,15 @@
 import { Router } from "express";
 import { prisma, type Prisma } from "@agency/database";
-import { invoiceSchema, invoiceStatusSchema, type LineItemInput } from "@agency/types";
+import { invoiceSchema, invoiceStatusSchema } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
 import { parseListQuery, paginationMeta, searchFilter, exactFilter } from "../lib/list-query.js";
-import { computeDocumentTotals, generateInvoiceNumber } from "../lib/finance.js";
+import {
+  toFinanceLineItems,
+  computeQuoteOrInvoiceTotals,
+  generateInvoiceNumber,
+  type FinanceDocumentLineItem,
+} from "../lib/finance.js";
 
 export const invoicesRouter = Router();
 
@@ -18,29 +23,7 @@ const invoiceInclude = {
 
 const invoiceSortableFields = ["invoiceNumber", "issueDate", "dueDate", "status", "createdAt", "updatedAt"];
 
-// Vercel's separate type-check pass (distinct from this project's own
-// passing tsc --noEmit) loses the required-ness of LineItemInput's fields
-// when `data.items` flows straight from a parsed Zod schema into
-// computeDocumentTotals's generic <T>, inferring `name` (and others) as
-// optional and rejecting the call. Reconstructing the array explicitly
-// field-by-field removes the ambiguity outright -- same fix as
-// quotations.routes.ts's toLineItems.
-function toLineItems(items: readonly LineItemInput[]): LineItemInput[] {
-  return items.map((it) => ({
-    id: it.id,
-    name: it.name,
-    description: it.description,
-    pricingType: it.pricingType,
-    quantity: it.quantity,
-    unitPrice: it.unitPrice,
-    discountType: it.discountType,
-    discountValue: it.discountValue,
-    taxPercent: it.taxPercent,
-    order: it.order,
-  }));
-}
-
-function itemCreateData(computedItems: (LineItemInput & { lineTotal: number })[]) {
+function itemCreateData(computedItems: (FinanceDocumentLineItem & { lineTotal: number })[]) {
   return computedItems.map((ci, i) => ({
     name: ci.name,
     description: ci.description ?? null,
@@ -108,8 +91,8 @@ invoicesRouter.post(
   requirePermission("invoices", "create"),
   asyncHandler(async (req, res) => {
     const data = invoiceSchema.parse(req.body);
-    const { computedItems, subtotal, discountTotal, taxTotal, grandTotal } = computeDocumentTotals(
-      toLineItems(data.items),
+    const { computedItems, subtotal, discountTotal, taxTotal, grandTotal } = computeQuoteOrInvoiceTotals(
+      toFinanceLineItems(data.items),
     );
     const invoiceNumber = await generateInvoiceNumber();
 
@@ -146,8 +129,8 @@ invoicesRouter.patch(
   requirePermission("invoices", "update"),
   asyncHandler(async (req, res) => {
     const data = invoiceSchema.parse(req.body);
-    const { computedItems, subtotal, discountTotal, taxTotal, grandTotal } = computeDocumentTotals(
-      toLineItems(data.items),
+    const { computedItems, subtotal, discountTotal, taxTotal, grandTotal } = computeQuoteOrInvoiceTotals(
+      toFinanceLineItems(data.items),
     );
 
     const item = await prisma.$transaction(async (tx) => {
