@@ -152,7 +152,22 @@ servicesRouter.post(
       technologies: { connect: technologyIds.map((id) => ({ id })) },
       faqs: { connect: faqIds.map((id) => ({ id })) },
       relatedTo: { connect: relatedServiceIds.map((id) => ({ id })) },
-      pricingPlans: { create: pricingPlans.map(({ id: _id, ...p }) => p) },
+      pricingPlans: {
+        create: pricingPlans.map((p) => ({
+          name: p.name,
+          regularPrice: p.regularPrice,
+          discountPrice: p.discountPrice,
+          billingType: p.billingType,
+          priceLabel: p.priceLabel,
+          currency: p.currency,
+          features: p.features,
+          isFeatured: p.isFeatured,
+          isCustomQuote: p.isCustomQuote,
+          ctaLabel: p.ctaLabel,
+          ctaHref: p.ctaHref,
+          order: p.order,
+        })),
+      },
       seoId: seoRecord.id,
     };
     const item = await prisma.service.create({ data: createData });
@@ -205,7 +220,21 @@ servicesRouter.patch(
     if (pricingPlans) {
       await prisma.pricingPlan.deleteMany({ where: { serviceId } });
       await prisma.pricingPlan.createMany({
-        data: pricingPlans.map(({ id: _id, ...p }) => ({ ...p, serviceId })),
+        data: pricingPlans.map((p) => ({
+          serviceId,
+          name: p.name,
+          regularPrice: p.regularPrice,
+          discountPrice: p.discountPrice,
+          billingType: p.billingType,
+          priceLabel: p.priceLabel,
+          currency: p.currency,
+          features: p.features,
+          isFeatured: p.isFeatured,
+          isCustomQuote: p.isCustomQuote,
+          ctaLabel: p.ctaLabel,
+          ctaHref: p.ctaHref,
+          order: p.order,
+        })),
       });
     }
 
