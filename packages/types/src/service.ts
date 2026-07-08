@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { contentStatusSchema, seoMetaSchema } from "./common";
-import { currencySchema } from "./settings";
+import { contentStatusSchema, seoMetaSchema } from "./common.js";
+import { currencySchema } from "./settings.js";
 
 export const billingTypeSchema = z.enum(["ONE_TIME", "HOURLY", "MONTHLY", "YEARLY", "CUSTOM"]);
 export type BillingType = z.infer<typeof billingTypeSchema>;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ALL_CURRENCIES } from "./currencies";
+import { ALL_CURRENCIES } from "./currencies.js";
 
 // Keep in sync with SOCIAL_PLATFORMS in @agency/ui/social-icons.tsx (the icon
 // set lives there since it's presentation-only; this package stays React-free).

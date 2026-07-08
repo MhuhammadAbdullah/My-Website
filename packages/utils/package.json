@@ -4,13 +4,19 @@
   "version": "0.1.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@agency/config": "workspace:*",
+    "@types/node": "^22.10.0",
     "typescript": "^5.7.0"
   }
 }

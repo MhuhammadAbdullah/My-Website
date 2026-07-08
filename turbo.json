@@ -8,6 +8,10 @@
       "dependsOn": ["^build", "^db:generate"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
+    "@agency/database#build": {
+      "dependsOn": ["db:generate", "^build"],
+      "outputs": ["dist/**"]
+    },
     "api#build": {
       "dependsOn": ["^build", "^db:generate"],
       "env": [

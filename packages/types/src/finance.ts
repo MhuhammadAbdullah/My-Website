@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { currencySchema, DEFAULT_CURRENCY } from "./settings";
+import { currencySchema, DEFAULT_CURRENCY } from "./settings.js";
 
 export const quotationStatusSchema = z.enum(["DRAFT", "SENT", "ACCEPTED", "REJECTED", "EXPIRED"]);
 export type QuotationStatus = z.infer<typeof quotationStatusSchema>;

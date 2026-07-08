@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { contentStatusSchema, faqContextSchema, hrefSchema, paginationQuerySchema, seoMetaSchema } from "./common";
+import { contentStatusSchema, faqContextSchema, hrefSchema, paginationQuerySchema, seoMetaSchema } from "./common.js";
 
 export const testimonialSchema = z.object({
   id: z.string().optional(),

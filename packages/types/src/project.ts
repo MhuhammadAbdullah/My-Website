@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { contentStatusSchema, seoMetaSchema } from "./common";
+import { contentStatusSchema, seoMetaSchema } from "./common.js";
 
 export const resultMetricSchema = z.object({
   label: z.string().min(1),
