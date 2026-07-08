@@ -1,7 +1,16 @@
 {
   "extends": "@agency/config/tsconfig.node.json",
   "compilerOptions": {
+    // esModuleInterop/allowSyntheticDefaultImports/moduleResolution are
+    // already set by the extended config -- restated explicitly here so this
+    // app's default imports of CJS-shaped packages (helmet, express-rate-limit)
+    // still resolve correctly even if a deploy environment's install ever
+    // fails to link the @agency/config workspace package the extends chain
+    // depends on.
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "Bundler",
     "outDir": "dist"
   },
-  "include": ["src"]
+  "include": ["src", "api"]
 }

@@ -8,6 +8,27 @@
       "dependsOn": ["^build", "^db:generate"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
+    "api#build": {
+      "dependsOn": ["^build", "^db:generate"],
+      "env": [
+        "PORT",
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "AUTH_TRUSTED_ORIGINS",
+        "AUTH_COOKIE_DOMAIN",
+        "CLOUDINARY_CLOUD_NAME",
+        "CLOUDINARY_API_KEY",
+        "CLOUDINARY_API_SECRET",
+        "SMTP_HOST",
+        "SMTP_PORT",
+        "SMTP_USER",
+        "SMTP_PASSWORD",
+        "SMTP_FROM",
+        "ADMIN_NOTIFICATION_EMAIL"
+      ]
+    },
     "dev": {
       "dependsOn": ["^db:generate"],
       "cache": false,
@@ -26,7 +47,8 @@
       "cache": false
     },
     "db:generate": {
-      "cache": false
+      "cache": false,
+      "env": ["DATABASE_URL", "DIRECT_URL"]
     }
   }
 }

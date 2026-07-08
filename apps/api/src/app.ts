@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import compression from "compression";
 import rateLimit from "express-rate-limit";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "@agency/auth/server";
@@ -13,8 +14,18 @@ export function createApp() {
 
   app.set("trust proxy", 1);
   app.use(helmet());
+  app.use(compression());
 
   const allowedOrigins = env.AUTH_TRUSTED_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean);
+  // Reflecting any origin (the old fallback) combined with credentials: true
+  // would let any website make authenticated, cookie-bearing requests to this
+  // API the moment AUTH_TRUSTED_ORIGINS is ever left unset in production --
+  // fail closed instead of silently opening that up.
+  if (env.NODE_ENV === "production" && allowedOrigins.length === 0) {
+    throw new Error(
+      "AUTH_TRUSTED_ORIGINS must be set in production (comma-separated list of allowed origins, e.g. https://mydomain.com,https://admin.mydomain.com)",
+    );
+  }
   app.use(
     cors({
       origin: allowedOrigins.length ? allowedOrigins : true,
