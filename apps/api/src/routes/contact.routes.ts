@@ -29,7 +29,16 @@ contactRouter.post(
   asyncHandler(async (req, res) => {
     const data = contactSubmissionSchema.parse(req.body);
     const submission = await prisma.contactSubmission.create({
-      data: { ...data, budget: data.budget || null },
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        country: data.country,
+        city: data.city,
+        budget: data.budget || null,
+        message: data.message,
+        source: data.source,
+      },
     });
     res.status(201).json({ item: submission });
 

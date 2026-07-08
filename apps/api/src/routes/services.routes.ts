@@ -148,7 +148,19 @@ servicesRouter.post(
     pricingPlans.forEach(assertValidPricingPlan);
     const seoRecord = await prisma.seoMeta.create({ data: seo as Prisma.SeoMetaCreateInput });
     const createData: Prisma.ServiceUncheckedCreateInput = {
-      ...data,
+      id: data.id,
+      categoryId: data.categoryId,
+      name: data.name,
+      slug: data.slug,
+      tagline: data.tagline,
+      description: data.description,
+      benefits: data.benefits,
+      process: data.process,
+      deliverables: data.deliverables,
+      timeline: data.timeline,
+      status: data.status,
+      isFeatured: data.isFeatured,
+      order: data.order,
       technologies: { connect: technologyIds.map((id) => ({ id })) },
       faqs: { connect: faqIds.map((id) => ({ id })) },
       relatedTo: { connect: relatedServiceIds.map((id) => ({ id })) },

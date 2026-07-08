@@ -75,7 +75,13 @@ teamRouter.post(
   asyncHandler(async (req, res) => {
     const { skillIds, socials, ...data } = teamMemberSchema.parse(req.body);
     const createData: Prisma.TeamMemberUncheckedCreateInput = {
-      ...data,
+      id: data.id,
+      name: data.name,
+      role: data.role,
+      bio: data.bio,
+      avatarId: data.avatarId,
+      status: data.status,
+      order: data.order,
       socials: socials === null ? Prisma.JsonNull : socials,
       skills: { connect: skillIds.map((id) => ({ id })) },
     };

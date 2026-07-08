@@ -25,7 +25,13 @@ rolesRouter.post(
   asyncHandler(async (req, res) => {
     const { permissionIds, ...data } = roleSchema.parse(req.body);
     const item = await prisma.role.create({
-      data: { ...data, permissions: { create: permissionIds.map((permissionId) => ({ permissionId })) } },
+      data: {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        permissions: { create: permissionIds.map((permissionId) => ({ permissionId })) },
+      },
     });
     res.status(201).json({ item });
   }),

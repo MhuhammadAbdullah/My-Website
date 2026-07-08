@@ -68,7 +68,15 @@ testimonialsRouter.post(
   asyncHandler(async (req, res) => {
     const { projectIds, ...data } = testimonialSchema.parse(req.body);
     const createData: Prisma.TestimonialUncheckedCreateInput = {
-      ...data,
+      id: data.id,
+      author: data.author,
+      role: data.role,
+      company: data.company,
+      avatarId: data.avatarId,
+      quote: data.quote,
+      rating: data.rating,
+      status: data.status,
+      order: data.order,
       projects: { connect: projectIds.map((id) => ({ id })) },
     };
     const item = await prisma.testimonial.create({ data: createData, include: testimonialInclude });
