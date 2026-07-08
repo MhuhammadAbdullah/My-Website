@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { LogOut, Menu } from "lucide-react";
 import { Avatar, AvatarFallback, Button } from "@agency/ui";
@@ -10,6 +11,14 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = authClient.useSession();
+
+  // useSession() can resolve synchronously from a cached session cookie on the
+  // client's first paint, while the server render always has no session data.
+  // That mismatch trips React hydration, so the session-derived text below is
+  // held back until after mount rather than rendered on the first pass.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const user = mounted ? session?.user : undefined;
 
   async function handleSignOut() {
     await authClient.signOut();
@@ -33,11 +42,11 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
       <div className="flex shrink-0 items-center gap-3">
         <Avatar className="size-9">
-          <AvatarFallback>{session?.user?.name?.charAt(0) ?? "A"}</AvatarFallback>
+          <AvatarFallback>{user?.name?.charAt(0) ?? "A"}</AvatarFallback>
         </Avatar>
         <div className="hidden text-body-sm sm:block">
-          <p className="max-w-40 truncate font-medium text-heading">{session?.user?.name ?? "Admin"}</p>
-          <p className="max-w-40 truncate text-neutral-400">{session?.user?.email}</p>
+          <p className="max-w-40 truncate font-medium text-heading">{user?.name ?? "Admin"}</p>
+          <p className="max-w-40 truncate text-neutral-400">{user?.email}</p>
         </div>
         <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sign out" className="size-11">
           <LogOut className="size-4" />

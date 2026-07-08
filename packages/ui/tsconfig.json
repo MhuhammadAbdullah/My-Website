@@ -1,7 +1,6 @@
 {
   "extends": "@agency/config/tsconfig.nextjs.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "jsx": "react-jsx"
   },
   "include": ["src"]

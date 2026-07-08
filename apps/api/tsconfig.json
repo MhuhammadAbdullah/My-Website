@@ -1,7 +1,6 @@
 {
   "extends": "@agency/config/tsconfig.node.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "outDir": "dist"
   },
   "include": ["src"]

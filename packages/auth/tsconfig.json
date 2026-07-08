@@ -1,7 +1,4 @@
 {
   "extends": "@agency/config/tsconfig.node.json",
-  "compilerOptions": {
-    "baseUrl": "."
-  },
   "include": ["src"]
 }

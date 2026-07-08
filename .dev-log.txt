@@ -307,3 +307,4 @@ web:dev:  GET /contact 200 in 1916ms
 web:dev:  ○ Compiling /affiliate-tools ...
 web:dev:  ✓ Compiled /affiliate-tools in 9.9s
 web:dev:  GET /affiliate-tools 200 in 11042ms
+[ELIFECYCLE] Command failed with exit code 1073807364.
