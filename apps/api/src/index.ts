@@ -1,15 +1,7 @@
 import "./env.js";
-import express from "express";
+import { createRequire } from "node:module";
+import express, { type RequestHandler } from "express";
 import cors from "cors";
-// Vercel's separate serverless-function type-check pass (distinct from the
-// project's own `tsc --noEmit`) resolves these packages' default-export
-// synthesis differently and reports "not callable" for a plain default
-// import, even though it's correct under this project's own tsconfig.
-// Sidestepping the synthetic-default mechanism entirely -- via a real named
-// export where the package provides one, and via explicit namespace + a
-// direct `.default` property read otherwise -- works identically under any
-// moduleResolution mode, since neither form depends on interop synthesis.
-import * as helmetModule from "helmet";
 import compression from "compression";
 import { rateLimit } from "express-rate-limit";
 import { toNodeHandler } from "better-auth/node";
@@ -18,7 +10,21 @@ import { env } from "./env.js";
 import { apiRouter } from "./routes/index.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 
-const helmet = helmetModule.default;
+// helmet ships types only as a single index.d.cts with no .d.ts/.d.mts
+// sibling. Vercel's own separate serverless-function type-check pass
+// (distinct from -- and additional to -- this project's own passing
+// `tsc --noEmit`) doesn't resolve that shape correctly: it falls back to an
+// untyped whole-module inference and reports the import as "not callable",
+// regardless of whether the import is written as a default import or a
+// namespace import with an explicit `.default` read -- both were tried and
+// both fail identically under that separate checker, which rules out import
+// style as the cause. Loading it via a genuine CJS require() sidesteps
+// package.json "types"/module resolution for this package entirely; the
+// value comes from Node's own CJS loader (unambiguous at runtime), and the
+// type below is written out explicitly rather than inferred.
+const require = createRequire(import.meta.url);
+type HelmetOptions = Record<string, unknown>;
+const helmet: (options?: Readonly<HelmetOptions>) => RequestHandler = require("helmet");
 
 // Safety net for the whole process. Without this, an unhandled rejection
 // anywhere -- including inside third-party request handlers that bypass our
