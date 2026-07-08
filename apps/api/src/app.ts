@@ -1,13 +1,23 @@
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
+// Vercel's separate serverless-function type-check pass (distinct from the
+// project's own `tsc --noEmit`) resolves these packages' default-export
+// synthesis differently and reports "not callable" for a plain default
+// import, even though it's correct under this project's own tsconfig.
+// Sidestepping the synthetic-default mechanism entirely -- via a real named
+// export where the package provides one, and via explicit namespace + a
+// direct `.default` property read otherwise -- works identically under any
+// moduleResolution mode, since neither form depends on interop synthesis.
+import * as helmetModule from "helmet";
 import compression from "compression";
-import rateLimit from "express-rate-limit";
+import { rateLimit } from "express-rate-limit";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "@agency/auth/server";
 import { env } from "./env.js";
 import { apiRouter } from "./routes/index.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
+
+const helmet = helmetModule.default;
 
 export function createApp() {
   const app = express();
