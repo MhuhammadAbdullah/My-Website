@@ -18,6 +18,28 @@ const invoiceInclude = {
 
 const invoiceSortableFields = ["invoiceNumber", "issueDate", "dueDate", "status", "createdAt", "updatedAt"];
 
+// Vercel's separate type-check pass (distinct from this project's own
+// passing tsc --noEmit) loses the required-ness of LineItemInput's fields
+// when `data.items` flows straight from a parsed Zod schema into
+// computeDocumentTotals's generic <T>, inferring `name` (and others) as
+// optional and rejecting the call. Reconstructing the array explicitly
+// field-by-field removes the ambiguity outright -- same fix as
+// quotations.routes.ts's toLineItems.
+function toLineItems(items: readonly LineItemInput[]): LineItemInput[] {
+  return items.map((it) => ({
+    id: it.id,
+    name: it.name,
+    description: it.description,
+    pricingType: it.pricingType,
+    quantity: it.quantity,
+    unitPrice: it.unitPrice,
+    discountType: it.discountType,
+    discountValue: it.discountValue,
+    taxPercent: it.taxPercent,
+    order: it.order,
+  }));
+}
+
 function itemCreateData(computedItems: (LineItemInput & { lineTotal: number })[]) {
   return computedItems.map((ci, i) => ({
     name: ci.name,
@@ -86,7 +108,9 @@ invoicesRouter.post(
   requirePermission("invoices", "create"),
   asyncHandler(async (req, res) => {
     const data = invoiceSchema.parse(req.body);
-    const { computedItems, subtotal, discountTotal, taxTotal, grandTotal } = computeDocumentTotals(data.items);
+    const { computedItems, subtotal, discountTotal, taxTotal, grandTotal } = computeDocumentTotals(
+      toLineItems(data.items),
+    );
     const invoiceNumber = await generateInvoiceNumber();
 
     const item = await prisma.invoice.create({
@@ -122,7 +146,9 @@ invoicesRouter.patch(
   requirePermission("invoices", "update"),
   asyncHandler(async (req, res) => {
     const data = invoiceSchema.parse(req.body);
-    const { computedItems, subtotal, discountTotal, taxTotal, grandTotal } = computeDocumentTotals(data.items);
+    const { computedItems, subtotal, discountTotal, taxTotal, grandTotal } = computeDocumentTotals(
+      toLineItems(data.items),
+    );
 
     const item = await prisma.$transaction(async (tx) => {
       const existing = await tx.invoice.findUniqueOrThrow({ where: { id: req.params.id }, include: { payments: true } });
