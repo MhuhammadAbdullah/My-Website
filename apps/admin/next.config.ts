@@ -17,7 +17,9 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    console.log(`[rewrite-debug] apiOrigin="${apiOrigin}" destination="${apiOrigin}/api/v1/:path*"`);
+    console.log(
+      `[rewrite-debug] len=${apiOrigin.length} endsWithSlash=${apiOrigin.endsWith("/")} startsHttps=${apiOrigin.startsWith("https://")} containsApiHost=${apiOrigin.includes("api-mabdigitalservice")} containsLocalhost=${apiOrigin.includes("localhost")} isFallback=${apiOrigin === "http://localhost:4000"} firstChar="${apiOrigin[0]}" lastChar="${apiOrigin[apiOrigin.length - 1]}"`,
+    );
     return [{ source: "/api/v1/:path*", destination: `${apiOrigin}/api/v1/:path*` }];
   },
 };
