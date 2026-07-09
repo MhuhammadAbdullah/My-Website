@@ -185,7 +185,14 @@ export const homePageContentSchema = z.object({
   contactCtaButtonText: buttonTextSchema.nullable().optional(),
   contactCtaButtonHref: hrefSchema.nullable().optional(),
 
-  seo: seoMetaSchema.partial().optional(),
+  // .nullable() matters here: GET returns `seo: null` (Prisma's shape for
+  // an unset optional relation) whenever no SeoMeta row has been created
+  // yet, and the route (pages.routes.ts) already treats null/undefined
+  // identically via `if (seo)`. Without .nullable(), a client that
+  // round-trips that null value straight back into the PUT body fails
+  // validation with "seo: Expected object, received null" even though
+  // null is exactly what this same endpoint just returned.
+  seo: seoMetaSchema.partial().nullable().optional(),
 });
 export type HomePageContentInput = z.infer<typeof homePageContentSchema>;
 
@@ -199,6 +206,13 @@ export const aboutPageContentSchema = z.object({
   mission: z.string().min(1, "Mission is required"),
   vision: z.string().min(1, "Vision is required"),
   philosophy: z.string().min(1, "Philosophy is required"),
-  seo: seoMetaSchema.partial().optional(),
+  // .nullable() matters here: GET returns `seo: null` (Prisma's shape for
+  // an unset optional relation) whenever no SeoMeta row has been created
+  // yet, and the route (pages.routes.ts) already treats null/undefined
+  // identically via `if (seo)`. Without .nullable(), a client that
+  // round-trips that null value straight back into the PUT body fails
+  // validation with "seo: Expected object, received null" even though
+  // null is exactly what this same endpoint just returned.
+  seo: seoMetaSchema.partial().nullable().optional(),
 });
 export type AboutPageContentInput = z.infer<typeof aboutPageContentSchema>;
