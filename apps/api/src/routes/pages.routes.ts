@@ -52,10 +52,18 @@ pagesRouter.put(
     // new SeoMeta record once the two required fields are present -- saving
     // hero/section copy shouldn't be blocked on filling in SEO first.
     if (seo) {
+      // structuredData is a nullable Json column with no admin form exposing
+      // it for editing -- GET returns it as `null` on any never-configured
+      // SeoMeta row, and the Home SEO form spreads the whole fetched seo
+      // object back into its PUT body, so it round-trips untouched. Prisma
+      // rejects a bare `null` for a nullable Json field (it needs the
+      // Prisma.JsonNull sentinel instead), so drop it before it reaches
+      // Prisma rather than plumb that sentinel through for an unused field.
+      const { structuredData: _structuredData, ...seoData } = seo;
       if (item.seoId) {
-        await prisma.seoMeta.update({ where: { id: item.seoId }, data: seo as Prisma.SeoMetaUpdateInput });
-      } else if (seo.metaTitle && seo.metaDescription) {
-        const seoRecord = await prisma.seoMeta.create({ data: seo as Prisma.SeoMetaCreateInput });
+        await prisma.seoMeta.update({ where: { id: item.seoId }, data: seoData as Prisma.SeoMetaUpdateInput });
+      } else if (seoData.metaTitle && seoData.metaDescription) {
+        const seoRecord = await prisma.seoMeta.create({ data: seoData as Prisma.SeoMetaCreateInput });
         await prisma.homePageContent.update({ where: { id: item.id }, data: { seoId: seoRecord.id } });
       }
     }
@@ -96,10 +104,13 @@ pagesRouter.put(
     // Same reasoning as PUT /home above: seo is a nested relation, updated
     // separately via its scalar seoId FK rather than a nested write.
     if (seo) {
+      // Same reasoning as PUT /home above -- structuredData is unused and
+      // Prisma rejects a bare null for its nullable Json column.
+      const { structuredData: _structuredData, ...seoData } = seo;
       if (item.seoId) {
-        await prisma.seoMeta.update({ where: { id: item.seoId }, data: seo as Prisma.SeoMetaUpdateInput });
-      } else if (seo.metaTitle && seo.metaDescription) {
-        const seoRecord = await prisma.seoMeta.create({ data: seo as Prisma.SeoMetaCreateInput });
+        await prisma.seoMeta.update({ where: { id: item.seoId }, data: seoData as Prisma.SeoMetaUpdateInput });
+      } else if (seoData.metaTitle && seoData.metaDescription) {
+        const seoRecord = await prisma.seoMeta.create({ data: seoData as Prisma.SeoMetaCreateInput });
         await prisma.aboutPageContent.update({ where: { id: item.id }, data: { seoId: seoRecord.id } });
       }
     }

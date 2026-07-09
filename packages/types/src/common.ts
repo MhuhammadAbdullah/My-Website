@@ -50,7 +50,16 @@ export const seoMetaSchema = z.object({
   twitterDescription: z.string().nullable().optional(),
   twitterImageId: z.string().nullable().optional(),
   robots: seoRobotsSchema.default("index, follow"),
-  structuredData: z.record(z.string(), z.unknown()).optional(),
+  // .nullable() matters here specifically: Prisma returns `structuredData:
+  // null` for any SeoMeta row where it was never set (nullable Json
+  // column), no admin form exposes this field for editing, and the Home/
+  // About SEO forms spread the *entire* fetched seo object back into their
+  // PUT body -- so this null leaks straight through untouched. Zod's
+  // `flatten()` buckets nested errors under their first path segment, so
+  // this alone produced the exact same top-level "seo: Expected object,
+  // received null" message as a null `seo` itself, masking which field was
+  // actually failing.
+  structuredData: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 export type SeoMetaInput = z.infer<typeof seoMetaSchema>;
 
