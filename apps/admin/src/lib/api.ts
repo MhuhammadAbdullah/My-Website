@@ -1,9 +1,9 @@
-import { env } from "./env";
-
 export class ApiError extends Error {}
 
+// Relative URL: goes through this app's own origin, proxied to the real API
+// via the /api/v1/* rewrite in next.config.ts (see that file for why).
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/v1${path}`, {
+  const res = await fetch(`/api/v1${path}`, {
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     cache: "no-store",

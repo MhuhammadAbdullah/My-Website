@@ -1,6 +1,6 @@
 import { createAuthClient } from "better-auth/react";
 
-export function createAgencyAuthClient(baseURL: string) {
+export function createAgencyAuthClient(baseURL?: string) {
   return createAuthClient({
     baseURL,
     basePath: "/api/v1/auth",

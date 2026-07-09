@@ -18,5 +18,8 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // /api is excluded: those requests are proxied straight through to the
+  // real API (see next.config.ts rewrites) and must not be intercepted by
+  // this page-auth-gate, or the login POST itself would get redirected.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api).*)"],
 };
