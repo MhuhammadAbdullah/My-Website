@@ -56,7 +56,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     "@type": "CreativeWork",
     name: project.title,
     description: project.summary,
-    creator: { "@type": "Organization", name: "Calibre Digital" },
+    creator: { "@type": "Organization", name: "MAB Digital" },
   };
 
   return (

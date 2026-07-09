@@ -36,7 +36,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               C
             </div>
             <div className="min-w-0">
-              <p className="truncate font-heading text-body font-semibold text-heading">Calibre Digital</p>
+              <p className="truncate font-heading text-body font-semibold text-heading">MAB Digital</p>
               <p className="truncate text-body-sm text-neutral-400">Admin panel</p>
             </div>
           </div>

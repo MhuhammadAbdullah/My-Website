@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
     seo,
     fallbackTitle: "Services",
-    fallbackDescription: "Web development, product design, and growth engineering services from Calibre Digital.",
+    fallbackDescription: "Web development, product design, and growth engineering services from MAB Digital.",
   });
 }
 

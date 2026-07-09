@@ -42,7 +42,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
     "@type": "Service",
     name: service.name,
     description: service.tagline,
-    provider: { "@type": "Organization", name: "Calibre Digital" },
+    provider: { "@type": "Organization", name: "MAB Digital" },
   };
 
   return (

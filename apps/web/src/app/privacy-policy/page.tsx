@@ -3,7 +3,7 @@ import { Container, Section, Heading, Breadcrumb } from "@agency/ui";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "How Calibre Digital collects, uses, and protects your information.",
+  description: "How MAB Digital collects, uses, and protects your information.",
 };
 
 export default function PrivacyPolicyPage() {

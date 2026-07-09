@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const about = await getAboutContent().catch(() => null);
   const seo = about?.seo;
   if (!seo) {
-    return { title: "About", description: "The story, mission, values, and team behind Calibre Digital." };
+    return { title: "About", description: "The story, mission, values, and team behind MAB Digital." };
   }
 
   return {

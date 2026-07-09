@@ -1,4 +1,4 @@
-# Calibre Digital — Agency Website Monorepo
+# MAB Digital — Agency Website Monorepo
 
 A full-stack agency/digital-services platform: a public marketing site, an internal admin panel (CMS + finance/invoicing system), and a shared Express API backed by PostgreSQL.
 
@@ -120,7 +120,7 @@ Once running:
 | `BETTER_AUTH_SECRET` | **yes** (min 16 chars) | Random secret used to sign session tokens |
 | `BETTER_AUTH_URL` | **yes** (must be a valid URL) | Public base URL of the API (auth is mounted at `<this>/api/v1/auth`) |
 | `AUTH_TRUSTED_ORIGINS` | required in production | Comma-separated list of origins allowed to make credentialed requests (CORS) — e.g. `https://mabdigitalservice.vercel.app,https://admin-mabdigitalservice.vercel.app`. Boot **fails** in production if empty. |
-| `AUTH_COOKIE_DOMAIN` | no | Set to the apex domain (e.g. `.calibre.digital`) so `web` and `admin` share one session cookie. Leave blank for local dev. |
+| `AUTH_COOKIE_DOMAIN` | no | Set to the apex domain (e.g. `.mabdigital.com`) so `web` and `admin` share one session cookie. Leave blank for local dev. |
 | `CLOUDINARY_CLOUD_NAME` | **yes** | |
 | `CLOUDINARY_API_KEY` | **yes** | |
 | `CLOUDINARY_API_SECRET` | **yes** | |
@@ -185,7 +185,7 @@ Almost every content model follows the same conventions: `cuid` ids, `createdAt`
   - `apps/admin/src/middleware.ts` (which gates every admin page via `getSessionCookie`) excludes `/api` from its matcher, so proxied auth calls aren't redirected to `/login` before they ever reach the rewrite.
   - Net effect: the session cookie is set on `admin-mabdigitalservice.vercel.app` itself, which the middleware can read. If you later move to a real custom domain, switch back to `AUTH_COOKIE_DOMAIN` + direct cross-origin calls (simpler, one less proxy hop) — the same-origin proxy is a workaround for not having an apex domain yet, not the long-term-preferred setup.
 - **RBAC**: every authenticated request that hits a protected route goes through `requireAuth` (`apps/api/src/middleware/require-auth.ts`), which resolves the Better Auth session, loads the `User` row with its `role.permissions`, and rejects banned/roleless-but-nonexistent users. `requirePermission(resource, action)` then checks the flattened `"resource:action"` permission set. Permissions are seeded (see `packages/database/prisma/seed.ts`): a **Super Admin** role gets every `resource:action` pair across ~25 resources × 4 actions (`view`/`create`/`update`/`delete`), and an **Editor** role gets everything except `users`/`roles`/`permissions`/`settings`.
-- **Bootstrapping the first login** — the seed script creates a *placeholder* `User` row (`admin@calibre.digital`) with the Super Admin role but **no password**, because Better Auth requires a real sign-up flow to create the linked `Account`/credential row, and there's no sign-up UI in the admin app (`apps/admin/src/app/login/page.tsx` is sign-in only, by design — this isn't a self-service product). To get a working login:
+- **Bootstrapping the first login** — the seed script creates a *placeholder* `User` row (`admin@mabdigital.com`) with the Super Admin role but **no password**, because Better Auth requires a real sign-up flow to create the linked `Account`/credential row, and there's no sign-up UI in the admin app (`apps/admin/src/app/login/page.tsx` is sign-in only, by design — this isn't a self-service product). To get a working login:
   1. Call the Better Auth sign-up endpoint directly, e.g.:
      ```bash
      curl -X POST http://localhost:4000/api/v1/auth/sign-up/email \

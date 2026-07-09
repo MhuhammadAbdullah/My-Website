@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
     seo,
     fallbackTitle: "Affiliate Tools",
-    fallbackDescription: "The hosting, domain, email, design, and productivity tools Calibre Digital actually uses and recommends.",
+    fallbackDescription: "The hosting, domain, email, design, and productivity tools MAB Digital actually uses and recommends.",
   });
 }
 

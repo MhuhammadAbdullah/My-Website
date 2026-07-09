@@ -12,11 +12,11 @@ import "./globals.css";
 // Dynamic (not a static `export const metadata`) so the template suffix
 // tracks the actual configured brand name from Settings instead of a
 // hardcoded string that goes stale the moment the site is rebranded --
-// every child page's title was getting "| Calibre Digital" appended
+// every child page's title was getting "| MAB Digital" appended
 // regardless of what the business is actually called today.
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings().catch(() => null);
-  const brandName = resolveBranding(settings ?? {}, "Calibre Digital").name;
+  const brandName = resolveBranding(settings ?? {}, "MAB Digital").name;
 
   return {
     metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
@@ -35,12 +35,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     withFallback(getSettings(), {}, "site settings"),
   ]);
 
-  const branding = resolveBranding(settings, "Calibre Digital");
+  const branding = resolveBranding(settings, "MAB Digital");
 
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: settings.company_name ?? "Calibre Digital",
+    name: settings.company_name ?? "MAB Digital",
     url: env.NEXT_PUBLIC_SITE_URL,
     email: settings.contact_email,
     telephone: settings.contact_phone,

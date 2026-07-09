@@ -3,7 +3,7 @@ import { Container, Section, Heading, Breadcrumb } from "@agency/ui";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "The terms that govern use of the Calibre Digital website and services.",
+  description: "The terms that govern use of the MAB Digital website and services.",
 };
 
 export default function TermsPage() {
@@ -20,7 +20,7 @@ export default function TermsPage() {
           <section>
             <Heading level={3}>1. Services</Heading>
             <p className="mt-2">
-              Calibre Digital provides web design, development, and related digital services as scoped in
+              MAB Digital provides web design, development, and related digital services as scoped in
               an individual project agreement or statement of work. These terms govern use of our website;
               project-specific terms are set out separately for each engagement.
             </p>
@@ -36,7 +36,7 @@ export default function TermsPage() {
           <section>
             <Heading level={3}>3. Intellectual property</Heading>
             <p className="mt-2">
-              All content on this site — copy, design, and code — is the property of Calibre Digital unless
+              All content on this site — copy, design, and code — is the property of MAB Digital unless
               otherwise noted, and may not be reproduced without permission.
             </p>
           </section>
@@ -50,7 +50,7 @@ export default function TermsPage() {
           <section>
             <Heading level={3}>5. Limitation of liability</Heading>
             <p className="mt-2">
-              This website and its content are provided "as is" without warranties of any kind. Calibre
+              This website and its content are provided "as is" without warranties of any kind. MAB
               Digital is not liable for any indirect or consequential damages arising from use of this
               site.
             </p>

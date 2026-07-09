@@ -10,7 +10,7 @@ import {
 
 const prisma = new PrismaClient();
 
-const AGENCY_NAME = "Calibre Digital";
+const AGENCY_NAME = "MAB Digital";
 
 function img(publicId: string, w = 1600, h = 1000, seedNum = 1) {
   return {
@@ -93,11 +93,11 @@ async function main() {
   });
 
   await prisma.user.upsert({
-    where: { email: "admin@calibre.digital" },
+    where: { email: "admin@mabdigital.com" },
     update: {},
     create: {
       name: "Admin",
-      email: "admin@calibre.digital",
+      email: "admin@mabdigital.com",
       emailVerified: true,
       roleId: adminRole.id,
     },
@@ -141,7 +141,7 @@ async function main() {
   // Testimonials
   // ---------------------------------------------------------------------
   const testimonialSeed = [
-    { author: "Elena Marsh", role: "Founder", company: "Northline Goods", quote: "Calibre didn't just build our site — they rebuilt how we think about our product. Every screen feels considered.", rating: 5 },
+    { author: "Elena Marsh", role: "Founder", company: "Northline Goods", quote: "MAB Digital didn't just build our site — they rebuilt how we think about our product. Every screen feels considered.", rating: 5 },
     { author: "Dev Patel", role: "VP Engineering", company: "Harbor Analytics", quote: "The handoff was the cleanest I've seen from an agency. Typed contracts, real tests, zero surprises in production.", rating: 5 },
     { author: "Sofia Reyes", role: "Head of Growth", company: "Lumen Health", quote: "Our conversion rate on the new marketing site is up 38%. The team understood the business, not just the brief.", rating: 5 },
     { author: "Marcus Webb", role: "CEO", company: "Fieldstone Capital", quote: "They pushed back on our first idea and were right to. The final product is sharper than what we asked for.", rating: 5 },
@@ -287,7 +287,7 @@ async function main() {
       data: {
         metaTitle: `${s.name} | ${AGENCY_NAME}`,
         metaDescription: s.tagline,
-        keywords: [s.name.toLowerCase(), "agency", "calibre digital"],
+        keywords: [s.name.toLowerCase(), "agency", "mab digital"],
       },
     });
     const service = await prisma.service.upsert({
@@ -424,7 +424,7 @@ async function main() {
   }
 
   const teamSeed = [
-    { name: "Amara Osei", role: "Founder & Principal Engineer", bio: "Ten years building product for startups from seed to Series C. Leads every architecture decision at Calibre.", skillIdx: [0, 1, 3] },
+    { name: "Amara Osei", role: "Founder & Principal Engineer", bio: "Ten years building product for startups from seed to Series C. Leads every architecture decision at MAB Digital.", skillIdx: [0, 1, 3] },
     { name: "Julian Voss", role: "Design Director", bio: "Formerly design lead at two YC-backed startups. Obsessed with type systems and restraint.", skillIdx: [0, 2] },
     { name: "Nadia Farrow", role: "Senior Backend Engineer", bio: "Databases, APIs, and the boring infrastructure that makes everything else possible.", skillIdx: [1, 4, 5] },
     { name: "Chen Liu", role: "Frontend Engineer", bio: "Ships pixel-accurate interfaces fast, and cares more about accessibility than anyone should have to.", skillIdx: [3, 2] },
@@ -452,7 +452,7 @@ async function main() {
   }
 
   const timelineSeed = [
-    { year: "2019", title: "Calibre founded", description: "Started as a two-person freelance partnership building sites for local businesses." },
+    { year: "2019", title: "MAB Digital founded", description: "Started as a two-person freelance partnership building sites for local businesses." },
     { year: "2021", title: "First product build", description: "Expanded beyond marketing sites into full-stack SaaS product development." },
     { year: "2023", title: "Team of six", description: "Brought on dedicated design and backend engineering leads." },
     { year: "2025", title: "50+ projects shipped", description: "Crossed 50 shipped client projects across SaaS, e-commerce, and internal tools." },
@@ -483,7 +483,7 @@ async function main() {
       id: "singleton-home",
       heroBadgeText: "Now booking Q3 projects",
       heroHeadline: "Software that feels inevitable.",
-      heroSubheadline: "Calibre Digital designs and engineers premium web products for startups and teams who refuse to ship something average.",
+      heroSubheadline: "MAB Digital designs and engineers premium web products for startups and teams who refuse to ship something average.",
       heroCtaLabel: "Start a project",
       heroCtaHref: "/contact",
       heroSecondaryCtaLabel: "View Our Work",
@@ -526,7 +526,7 @@ async function main() {
   // ---------------------------------------------------------------------
   const affiliateSeed: Array<{ slug: string; name: string; tools: Array<{ name: string; description: string; benefits: string[]; specialOffer?: string; ctaUrl: string }> }> = [
     { slug: "hosting", name: "Hosting", tools: [
-      { name: "Vercel", description: "The platform Calibre deploys every Next.js project to.", benefits: ["Zero-config deploys", "Global edge network", "Preview URLs per PR"], ctaUrl: "https://vercel.com" },
+      { name: "Vercel", description: "The platform MAB Digital deploys every Next.js project to.", benefits: ["Zero-config deploys", "Global edge network", "Preview URLs per PR"], ctaUrl: "https://vercel.com" },
       { name: "Railway", description: "Simple infrastructure hosting for databases and backend services.", benefits: ["One-click Postgres", "Usage-based pricing"], ctaUrl: "https://railway.app" },
     ]},
     { slug: "domains", name: "Domains", tools: [
@@ -536,11 +536,11 @@ async function main() {
       { name: "Resend", description: "Developer-first transactional email, built by the team behind React Email.", benefits: ["React-based templates", "Generous free tier"], ctaUrl: "https://resend.com" },
     ]},
     { slug: "development", name: "Development", tools: [
-      { name: "GitHub", description: "Where every Calibre project lives, from day one commit to production.", benefits: ["Free private repos", "Actions CI/CD"], ctaUrl: "https://github.com" },
+      { name: "GitHub", description: "Where every MAB Digital project lives, from day one commit to production.", benefits: ["Free private repos", "Actions CI/CD"], ctaUrl: "https://github.com" },
       { name: "Supabase", description: "Postgres, auth, and storage in one box for projects that don't need a custom backend.", benefits: ["Generous free tier", "Realtime subscriptions"], ctaUrl: "https://supabase.com" },
     ]},
     { slug: "design", name: "Design", tools: [
-      { name: "Figma", description: "The design tool every Calibre project is designed in, and handed off from.", benefits: ["Free for small teams", "Dev Mode handoff"], ctaUrl: "https://figma.com" },
+      { name: "Figma", description: "The design tool every MAB Digital project is designed in, and handed off from.", benefits: ["Free for small teams", "Dev Mode handoff"], ctaUrl: "https://figma.com" },
     ]},
     { slug: "ai", name: "AI", tools: [
       { name: "Claude", description: "The AI assistant we use for everything from code review to content drafts.", benefits: ["Best-in-class coding assistant", "Long context windows"], ctaUrl: "https://claude.com" },
@@ -602,7 +602,7 @@ async function main() {
   // ---------------------------------------------------------------------
   const settings: Array<{ key: string; value: Prisma.InputJsonValue }> = [
     { key: "company_name", value: AGENCY_NAME },
-    { key: "contact_email", value: "hello@calibre.digital" },
+    { key: "contact_email", value: "hello@mabdigital.com" },
     { key: "contact_phone", value: "+1 (555) 010-2938" },
     { key: "whatsapp_number", value: "+15550102938" },
     { key: "address", value: "148 Merchant Street, Suite 400, Austin, TX 78701" },
@@ -610,15 +610,15 @@ async function main() {
     {
       key: "socials",
       value: {
-        x: "https://x.com/calibredigital",
-        linkedin: "https://linkedin.com/company/calibredigital",
-        github: "https://github.com/calibredigital",
-        instagram: "https://instagram.com/calibredigital",
-        facebook: "https://facebook.com/calibredigital",
-        youtube: "https://youtube.com/@calibredigital",
+        x: "https://x.com/mabdigital",
+        linkedin: "https://linkedin.com/company/mabdigital",
+        github: "https://github.com/mabdigital",
+        instagram: "https://instagram.com/mabdigital",
+        facebook: "https://facebook.com/mabdigital",
+        youtube: "https://youtube.com/@mabdigital",
       },
     },
-    { key: "calendly_url", value: "https://calendly.com/calibre-digital/intro-call" },
+    { key: "calendly_url", value: "https://calendly.com/mab-digital/intro-call" },
     { key: "google_maps_embed", value: "https://www.google.com/maps/embed?pb=placeholder" },
     { key: "google_maps_embed_code", value: "" },
     { key: "currency", value: "PKR" },

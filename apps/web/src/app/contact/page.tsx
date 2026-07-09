@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata({
     seo,
     fallbackTitle: "Contact",
-    fallbackDescription: "Start a project with Calibre Digital — get a response within one business day.",
+    fallbackDescription: "Start a project with MAB Digital — get a response within one business day.",
   });
 }
 
