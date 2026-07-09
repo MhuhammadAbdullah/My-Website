@@ -194,7 +194,7 @@ export function AdminSidebar({
         </div>
         {!collapsed && (
           <div className="min-w-0 flex-1">
-            <p className="truncate font-heading text-body font-semibold text-heading">Calibre Digital</p>
+            <p className="truncate font-heading text-body font-semibold text-heading">MAB Digital Service</p>
             <p className="truncate text-body-sm text-neutral-400">Admin panel</p>
           </div>
         )}

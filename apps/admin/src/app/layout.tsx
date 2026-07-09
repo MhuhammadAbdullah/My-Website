@@ -5,8 +5,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Admin | Calibre Digital",
-    template: "%s | Calibre Digital Admin",
+    default: "Admin | MAB Digital Service",
+    template: "%s | MAB Digital Service Admin",
   },
   robots: { index: false, follow: false },
 };

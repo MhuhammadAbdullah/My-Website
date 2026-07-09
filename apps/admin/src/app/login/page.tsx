@@ -35,7 +35,7 @@ function LoginPageInner() {
         <Heading level={2} className="text-center">
           Admin sign in
         </Heading>
-        <p className="mt-1 text-center text-body-sm text-neutral-500">Calibre Digital control panel</p>
+        <p className="mt-1 text-center text-body-sm text-neutral-500">MAB Digital Service control panel</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5" noValidate>
           <div>
