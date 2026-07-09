@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    console.log(`[rewrite-debug] apiOrigin="${apiOrigin}" destination="${apiOrigin}/api/v1/:path*"`);
     return [{ source: "/api/v1/:path*", destination: `${apiOrigin}/api/v1/:path*` }];
   },
 };
