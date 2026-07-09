@@ -6,7 +6,11 @@ import type { NextConfig } from "next";
 // traffic through this app's own origin makes every request same-origin
 // from the browser's perspective, so Better Auth's session cookie lands on
 // *this* domain instead — see apps/admin/src/lib/{api,auth-client}.ts.
-const apiOrigin = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+// NEXT_PUBLIC_API_URL is configured on Vercel with a trailing slash, which
+// produced a `...vercel.app//api/v1/:path*` destination (double slash) that
+// Vercel's edge resolved as a same-path 308 redirect loop instead of a
+// proxy. Stripping it defensively so this can't regress silently.
+const apiOrigin = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000").replace(/\/+$/, "");
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@agency/ui", "@agency/types", "@agency/utils", "@agency/auth"],
@@ -17,9 +21,6 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    console.log(
-      `[rewrite-debug] len=${apiOrigin.length} endsWithSlash=${apiOrigin.endsWith("/")} startsHttps=${apiOrigin.startsWith("https://")} containsApiHost=${apiOrigin.includes("api-mabdigitalservice")} containsLocalhost=${apiOrigin.includes("localhost")} isFallback=${apiOrigin === "http://localhost:4000"} firstChar="${apiOrigin[0]}" lastChar="${apiOrigin[apiOrigin.length - 1]}"`,
-    );
     return [{ source: "/api/v1/:path*", destination: `${apiOrigin}/api/v1/:path*` }];
   },
 };
