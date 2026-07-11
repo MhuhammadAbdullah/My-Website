@@ -68,3 +68,8 @@ export const brandingSchema = z.object({
   displayMode: z.enum(BRANDING_DISPLAY_MODES),
 });
 export type BrandingInput = z.infer<typeof brandingSchema>;
+
+export const TECH_STACK_DISPLAY_MODES = ["TAGS", "MARQUEE"] as const;
+export type TechStackDisplayMode = (typeof TECH_STACK_DISPLAY_MODES)[number];
+
+export const techStackDisplaySchema = z.enum(TECH_STACK_DISPLAY_MODES);

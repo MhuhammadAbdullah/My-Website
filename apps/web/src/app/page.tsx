@@ -9,6 +9,7 @@ import {
   getHomeWhyReasons,
   getProjects,
   getServices,
+  getSettings,
   getTechnologies,
   getTestimonials,
 } from "@/lib/api";
@@ -56,18 +57,20 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [home, stats, about, services, projectsPage, technologies, testimonials, faqs, processSteps, whyReasons] = await Promise.all([
-    withFallback(getHomeContent(), EMPTY_HOME_CONTENT, "home content"),
-    withFallback(getHomeStats(), [], "home stats"),
-    withFallback(getAboutContent(), EMPTY_ABOUT_CONTENT, "about content"),
-    withFallback(getServices(), [], "services"),
-    withFallback(getProjects({ pageSize: 3 }), emptyPage(1, 3), "featured projects"),
-    withFallback(getTechnologies(), [], "technologies"),
-    withFallback(getTestimonials(), [], "testimonials"),
-    withFallback(getFaqs("GENERAL"), [], "faqs"),
-    withFallback(getHomeProcessSteps(), [], "home process steps"),
-    withFallback(getHomeWhyReasons(), [], "home why-work-with-me reasons"),
-  ]);
+  const [home, stats, about, services, projectsPage, technologies, testimonials, faqs, processSteps, whyReasons, settings] =
+    await Promise.all([
+      withFallback(getHomeContent(), EMPTY_HOME_CONTENT, "home content"),
+      withFallback(getHomeStats(), [], "home stats"),
+      withFallback(getAboutContent(), EMPTY_ABOUT_CONTENT, "about content"),
+      withFallback(getServices(), [], "services"),
+      withFallback(getProjects({ pageSize: 3 }), emptyPage(1, 3), "featured projects"),
+      withFallback(getTechnologies(), [], "technologies"),
+      withFallback(getTestimonials(), [], "testimonials"),
+      withFallback(getFaqs("GENERAL"), [], "faqs"),
+      withFallback(getHomeProcessSteps(), [], "home process steps"),
+      withFallback(getHomeWhyReasons(), [], "home why-work-with-me reasons"),
+      withFallback(getSettings(), {}, "settings"),
+    ]);
 
   return (
     <>
@@ -103,7 +106,7 @@ export default async function HomePage() {
 
       <Section>
         <Container>
-          <Technologies technologies={technologies} />
+          <Technologies technologies={technologies} displayStyle={settings.tech_stack_display ?? "TAGS"} />
         </Container>
       </Section>
 

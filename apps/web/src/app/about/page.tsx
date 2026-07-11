@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Award, Github, Linkedin, Twitter } from "lucide-react";
 import { Badge, Container, Section, Heading, Reveal, Progress, Avatar, AvatarFallback, AvatarImage } from "@agency/ui";
-import { getAboutContent, getAboutTeamData, getSkills, getTechnologies } from "@/lib/api";
+import { getAboutContent, getAboutTeamData, getSettings, getSkills, getTechnologies } from "@/lib/api";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { getFaqs } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
@@ -9,6 +9,7 @@ import { EMPTY_ABOUT_CONTENT, EMPTY_ABOUT_TEAM_DATA } from "@/lib/fallbacks";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { cloudinaryTransform } from "@/lib/cloudinary";
+import { TechMarquee } from "@/components/marketing/tech-marquee";
 
 export async function generateMetadata(): Promise<Metadata> {
   const about = await getAboutContent().catch(() => null);
@@ -43,12 +44,13 @@ export async function generateMetadata(): Promise<Metadata> {
 const socialIcons = { twitter: Twitter, linkedin: Linkedin, github: Github } as const;
 
 export default async function AboutPage() {
-  const [about, teamData, skills, technologies, faqs] = await Promise.all([
+  const [about, teamData, skills, technologies, faqs, settings] = await Promise.all([
     withFallback(getAboutContent(), EMPTY_ABOUT_CONTENT, "about content"),
     withFallback(getAboutTeamData(), EMPTY_ABOUT_TEAM_DATA, "about team data"),
     withFallback(getSkills(), [], "skills"),
     withFallback(getTechnologies(), [], "technologies"),
     withFallback(getFaqs("GENERAL"), [], "faqs"),
+    withFallback(getSettings(), {}, "settings"),
   ]);
 
   return (
@@ -185,13 +187,19 @@ export default async function AboutPage() {
             <Heading level={2} className="mt-10">
               Technologies
             </Heading>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {technologies.map((tech) => (
-                <Badge key={tech.id} variant="neutral">
-                  {tech.name}
-                </Badge>
-              ))}
-            </div>
+            {settings.tech_stack_display === "MARQUEE" ? (
+              <div className="mt-4">
+                <TechMarquee technologies={technologies} />
+              </div>
+            ) : (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {technologies.map((tech) => (
+                  <Badge key={tech.id} variant="neutral">
+                    {tech.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         </Container>
       </Section>

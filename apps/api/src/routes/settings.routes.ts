@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { prisma, type Prisma } from "@agency/database";
-import { socialLinksSchema, currencySchema, brandingSchema } from "@agency/types";
+import { socialLinksSchema, currencySchema, brandingSchema, techStackDisplaySchema } from "@agency/types";
 import { isGoogleMapsUrl, extractGoogleMapsEmbedSrc } from "@agency/utils";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
@@ -14,6 +14,7 @@ const settingValidators: Record<string, (value: unknown) => Prisma.InputJsonValu
   socials: (value) => socialLinksSchema.parse(value),
   currency: (value) => currencySchema.parse(value),
   branding: (value) => brandingSchema.parse(value),
+  tech_stack_display: (value) => techStackDisplaySchema.parse(value),
   google_maps_embed: (value) => {
     if (!value) return "";
     if (typeof value !== "string" || !isGoogleMapsUrl(value)) {

@@ -13,12 +13,15 @@ const categorySortableFields = ["name", "order", "createdAt", "updatedAt"];
 // never had zod-validated writes -- POST already passes req.body straight
 // through. PATCH keeps that same trust level, just whitelisted to the fields
 // this generic edit/toggle UI can actually send.
-function pickCategoryFields(body: Record<string, unknown>) {
+function pickCategoryFields(body: Record<string, unknown>, extraFields: string[] = []) {
   const data: Record<string, unknown> = {};
   if (typeof body.name === "string") data.name = body.name;
   if (typeof body.slug === "string") data.slug = body.slug;
   if (typeof body.order === "number") data.order = body.order;
   if (typeof body.isEnabled === "boolean") data.isEnabled = body.isEnabled;
+  if (extraFields.includes("logoId") && (typeof body.logoId === "string" || body.logoId === null)) {
+    data.logoId = body.logoId;
+  }
   return data;
 }
 
@@ -27,6 +30,7 @@ async function paginatedCategoryList(
   req: Request,
   res: Response,
   delegate: { findMany: (args: any) => Promise<unknown[]>; count: (args: any) => Promise<number> },
+  options: { include?: Record<string, unknown> } = {},
 ) {
   const { page, limit, skip, search, sortBy, sortOrder } = parseListQuery(req.query, {
     sortableFields: categorySortableFields,
@@ -34,7 +38,13 @@ async function paginatedCategoryList(
   });
   const where = searchFilter(search, ["name"]);
   const [items, total] = await Promise.all([
-    delegate.findMany({ where, orderBy: { [sortBy]: sortOrder }, skip, take: limit }),
+    delegate.findMany({
+      where,
+      orderBy: { [sortBy]: sortOrder },
+      skip,
+      take: limit,
+      ...(options.include ? { include: options.include } : {}),
+    }),
     delegate.count({ where }),
   ]);
   res.json({ items, ...paginationMeta(total, page, limit) });
@@ -125,14 +135,20 @@ categoriesRouter.delete(
 categoriesRouter.get(
   "/technologies",
   asyncHandler(async (_req, res) => {
-    res.json({ items: await prisma.technology.findMany({ where: { isEnabled: true }, orderBy: { order: "asc" } }) });
+    res.json({
+      items: await prisma.technology.findMany({
+        where: { isEnabled: true },
+        orderBy: { order: "asc" },
+        include: { logo: true },
+      }),
+    });
   }),
 );
 categoriesRouter.get(
   "/technologies/admin",
   requireAuth,
   requirePermission("categories", "view"),
-  asyncHandler((req, res) => paginatedCategoryList(req, res, prisma.technology)),
+  asyncHandler((req, res) => paginatedCategoryList(req, res, prisma.technology, { include: { logo: true } })),
 );
 categoriesRouter.post(
   "/technologies",
@@ -147,8 +163,8 @@ categoriesRouter.patch(
   requireAuth,
   requirePermission("categories", "update"),
   asyncHandler(async (req, res) => {
-    const data = pickCategoryFields(req.body);
-    res.json({ item: await prisma.technology.update({ where: { id: req.params.id }, data }) });
+    const data = pickCategoryFields(req.body, ["logoId"]);
+    res.json({ item: await prisma.technology.update({ where: { id: req.params.id }, data, include: { logo: true } }) });
   }),
 );
 categoriesRouter.delete(

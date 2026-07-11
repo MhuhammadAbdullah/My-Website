@@ -26,6 +26,7 @@ import { request } from "@/lib/api";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { slugify } from "@agency/utils";
+import { TechnologiesList } from "./technologies-list";
 
 interface CategoryItem {
   id: string;
@@ -236,7 +237,7 @@ function CategoriesPageInner() {
           <CategoryList endpoint="/categories/projects" paramPrefix="proj" label="Category" />
         </TabsContent>
         <TabsContent value="technologies">
-          <CategoryList endpoint="/categories/technologies" paramPrefix="tech" label="Technology" />
+          <TechnologiesList />
         </TabsContent>
         <TabsContent value="affiliate">
           <CategoryList endpoint="/affiliate/categories" paramPrefix="aff" label="Category" />

@@ -15,6 +15,7 @@ export interface TechnologyRead {
   name: string;
   slug: string;
   category: string;
+  logo: MediaRead | null;
 }
 
 export interface TestimonialRead {
@@ -247,6 +248,7 @@ export interface SiteSettings {
     logoUrl: string | null;
     displayMode: "LOGO" | "TEXT";
   };
+  tech_stack_display?: "TAGS" | "MARQUEE";
 }
 
 export interface NavItemRead {

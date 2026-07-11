@@ -94,6 +94,9 @@
   /* ---- Radix accordion animation ---- */
   --animate-accordion-down: accordion-down var(--duration-base) var(--ease-premium);
   --animate-accordion-up: accordion-up var(--duration-base) var(--ease-premium);
+
+  /* ---- Tech stack marquee ---- */
+  --animate-marquee: marquee var(--tech-marquee-duration, 30s) linear infinite;
 }
 
 @keyframes accordion-down {
@@ -215,10 +218,34 @@
       animation: none;
     }
   }
+
+  .tech-marquee-track {
+    animation: var(--animate-marquee);
+    will-change: transform;
+  }
+  @media (hover: hover) {
+    .tech-marquee-track:hover {
+      animation-play-state: paused;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tech-marquee-track {
+      animation: none;
+    }
+  }
 }
 
 @keyframes shimmer {
   100% {
     transform: translateX(100%);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }
