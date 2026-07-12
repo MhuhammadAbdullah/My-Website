@@ -307,6 +307,8 @@ model SeoMeta {
   project       Project?
   homePage      HomePageContent?
   aboutPage     AboutPageContent?
+  privacyPolicyPage PrivacyPolicyContent?
+  termsPage         TermsContent?
 
   @@map("seo_meta")
 }
@@ -761,6 +763,43 @@ model AboutPageContent {
   seo SeoMeta? @relation(fields: [seoId], references: [id])
 
   @@map("about_page_content")
+}
+
+// `content` only ever gets written by the publish action, so the public
+// route always serves the last published snapshot even mid-edit. `draftContent`
+// holds whatever was last "Save Draft"-ed and is null when there's nothing
+// pending. `status` flips DRAFT -> PUBLISHED once and never reverts (no
+// unpublish flow exists) -- the public route returns null unless PUBLISHED.
+model PrivacyPolicyContent {
+  id            String        @id @default(cuid())
+  title         String        @default("Privacy Policy")
+  content       String        @default("")
+  draftContent  String?
+  lastUpdatedAt DateTime?
+  status        ContentStatus @default(DRAFT)
+  publishedAt   DateTime?
+  seoId         String?       @unique
+  updatedAt     DateTime      @updatedAt
+
+  seo SeoMeta? @relation(fields: [seoId], references: [id])
+
+  @@map("privacy_policy_content")
+}
+
+model TermsContent {
+  id            String        @id @default(cuid())
+  title         String        @default("Terms & Conditions")
+  content       String        @default("")
+  draftContent  String?
+  lastUpdatedAt DateTime?
+  status        ContentStatus @default(DRAFT)
+  publishedAt   DateTime?
+  seoId         String?       @unique
+  updatedAt     DateTime      @updatedAt
+
+  seo SeoMeta? @relation(fields: [seoId], references: [id])
+
+  @@map("terms_content")
 }
 
 // ---------------------------------------------------------------------------

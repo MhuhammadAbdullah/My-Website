@@ -218,6 +218,15 @@ export interface AboutContentRead {
   seo: SeoRead | null;
 }
 
+// Privacy Policy / Terms & Conditions -- `null` on GET means the page has
+// never been published, distinct from "never edited" (see legal.routes.ts).
+export interface LegalPageContentRead {
+  title: string;
+  content: string;
+  lastUpdatedAt: string | null;
+  seo: SeoRead | null;
+}
+
 // SEO for pages with no content model of their own (Services, Portfolio,
 // Affiliate Tools, Contact) -- one social image covers both Open Graph and
 // Twitter Card, unlike SeoRead above which has separate og/twitter fields.

@@ -8,6 +8,7 @@ import type {
   HomeProcessStepRead,
   HomeStatRead,
   HomeWhyReasonRead,
+  LegalPageContentRead,
   NavItemRead,
   PageSeoRead,
   PaginatedResponse,
@@ -123,6 +124,14 @@ export const getPageSeo = (page: "services" | "portfolio" | "affiliate-tools" | 
   apiFetch<{ item: PageSeoRead | null }>(`/page-seo/${page}`).then((r) => r.item);
 
 export const getAboutContent = () => apiFetch<{ item: AboutContentRead }>("/pages/about").then((r) => r.item);
+
+// `item` is null whenever the page has never been published -- callers use
+// withFallback()/EMPTY_PRIVACY_POLICY_CONTENT (or EMPTY_TERMS_CONTENT) the
+// same way every other content type degrades on a fetch failure.
+export const getPrivacyPolicyContent = () =>
+  apiFetch<{ item: LegalPageContentRead | null }>("/pages/privacy-policy").then((r) => r.item);
+
+export const getTermsContent = () => apiFetch<{ item: LegalPageContentRead | null }>("/pages/terms").then((r) => r.item);
 
 export const getSettings = () => apiFetch<{ settings: SiteSettings }>("/settings").then((r) => r.settings);
 

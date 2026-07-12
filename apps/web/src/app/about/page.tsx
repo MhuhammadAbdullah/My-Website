@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Award, Github, Linkedin, Twitter } from "lucide-react";
-import { Badge, Container, Section, Heading, Reveal, Progress, Avatar, AvatarFallback, AvatarImage } from "@agency/ui";
+import { Container, Section, Heading, Reveal, Progress, Avatar, AvatarFallback, AvatarImage } from "@agency/ui";
 import { getAboutContent, getAboutTeamData, getSettings, getSkills, getTechnologies } from "@/lib/api";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { getFaqs } from "@/lib/api";
@@ -9,7 +9,7 @@ import { EMPTY_ABOUT_CONTENT, EMPTY_ABOUT_TEAM_DATA } from "@/lib/fallbacks";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { cloudinaryTransform } from "@/lib/cloudinary";
-import { TechMarquee } from "@/components/marketing/tech-marquee";
+import { Technologies } from "@/components/home/technologies";
 
 export async function generateMetadata(): Promise<Metadata> {
   const about = await getAboutContent().catch(() => null);
@@ -183,24 +183,13 @@ export default async function AboutPage() {
                 </li>
               ))}
             </ul>
-
-            <Heading level={2} className="mt-10">
-              Technologies
-            </Heading>
-            {settings.tech_stack_display === "MARQUEE" ? (
-              <div className="mt-4">
-                <TechMarquee technologies={technologies} />
-              </div>
-            ) : (
-              <div className="mt-4 flex flex-wrap gap-2">
-                {technologies.map((tech) => (
-                  <Badge key={tech.id} variant="neutral">
-                    {tech.name}
-                  </Badge>
-                ))}
-              </div>
-            )}
           </div>
+        </Container>
+      </Section>
+
+      <Section>
+        <Container>
+          <Technologies technologies={technologies} displayStyle={settings.tech_stack_display ?? "TAGS"} />
         </Container>
       </Section>
 

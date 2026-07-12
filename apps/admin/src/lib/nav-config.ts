@@ -26,6 +26,7 @@ import {
   Landmark,
   Globe,
   Lock,
+  Scale,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -113,6 +114,8 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: "SEO", href: "/seo", icon: SearchCheck },
       { label: "Messages", href: "/analytics", icon: Mail },
       { label: "Settings", href: "/settings", icon: Settings },
+      { label: "Privacy Policy", href: "/privacy-policy", icon: ShieldCheck },
+      { label: "Terms & Conditions", href: "/terms", icon: Scale },
     ],
   },
   {

@@ -241,6 +241,137 @@
   }
 }
 
+/* Renders HTML from RichTextEditor (packages/ui/src/rich-text-editor.tsx)
+   -- used both by the public site's content pages and the admin's Preview
+   dialog, so both render identically. Raw h1-h6/p/ul/etc tags from
+   dangerouslySetInnerHTML aren't reachable by Tailwind utility classes, so
+   this styles them directly with this project's own design tokens instead
+   of pulling in a generic typography plugin. */
+.rich-text {
+  color: var(--color-body);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.75;
+  overflow-wrap: break-word;
+}
+.rich-text > * + * {
+  margin-top: 1.25em;
+}
+.rich-text h1 {
+  font-size: var(--text-h1);
+  margin-top: 1.8em;
+}
+.rich-text h2 {
+  font-size: var(--text-h2);
+  margin-top: 1.6em;
+}
+.rich-text h3 {
+  font-size: var(--text-h3);
+  margin-top: 1.4em;
+}
+.rich-text h4,
+.rich-text h5,
+.rich-text h6 {
+  font-size: var(--text-h4);
+  margin-top: 1.2em;
+}
+.rich-text a {
+  color: var(--color-accent-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-word;
+}
+.rich-text a:hover {
+  color: var(--color-accent-700);
+}
+.rich-text strong {
+  font-weight: 600;
+  color: var(--color-heading);
+}
+.rich-text ul,
+.rich-text ol {
+  padding-left: 1.5em;
+}
+.rich-text ul {
+  list-style: disc;
+}
+.rich-text ol {
+  list-style: decimal;
+}
+.rich-text li + li {
+  margin-top: 0.5em;
+}
+.rich-text ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+.rich-text ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6em;
+}
+.rich-text ul[data-type="taskList"] li > label {
+  margin-top: 0.3em;
+}
+.rich-text blockquote {
+  border-left: 3px solid var(--color-neutral-200);
+  padding-left: 1.25em;
+  color: var(--color-neutral-500);
+  font-style: italic;
+}
+.rich-text code {
+  background: var(--color-neutral-100);
+  padding: 0.15em 0.4em;
+  border-radius: var(--radius-sm);
+  font-size: 0.9em;
+}
+.rich-text pre {
+  background: var(--color-neutral-950);
+  color: var(--color-neutral-50);
+  padding: 1em 1.25em;
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+.rich-text pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+.rich-text hr {
+  border: none;
+  border-top: 1px solid var(--color-neutral-200);
+  margin: 2em 0;
+}
+/* `display: block` + `overflow-x: auto` directly on the table lets it
+   scroll horizontally on narrow screens without a wrapper element -- content
+   is raw HTML from dangerouslySetInnerHTML, so there's no JS pass available
+   to inject one. Browsers still generate the anonymous table boxes needed
+   to lay out the tbody/tr/td children as a real table despite the outer
+   `display: block`. */
+.rich-text table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+.rich-text th,
+.rich-text td {
+  border: 1px solid var(--color-neutral-200);
+  padding: 0.6em 0.9em;
+  text-align: left;
+}
+.rich-text th {
+  background: var(--color-neutral-50);
+  font-weight: 600;
+  color: var(--color-heading);
+}
+.rich-text img {
+  border-radius: var(--radius-lg);
+  max-width: 100%;
+  height: auto;
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);

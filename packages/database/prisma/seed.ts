@@ -33,7 +33,7 @@ async function main() {
     "home", "about", "services", "pricing", "portfolio", "projects", "categories",
     "testimonials", "faqs", "team", "affiliate", "media", "navigation",
     "footer", "seo", "analytics", "settings", "users", "roles", "permissions",
-    "clients", "quotations", "invoices", "payments", "financeSettings",
+    "clients", "quotations", "invoices", "payments", "financeSettings", "legal",
   ];
   const actions = ["view", "create", "update", "delete"];
 

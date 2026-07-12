@@ -216,3 +216,18 @@ export const aboutPageContentSchema = z.object({
   seo: seoMetaSchema.partial().nullable().optional(),
 });
 export type AboutPageContentInput = z.infer<typeof aboutPageContentSchema>;
+
+// Shared by Privacy Policy and Terms & Conditions -- both are singleton
+// pages with an identical shape (title, rich-text body, optional last-
+// updated date, SEO), used as the body for both the draft-save (PATCH) and
+// publish (POST .../publish) routes in legal.routes.ts. Enforcing title and
+// content on every save (not just publish) also means a page can never end
+// up published with empty content, since publish goes through this same
+// validation.
+export const legalPageContentSchema = z.object({
+  title: z.string().min(1, "Page title is required").max(120),
+  content: z.string().min(1, "Rich text content is required"),
+  lastUpdatedAt: z.coerce.date().nullable().optional(),
+  seo: seoMetaSchema.partial().nullable().optional(),
+});
+export type LegalPageContentInput = z.infer<typeof legalPageContentSchema>;
