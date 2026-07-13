@@ -7,6 +7,15 @@ export const resultMetricSchema = z.object({
 });
 export type ResultMetric = z.infer<typeof resultMetricSchema>;
 
+export const projectSectionSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  content: z.string().min(1),
+  icon: z.string().nullable().optional(),
+  order: z.number().int().default(0),
+});
+export type ProjectSectionInput = z.infer<typeof projectSectionSchema>;
+
 export const projectGalleryImageSchema = z.object({
   url: z.string().url(),
   publicId: z.string().min(1),
@@ -26,16 +35,7 @@ export const projectSchema = z.object({
     .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Slug must be lowercase, hyphen-separated"),
   client: z.string().min(1).nullable().optional(),
   summary: z.string().min(1).max(240),
-  overview: z.string().min(1),
-  problem: z.string().min(1),
-  research: z.string().min(1),
-  strategy: z.string().min(1),
-  planning: z.string().min(1),
-  wireframesNote: z.string().nullable().optional(),
-  designNotes: z.string().min(1),
-  developmentNotes: z.string().min(1),
-  challenges: z.string().min(1),
-  solutions: z.string().min(1),
+  sections: z.array(projectSectionSchema).default([]),
   results: z.array(resultMetricSchema).default([]),
   liveUrl: z.string().url().nullable().optional().or(z.literal("")),
   githubUrl: z.string().url().nullable().optional().or(z.literal("")),

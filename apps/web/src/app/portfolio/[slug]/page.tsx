@@ -8,6 +8,8 @@ import { TestimonialCard } from "@/components/marketing/testimonial-card";
 import { ProjectCard } from "@/components/marketing/project-card";
 import { ProjectGallery } from "@/components/portfolio/project-gallery";
 import { ProjectVideo } from "@/components/portfolio/project-video";
+import { ProjectSectionCard } from "@/components/portfolio/project-section-card";
+import { ProjectToc } from "@/components/portfolio/project-toc";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { env } from "@/lib/env";
@@ -32,19 +34,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     },
   };
 }
-
-const caseStudySections: { key: keyof Awaited<ReturnType<typeof getProject>>; title: string }[] = [
-  { key: "overview", title: "Overview" },
-  { key: "problem", title: "Client problem" },
-  { key: "research", title: "Research" },
-  { key: "strategy", title: "Strategy" },
-  { key: "planning", title: "Planning" },
-  { key: "wireframesNote", title: "Wireframes" },
-  { key: "designNotes", title: "Design" },
-  { key: "developmentNotes", title: "Development" },
-  { key: "challenges", title: "Challenges" },
-  { key: "solutions", title: "Solutions" },
-];
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -111,47 +100,44 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
       <Section className="pt-0">
         <Container className="grid gap-12 lg:grid-cols-[2fr_1fr]">
-          <div className="space-y-12">
-            {caseStudySections.map(({ key, title }) => {
-              const content = project[key];
-              if (!content || typeof content !== "string") return null;
-              return (
-                <div key={key}>
-                  <Heading level={3}>{title}</Heading>
-                  <p className="mt-3 text-body text-body">{content}</p>
-                </div>
-              );
-            })}
+          <div className="space-y-10">
+            {project.sections.map((section) => (
+              <ProjectSectionCard key={section.id} section={section} />
+            ))}
           </div>
 
-          <aside className="h-fit space-y-6 rounded-2xl border border-neutral-200 p-6">
-            <div>
-              <p className="font-mono text-label uppercase text-neutral-400">Client</p>
-              <p className="mt-1 text-body font-medium text-heading">{project.client}</p>
-            </div>
-            <div>
-              <p className="font-mono text-label uppercase text-neutral-400">Tech stack</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {project.techStack.map((tech) => (
-                  <Badge key={tech.id} variant="neutral">
-                    {tech.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            {project.results.length > 0 && (
+          <aside className="h-fit space-y-6 lg:sticky lg:top-24">
+            <ProjectToc sections={project.sections} />
+
+            <div className="space-y-6 rounded-2xl border border-neutral-200 p-6">
               <div>
-                <p className="font-mono text-label uppercase text-neutral-400">Results</p>
-                <dl className="mt-3 space-y-3">
-                  {project.results.map((result) => (
-                    <div key={result.label} className="flex items-baseline justify-between gap-3">
-                      <dt className="text-body-sm text-body">{result.label}</dt>
-                      <dd className="font-heading text-h4 font-semibold text-accent-600">{result.value}</dd>
-                    </div>
-                  ))}
-                </dl>
+                <p className="font-mono text-label uppercase text-neutral-400">Client</p>
+                <p className="mt-1 text-body font-medium text-heading">{project.client}</p>
               </div>
-            )}
+              <div>
+                <p className="font-mono text-label uppercase text-neutral-400">Tech stack</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {project.techStack.map((tech) => (
+                    <Badge key={tech.id} variant="neutral">
+                      {tech.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              {project.results.length > 0 && (
+                <div>
+                  <p className="font-mono text-label uppercase text-neutral-400">Results</p>
+                  <dl className="mt-3 space-y-3">
+                    {project.results.map((result) => (
+                      <div key={result.label} className="flex items-baseline justify-between gap-3">
+                        <dt className="text-body-sm text-body">{result.label}</dt>
+                        <dd className="font-heading text-h4 font-semibold text-accent-600">{result.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              )}
+            </div>
           </aside>
         </Container>
       </Section>

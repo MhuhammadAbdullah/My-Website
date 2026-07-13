@@ -461,16 +461,7 @@ model Project {
   slug           String        @unique
   client         String?
   summary        String
-  overview       String
-  problem        String
-  research       String
-  strategy       String
-  planning       String
-  wireframesNote String?
-  designNotes    String
-  developmentNotes String
-  challenges     String
-  solutions      String
+  sections       Json     @default("[]") // ordered [{ id, title, content, icon, order }]
   results        Json // ordered [{ label, value }]
   liveUrl        String?
   githubUrl      String?

@@ -39,6 +39,7 @@ import { usePaginatedList } from "@/lib/use-paginated-list";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { GalleryField, VideoField, type GalleryImageItem, type VideoItem } from "./media-fields";
 import { ProjectFinanceDialog } from "@/components/finance/project-finance-dialog";
+import { ProjectSectionsField, newProjectSection, type ProjectSectionForm } from "@/components/portfolio/project-sections-field";
 
 interface Category {
   id: string;
@@ -60,23 +61,6 @@ interface Project {
   categoryId: string | null;
   category: Category | null;
 }
-
-const caseStudyFields = [
-  ["overview", "Overview"],
-  ["problem", "Client problem"],
-  ["research", "Research"],
-  ["strategy", "Strategy"],
-  ["planning", "Planning"],
-  ["wireframesNote", "Wireframes"],
-  ["designNotes", "Design"],
-  ["developmentNotes", "Development"],
-  ["challenges", "Challenges"],
-  ["solutions", "Solutions"],
-] as const;
-
-// wireframesNote is the only optional case-study field — everything else is
-// required by the Project model (see packages/database/prisma/schema.prisma).
-const requiredCaseStudyKeys = caseStudyFields.filter(([key]) => key !== "wireframesNote").map(([key]) => key);
 
 function ProjectEditor({
   project,
@@ -100,10 +84,10 @@ function ProjectEditor({
     status: project?.status ?? "DRAFT",
     liveUrl: "",
     githubUrl: "",
-    ...Object.fromEntries(caseStudyFields.map(([key]) => [key, ""])),
   });
   const [isFeatured, setIsFeatured] = React.useState(project?.isFeatured ?? false);
   const [technologyIds, setTechnologyIds] = React.useState<string[]>([]);
+  const [sections, setSections] = React.useState<ProjectSectionForm[]>([newProjectSection()]);
   const [results, setResults] = React.useState<{ label: string; value: string }[]>([{ label: "", value: "" }]);
   const [gallery, setGallery] = React.useState<GalleryImageItem[]>([]);
   const [video, setVideo] = React.useState<VideoItem | null>(null);
@@ -117,11 +101,6 @@ function ProjectEditor({
       nextErrors.slug = "Slug must be lowercase, hyphen-separated (e.g. my-project).";
     }
     if (!(form.summary ?? "").trim()) nextErrors.summary = "Summary is required.";
-    for (const [key, label] of caseStudyFields) {
-      if (requiredCaseStudyKeys.includes(key) && !(form[key] ?? "").trim()) {
-        nextErrors[key] = `${label} is required.`;
-      }
-    }
     return nextErrors;
   }
 
@@ -130,11 +109,12 @@ function ProjectEditor({
     request<{ item: Project & Record<string, unknown> }>(`/projects/${project.slug}`).then(({ item }) => {
       setForm((f) => ({
         ...f,
-        ...Object.fromEntries(caseStudyFields.map(([key]) => [key, (item as Record<string, string>)[key] ?? ""])),
         liveUrl: (item.liveUrl as string) ?? "",
         githubUrl: (item.githubUrl as string) ?? "",
       }));
       setTechnologyIds(((item.techStack as { id: string }[]) ?? []).map((t) => t.id));
+      const existingSections = item.sections as ProjectSectionForm[] | undefined;
+      setSections(existingSections && existingSections.length > 0 ? existingSections : [newProjectSection()]);
       if (Array.isArray(item.results) && item.results.length) setResults(item.results as { label: string; value: string }[]);
 
       const existingGallery = (item.gallery as
@@ -185,6 +165,9 @@ function ProjectEditor({
         githubUrl: form.githubUrl || null,
         videoUrl: video?.url ?? null,
         videoPublicId: video?.publicId ?? null,
+        sections: sections
+          .filter((s) => s.title.trim() && s.content.trim())
+          .map((s, index) => ({ ...s, order: index })),
         isFeatured,
         techStackIds: technologyIds,
         relatedProjectIds: [],
@@ -273,23 +256,7 @@ function ProjectEditor({
             <FieldError>{errors.summary}</FieldError>
           </div>
 
-          {caseStudyFields.map(([key, label]) => {
-            const required = requiredCaseStudyKeys.includes(key);
-            return (
-              <div key={key}>
-                <Label>
-                  {label} {required && "*"}
-                </Label>
-                <Textarea
-                  rows={2}
-                  value={form[key]}
-                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                  aria-invalid={!!errors[key]}
-                />
-                <FieldError>{errors[key]}</FieldError>
-              </div>
-            );
-          })}
+          <ProjectSectionsField sections={sections} onChange={setSections} />
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>

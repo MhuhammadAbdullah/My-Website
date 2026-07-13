@@ -110,17 +110,16 @@ export interface ProjectListItem {
   gallery: ProjectImageRead[];
 }
 
+export interface ProjectSection {
+  id: string;
+  title: string;
+  content: string;
+  icon: string | null;
+  order: number;
+}
+
 export interface ProjectDetail extends ProjectListItem {
-  overview: string;
-  problem: string;
-  research: string;
-  strategy: string;
-  planning: string;
-  wireframesNote: string | null;
-  designNotes: string;
-  developmentNotes: string;
-  challenges: string;
-  solutions: string;
+  sections: ProjectSection[];
   results: { label: string; value: string }[];
   liveUrl: string | null;
   githubUrl: string | null;

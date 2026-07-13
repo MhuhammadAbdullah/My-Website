@@ -3,6 +3,7 @@ export type FieldConfig =
   | { key: string; label: string; type: "textarea"; required?: boolean }
   | { key: string; label: string; type: "number"; required?: boolean }
   | { key: string; label: string; type: "checkbox" }
+  | { key: string; label: string; type: "icon"; required?: boolean }
   | { key: string; label: string; type: "select"; options: { value: string; label: string }[]; required?: boolean }
   // Same single-value selection as "select", but with a type-to-filter search
   // box — for fields with many possible options (e.g. every affiliate category).

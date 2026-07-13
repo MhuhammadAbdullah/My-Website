@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
   Combobox,
+  IconPicker,
   Badge,
   Button,
   cn,
@@ -55,6 +56,15 @@ export function ResourceForm({
             <div key={field.key} className="sm:col-span-2">
               <Label>{field.label}</Label>
               <Textarea value={(value as string) ?? ""} onChange={(e) => setField(field.key, e.target.value)} />
+            </div>
+          );
+        }
+
+        if (field.type === "icon") {
+          return (
+            <div key={field.key}>
+              <Label>{field.label}</Label>
+              <IconPicker value={(value as string) ?? null} onValueChange={(v) => setField(field.key, v ?? "")} />
             </div>
           );
         }

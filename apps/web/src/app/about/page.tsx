@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { Award, Github, Linkedin, Twitter } from "lucide-react";
-import { Container, Section, Heading, Reveal, Progress, Avatar, AvatarFallback, AvatarImage } from "@agency/ui";
+import { Github, Linkedin, Twitter } from "lucide-react";
+import { Container, Section, Heading, Reveal, Progress, Avatar, AvatarFallback, AvatarImage, DynamicIcon } from "@agency/ui";
 import { getAboutContent, getAboutTeamData, getSettings, getSkills, getTechnologies } from "@/lib/api";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { getFaqs } from "@/lib/api";
@@ -93,7 +93,7 @@ export default async function AboutPage() {
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {teamData.values.map((value, i) => (
               <Reveal key={value.id} delay={i * 0.06} className="rounded-2xl border border-neutral-200 p-6">
-                <Award className="size-6 text-accent-500" />
+                <DynamicIcon name={value.icon} size={24} className="text-accent-500" fallback="award" />
                 <h3 className="mt-4 text-h4 font-semibold text-heading">{value.title}</h3>
                 <p className="mt-2 text-body-sm text-body">{value.description}</p>
               </Reveal>

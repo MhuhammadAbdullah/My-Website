@@ -19,6 +19,7 @@ export * from "./select";
 export * from "./popover";
 export * from "./combobox";
 export * from "./icon-picker";
+export * from "./icons";
 export * from "./checkbox";
 export * from "./switch";
 export * from "./progress";

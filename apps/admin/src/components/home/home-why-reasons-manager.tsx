@@ -5,11 +5,10 @@ import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type D
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Heading, IconPicker, Input, Label, Skeleton, Switch, Textarea, toast } from "@agency/ui";
+import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DynamicIcon, Heading, IconPicker, Input, Label, Skeleton, Switch, Textarea, toast } from "@agency/ui";
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
-import { WHY_REASON_ICON_OPTIONS } from "./icon-options";
 
 interface WhyReason {
   id: string;
@@ -20,7 +19,7 @@ interface WhyReason {
   isEnabled: boolean;
 }
 
-const EMPTY_FORM = { icon: "Gem", title: "", description: "", isEnabled: true };
+const EMPTY_FORM = { icon: "gem", title: "", description: "", isEnabled: true };
 type ReasonForm = typeof EMPTY_FORM;
 
 function SortableReasonRow({
@@ -40,8 +39,6 @@ function SortableReasonRow({
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
-  const Icon = WHY_REASON_ICON_OPTIONS[reason.icon];
-
   return (
     <div ref={setNodeRef} style={style} className="flex flex-wrap items-center gap-3 rounded-xl border border-neutral-200 bg-background p-4">
       <button type="button" {...attributes} {...listeners} className="cursor-grab touch-none text-neutral-400 hover:text-heading" aria-label="Drag to reorder">
@@ -49,7 +46,7 @@ function SortableReasonRow({
       </button>
 
       <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-600">
-        {Icon ? <Icon className="size-5" /> : null}
+        <DynamicIcon name={reason.icon} size={20} />
       </div>
 
       <div className="min-w-[10rem] flex-1 basis-40">
@@ -210,7 +207,7 @@ export function HomeWhyReasonsManager() {
           <div className="space-y-4">
             <div>
               <Label>Icon</Label>
-              <IconPicker value={form.icon} onValueChange={(icon) => setForm({ ...form, icon })} options={WHY_REASON_ICON_OPTIONS} />
+              <IconPicker value={form.icon} onValueChange={(icon) => setForm({ ...form, icon: icon ?? "" })} />
             </div>
             <div>
               <Label>Title</Label>

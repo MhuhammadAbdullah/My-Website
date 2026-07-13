@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Button, Heading, Label, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, toast } from "@agency/ui";
+import { Button, DynamicIcon, Heading, Label, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, toast } from "@agency/ui";
 import { request, createResourceClient } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { ResourceManager } from "@/components/resource-manager/resource-manager";
@@ -123,15 +123,15 @@ export default function AboutContentPage() {
             resourceClient={coreValuesClient}
             columns={[
               { key: "title", label: "Title" },
-              { key: "icon", label: "Icon" },
+              { key: "icon", label: "Icon", render: (item) => <DynamicIcon name={item.icon} size={18} /> },
             ]}
             fields={[
               { key: "title", label: "Title", type: "text", required: true },
               { key: "description", label: "Description", type: "textarea", required: true },
-              { key: "icon", label: "Lucide icon name", type: "text", required: true },
+              { key: "icon", label: "Icon", type: "icon", required: true },
               { key: "order", label: "Sort order", type: "number" },
             ]}
-            defaultValues={{ title: "", description: "", icon: "Gem", order: 0 }}
+            defaultValues={{ title: "", description: "", icon: "gem", order: 0 }}
           />
         </TabsContent>
         <TabsContent value="timeline">
