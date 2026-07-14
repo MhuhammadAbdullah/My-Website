@@ -91,3 +91,13 @@ api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: S
 web:dev:  GET / 200 in 12363ms
 admin:dev:  ○ Compiling / ...
 admin:dev:  ✓ Compiled / in 61.5s
+ ERROR  @agency/auth#dev: command (D:\My-Website\packages\auth) C:\Users\Abdullah\AppData\Roaming\npm\pnpm.cmd run dev exited (1073807364)
+ ERROR  api#dev: command (D:\My-Website\apps\api) C:\Users\Abdullah\AppData\Roaming\npm\pnpm.cmd run dev exited (1073807364)
+
+ Tasks:    1 successful, 8 total
+Cached:    0 cached, 8 total
+  Time:    56m18.398s 
+Failed:    @agency/auth#dev, api#dev
+
+ ERROR  run failed: command  exited (1073807364)
+[ELIFECYCLE] Command failed with exit code 1073807364.
