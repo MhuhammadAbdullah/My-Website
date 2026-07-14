@@ -7,493 +7,87 @@ $ turbo run dev
 
 @agency/database:db:generate: cache bypass, force executing c21ff56892310416
 @agency/utils:dev: cache bypass, force executing b94f293743142543
-@agency/types:dev: cache bypass, force executing e5e5b27ae42e9e39
 @agency/database:dev: cache bypass, force executing 3e10e3343bd623ed
-admin:dev: cache bypass, force executing 5e1a3b94e0592a92
 web:dev: cache bypass, force executing bc5ade6890f1342f
+admin:dev: cache bypass, force executing 5e1a3b94e0592a92
+@agency/types:dev: cache bypass, force executing e5e5b27ae42e9e39
 @agency/database:db:generate: $ prisma generate
 @agency/utils:dev: $ tsc -p tsconfig.build.json --watch
-@agency/database:dev: $ tsc -p tsconfig.build.json --watch
-@agency/types:dev: $ tsc -p tsconfig.build.json --watch
-@agency/utils:dev: [2J[3J[H12:33:42 PM - Starting compilation in watch mode...
-@agency/utils:dev: 
-@agency/database:dev: [2J[3J[H12:33:42 PM - Starting compilation in watch mode...
-@agency/database:dev: 
-web:dev: $ next dev --turbopack -p 3000
 admin:dev: $ next dev --turbopack -p 3001
-@agency/types:dev: [2J[3J[H12:33:44 PM - Starting compilation in watch mode...
+web:dev: $ next dev --turbopack -p 3000
+@agency/types:dev: $ tsc -p tsconfig.build.json --watch
+@agency/database:dev: $ tsc -p tsconfig.build.json --watch
+@agency/types:dev: [2J[3J[H3:57:13 PM - Starting compilation in watch mode...
 @agency/types:dev: 
-@agency/types:dev: 
-@agency/types:dev: 12:33:47 PM - Found 0 errors. Watching for file changes.
+@agency/utils:dev: [2J[3J[H3:57:13 PM - Starting compilation in watch mode...
 @agency/utils:dev: 
-@agency/utils:dev: 12:33:48 PM - Found 0 errors. Watching for file changes.
+@agency/database:dev: [2J[3J[H3:57:15 PM - Starting compilation in watch mode...
 @agency/database:dev: 
-@agency/database:dev: 12:33:51 PM - Found 0 errors. Watching for file changes.
+@agency/types:dev: 
+@agency/types:dev: 3:57:17 PM - Found 0 errors. Watching for file changes.
+@agency/utils:dev: 
+@agency/utils:dev: 3:57:20 PM - Found 0 errors. Watching for file changes.
+@agency/database:dev: 
+@agency/database:dev: 3:57:23 PM - Found 0 errors. Watching for file changes.
 @agency/database:db:generate: Loaded Prisma config from prisma.config.ts.
 @agency/database:db:generate: 
 @agency/database:db:generate: Prisma config detected, skipping environment variable loading.
 @agency/database:db:generate: Prisma schema loaded from prisma\schema.prisma
-@agency/database:dev: [2J[3J[H12:33:58 PM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
 web:dev:    ▲ Next.js 15.5.20 (Turbopack)
 web:dev:    - Local:        http://localhost:3000
-web:dev:    - Network:      http://192.168.100.118:3000
+web:dev:    - Network:      http://172.30.233.21:3000
 web:dev:    - Environments: .env.local
 web:dev: 
 web:dev:  ✓ Starting...
 admin:dev:    ▲ Next.js 15.5.20 (Turbopack)
 admin:dev:    - Local:        http://localhost:3001
-admin:dev:    - Network:      http://192.168.100.118:3001
+admin:dev:    - Network:      http://172.30.233.21:3001
 admin:dev:    - Environments: .env.local
 admin:dev: 
 admin:dev:  ✓ Starting...
+@agency/database:dev: [2J[3J[H3:57:31 PM - File change detected. Starting incremental compilation...
 @agency/database:dev: 
-@agency/database:dev: 12:34:01 PM - Found 0 errors. Watching for file changes.
+@agency/database:dev: 
+@agency/database:dev: 3:57:33 PM - Found 0 errors. Watching for file changes.
 @agency/database:db:generate: 
-@agency/database:db:generate: ✔ Generated Prisma Client (v6.19.3) to .\generated\client in 5.02s
+@agency/database:db:generate: ✔ Generated Prisma Client (v6.19.3) to .\generated\client in 4.78s
 @agency/database:db:generate: 
 @agency/database:db:generate: Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 @agency/database:db:generate: 
-@agency/database:db:generate: Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+@agency/database:db:generate: Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
 @agency/database:db:generate: 
 api:dev: cache bypass, force executing fd5859d12b706804
 @agency/auth:dev: cache bypass, force executing f449cc0758a65f95
 admin:dev:  ○ Compiling middleware ...
+web:dev:  ✓ Ready in 12s
 api:dev: $ tsx watch --env-file=.env src/index.ts
 @agency/auth:dev: $ tsc -p tsconfig.build.json --watch
-@agency/auth:dev: [2J[3J[H12:34:07 PM - Starting compilation in watch mode...
+@agency/auth:dev: [2J[3J[H3:57:40 PM - Starting compilation in watch mode...
 @agency/auth:dev: 
-web:dev:  ✓ Ready in 11.2s
-admin:dev:  ✓ Compiled middleware in 7.7s
-admin:dev:  ✓ Ready in 21.6s
+admin:dev:  ✓ Compiled middleware in 6.8s
+admin:dev:  ✓ Ready in 19.8s
 @agency/auth:dev: 
-@agency/auth:dev: 12:34:21 PM - Found 0 errors. Watching for file changes.
+@agency/auth:dev: 3:57:55 PM - Found 0 errors. Watching for file changes.
 api:dev: API listening on http://localhost:4000
-web:dev:  ○ Compiling /contact ...
-admin:dev:  ○ Compiling / ...
-web:dev:  ✓ Compiled /contact in 118.8s
-web:dev:  GET /contact 200 in 133748ms
 web:dev:  ○ Compiling / ...
-web:dev:  ✓ Compiled / in 82.1s
-web:dev:  GET / 200 in 89663ms
-admin:dev:  ✓ Compiled / in 185.4s
-admin:dev:  GET / 200 in 193843ms
-admin:dev:  ○ Compiling /home ...
-admin:dev:  ✓ Compiled /home in 35.3s
-admin:dev:  GET /home 200 in 36399ms
-admin:dev:  GET /home 200 in 2033ms
-api:dev: prisma:error 
-api:dev: Invalid `delegate.count()` invocation in
-api:dev: D:\My-Website\apps\api\src\lib\create-crud-router.ts:88:18
-api:dev: 
-api:dev:   85 
-api:dev:   86 const [items, total] = await Promise.all([
-api:dev: Database unreachable on GET /api/v1/home-stats/admin 
-api:dev:   87   delegate.findMany({ where, orderBy: { [sortBy]: sortOrder }, skip, take: limit, include }),
-api:dev: → 88   delegate.count(
-api:dev: Invalid `delegate.count()` invocation in
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: D:\My-Website\apps\api\src\lib\create-crud-router.ts:88:18
-api:dev: 
-api:dev:   85 
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev:   86 const [items, total] = await Promise.all([
-api:dev:   87   delegate.findMany({ where, orderBy: { [sortBy]: sortOrder }, skip, take: limit, include }),
-api:dev: → 88   delegate.count(
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-web:dev:  GET / 200 in 10579ms
-web:dev:  GET / 200 in 13875ms
-web:dev:  GET / 200 in 7914ms
-admin:dev:  ○ Compiling /about ...
-web:dev:  ○ Compiling /about ...
-admin:dev:  ✓ Compiled /about in 59.1s
-admin:dev:  GET /about 200 in 61205ms
-admin:dev:  GET /about 200 in 7765ms
-admin:dev:  GET /about 200 in 5860ms
-admin:dev:  GET /about 200 in 1635ms
-admin:dev:  GET /about 200 in 4622ms
-web:dev:  ✓ Compiled /about in 130.1s
-web:dev:  GET /about 200 in 138032ms
-web:dev:  GET /about 200 in 109181ms
-admin:dev:  ○ Compiling /services ...
-admin:dev:  ✓ Compiled /services in 64.7s
-admin:dev:  GET /services 200 in 66236ms
-web:dev:  ○ Compiling /services ...
-admin:dev:  GET /about 200 in 6417ms
-web:dev:  GET /about 200 in 12339ms
-web:dev:  ✓ Compiled /services in 219.6s
-web:dev:  GET /about 200 in 8269ms
-web:dev:  GET /about 200 in 10820ms
-admin:dev:  GET /services 200 in 1107ms
-admin:dev:  ○ Compiling /categories ...
-@agency/utils:dev: [2J[3J[H1:02:56 PM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/utils:dev: 
-@agency/utils:dev: 1:02:57 PM - Found 0 errors. Watching for file changes.
-@agency/database:dev: [2J[3J[H1:02:57 PM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/utils:dev: [2J[3J[H1:02:57 PM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/auth:dev: [2J[3J[H1:02:57 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/utils:dev: 
-@agency/utils:dev: 1:02:58 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 1:03:01 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H1:03:02 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 1:03:02 PM - Found 0 errors. Watching for file changes.
-@agency/database:dev: 
-@agency/database:dev: 1:03:03 PM - Found 0 errors. Watching for file changes.
-admin:dev:  GET /categories 200 in 64340ms
-admin:dev:  GET /categories 200 in 14110ms
-admin:dev:  GET /categories 200 in 98545ms
-web:dev:  GET /about 200 in 16289ms
-admin:dev:  GET /categories?tech_limit=25 200 in 24907ms
-admin:dev:  GET /categories?tech_limit=25 200 in 5748ms
-admin:dev:  ✓ Compiled /categories in 237.1s
-admin:dev:  GET /Portfolio 404 in 3031ms
-admin:dev:  ○ Compiling /portfolio ...
-admin:dev:  GET /Portfolio 404 in 7456ms
-admin:dev:  GET /categories 200 in 15756ms
-admin:dev:  ✓ Compiled /portfolio in 184s
-admin:dev:  GET /portfolio 200 in 54616ms
-admin:dev:  GET /portfolio 200 in 24861ms
-web:dev:  GET /about 200 in 7696ms
-web:dev:  ○ Compiling /portfolio ...
-web:dev:  ✓ Compiled /portfolio in 59.2s
-web:dev:  GET /portfolio 200 in 76226ms
-web:dev:  GET /portfolio 200 in 16428ms
-web:dev:  GET /portfolio 200 in 3425ms
-admin:dev:  ○ Compiling /testimonials ...
-admin:dev:  ✓ Compiled /testimonials in 114.2s
-admin:dev:  GET /testimonials 200 in 117223ms
-admin:dev:  GET /testimonials 200 in 99093ms
-admin:dev: [?25h
-@agency/auth:dev: [2J[3J[H1:25:43 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 1:25:43 PM - Found 0 errors. Watching for file changes.
-web:dev:  GET / 200 in 3926ms
-@agency/auth:dev: [2J[3J[H1:   ▲ Next.js 15.5.20 (Turbopack)
-   - Local:        http://localhost:3001
-   - Network:      http://192.168.100.118:3001
-   - Environments: .env.local
-
- ✓ Starting...
- ○ Compiling middleware ...
- ✓ Compiled middleware in 3s
- ✓ Ready in 11.2s
- ○ Compiling /testimonials ...
- ✓ Compiled /testimonials in 56.7s
- GET /testimonials 200 in 87282ms
- ○ Compiling /faqs ...
- ✓ Compiled /faqs in 48.8s
- GET /faqs 200 in 52323ms
- ○ Compiling /team ...
- ✓ Compiled /team in 56.9s
- GET /team 200 in 59901ms
- ○ Compiling /_not-found/page ...
- ✓ Compiled /_not-found/page in 56.1s
- GET /affiliate-tools 404 in 59050ms
- GET /affiliate-tool 404 in 506ms
- GET /affiliate-tools 404 in 664ms
- GET /team 200 in 2670ms
- ○ Compiling /affiliate ...
- ✓ Compiled /affiliate in 46.2s
- GET /affiliate 200 in 22003ms
- GET /affiliate 200 in 16910ms
- GET /affiliate 200 in 48186ms
- GET /affiliate?limit=25 200 in 1044ms
- ○ Compiling /contact ...
- ✓ Compiled /contact in 160.2s
- GET /contact 200 in 67237ms
- GET /contact 200 in 164583ms
- GET /contact 200 in 67119ms
- GET /contact 200 in 90087ms
- GET /contact 200 in 74613ms
- ○ Compiling /settings ...
- ✓ Compiled /settings in 164.7s
- GET /settings 200 in 170319ms
- GET /settings 200 in 143224ms
- ○ Compiling /users ...
- ✓ Compiled /users in 156.3s
- GET /users 200 in 157631ms
- GET /users 200 in 7955ms
-Failed to proxy http://localhost:4000/api/v1/users [Error: socket hang up] { code: 'ECONNRESET' }
-[Error: socket hang up] { code: 'ECONNRESET' }
-Failed to proxy http://localhost:4000/api/v1/roles [Error: socket hang up] { code: 'ECONNRESET' }
-[Error: socket hang up] { code: 'ECONNRESET' }
- ○ Compiling /_error ...
-[?25h
-Watching for file changes.
-@agency/utils:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/utils:dev: 
-@agency/utils:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
-@agency/database:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/database:dev: 
-@agency/database:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/types:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-@agency/types:dev: 
-@agency/types:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/utils:dev: 
-@agency/utils:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
-@agency/database:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/database:dev: 
-@agency/database:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 1:30:55 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H1:30:55 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 1:30:55 PM - Found 0 errors. Watching for file changes.
-@agency/types:dev: [2J[3J[H1:31:06 PM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-@agency/types:dev: 
-@agency/types:dev: 1:31:06 PM - Found 0 errors. Watching for file changes.
-web:dev:  GET / 200 in 2247ms
-web:dev:  GET /contact 200 in 1146ms
+web:dev:  ✓ Compiled / in 105.1s
+web:dev:  GET / 200 in 5051ms
+web:dev:  ○ Compiling /contact ...
+web:dev:  ✓ Compiled /contact in 40.7s
 api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
 api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
 api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
 api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
 api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
-web:dev:  GET /portfolio 200 in 4660ms
-web:dev:  GET /about 200 in 6361ms
-web:dev:  GET /about 200 in 10080ms
-web:dev:  GET /about 200 in 13040ms
-web:dev:  GET /about 200 in 18805ms
-web:dev:  GET / 200 in 5812ms
-web:dev:  GET /about 200 in 7245ms
-web:dev:  ○ Compiling /affiliate-tools ...
-web:dev:  ✓ Compiled /affiliate-tools in 144.4s
-web:dev:  GET /affiliate-tools 200 in 125512ms
-web:dev:  GET /affiliate-tools 200 in 157286ms
-web:dev:  GET /affiliate-tools 200 in 73970ms
-web:dev:  GET /affiliate-tools 200 in 126360ms
-web:dev:  GET /affiliate-tools 200 in 128509ms
-web:dev:  GET /affiliate-tools 200 in 43662ms
-@agency/utils:dev: [2J[3J[H2:16:44 PM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/utils:dev: 
-@agency/utils:dev: 2:16:45 PM - Found 0 errors. Watching for file changes.
-@agency/database:dev: [2J[3J[H2:16:45 PM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/utils:dev: [2J[3J[H2:16:46 PM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/auth:dev: [2J[3J[H2:16:46 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/utils:dev: 
-@agency/utils:dev: 2:16:48 PM - Found 0 errors. Watching for file changes.
-@agency/database:dev: 
-@agency/database:dev: 2:16:48 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 2:16:50 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H2:16:51 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 2:16:52 PM - Found 0 errors. Watching for file changes.
-web:dev:  GET /contact 200 in 5761ms
-web:dev:  GET /contact 200 in 976ms
-web:dev:  GET / 200 in 19169ms
+web:dev:  GET / 200 in 7297ms
+admin:dev:  ○ Compiling /login ...
+admin:dev:  ✓ Compiled /login in 139s
+admin:dev:  GET /login?redirect=%2F 200 in 146126ms
 api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
 api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
 api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
 api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
 api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
-@agency/types:dev: [2J[3J[H3:48:04 PM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-@agency/database:dev: [2J[3J[H3:48:04 PM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/utils:dev: [2J[3J[H3:48:05 PM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/auth:dev: [2J[3J[H3:48:05 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/types:dev: 
-@agency/types:dev: 3:48:07 PM - Found 0 errors. Watching for file changes.
-@agency/types:dev: [2J[3J[H3:48:07 PM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-@agency/types:dev: 
-@agency/types:dev: 3:48:07 PM - Found 0 errors. Watching for file changes.
-@agency/database:dev: 
-@agency/database:dev: 3:48:07 PM - Found 0 errors. Watching for file changes.
-@agency/types:dev: [2J[3J[H3:48:08 PM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-@agency/types:dev: 
-@agency/types:dev: 3:48:08 PM - Found 0 errors. Watching for file changes.
-@agency/database:dev: [2J[3J[H3:48:09 PM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/utils:dev: 
-@agency/utils:dev: 3:48:10 PM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: [2J[3J[H3:48:11 PM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/database:dev: 
-@agency/database:dev: 3:48:13 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 3:48:14 PM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: 
-@agency/utils:dev: 3:48:15 PM - Found 0 errors. Watching for file changes.
-@agency/database:dev: [2J[3J[H3:48:15 PM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H3:48:16 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/utils:dev: [2J[3J[H3:48:17 PM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
-api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
-api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
-api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
-api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
-@agency/utils:dev: 
-@agency/utils:dev: 3:48:29 PM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: [2J[3J[H3:48:30 PM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/database:dev: 
-@agency/database:dev: 3:48:33 PM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: 
-@agency/utils:dev: 3:48:33 PM - Found 0 errors. Watching for file changes.
-@agency/database:dev: [2J[3J[H3:48:34 PM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-api:dev: prisma:error 
-api:dev: Invalid `prisma.session.findFirst()` invocation:
-api:dev: 
-api:dev: 
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev: [2m2026-07-14T10:48:35.840Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR PrismaClientKnownRequestError: 
-api:dev: Invalid `prisma.session.findFirst()` invocation:
-api:dev: 
-api:dev: 
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev:     at ei.handleRequestError (D:\My-Website\packages\database\generated\client\runtime\library.js:125:7268)
-api:dev:     at ei.handleAndLogRequestError (D:\My-Website\packages\database\generated\client\runtime\library.js:125:6593)
-api:dev:     at ei.request (D:\My-Website\packages\database\generated\client\runtime\library.js:125:6300)
-api:dev:     at async a (D:\My-Website\packages\database\generated\client\runtime\library.js:134:9551)
-api:dev:     at async Object.findOne (file:///D:/My-Website/node_modules/.pnpm/@better-auth+prisma-adapter_a611f82e6c3cc80b1d3eed4d7c30f28b/node_modules/@better-auth/prisma-adapter/dist/index.mjs:191:20)
-api:dev:     at async Object.findOne (file:///D:/My-Website/node_modules/.pnpm/@better-auth+core@1.6.23_@b_d48b109f1eea62b30e2346002f900f65/node_modules/@better-auth/core/dist/db/adapter/factory.mjs:557:16)
-api:dev:     at async Object.findSession (file:///D:/My-Website/node_modules/.pnpm/better-auth@1.6.23_@prisma+_6c44cdd132e11e231ea8c34054474320/node_modules/better-auth/dist/db/internal-adapter.mjs:246:19)
-api:dev:     at async file:///D:/My-Website/node_modules/.pnpm/better-auth@1.6.23_@prisma+_6c44cdd132e11e231ea8c34054474320/node_modules/better-auth/dist/api/routes/session.mjs:178:19
-api:dev:     at async wrapped (file:///D:/My-Website/node_modules/.pnpm/@better-auth+core@1.6.23_@b_d48b109f1eea62b30e2346002f900f65/node_modules/@better-auth/core/dist/api/index.mjs:40:11)
-api:dev:     at async internalHandler (D:\My-Website\node_modules\.pnpm\better-call@1.3.7_zod@4.4.3\node_modules\better-call\src\endpoint.ts:623:20) {
-api:dev:   code: 'P1001',
-api:dev:   meta: {
-api:dev:     modelName: 'Session',
-api:dev:     database_location: 'aws-1-ap-southeast-1.pooler.supabase.com:6543'
-api:dev:   },
-api:dev:   clientVersion: '6.19.3'
-api:dev: }
-api:dev: Unhandled promise rejection (server staying up): [APIError: Failed to get session] {
-api:dev:   status: 'INTERNAL_SERVER_ERROR',
-api:dev:   body: { message: 'Failed to get session', code: 'FAILED_TO_GET_SESSION' },
-api:dev:   headers: {},
-api:dev:   statusCode: 500
-api:dev: }
-api:dev: prisma:error 
-api:dev: Invalid `prisma.session.findFirst()` invocation:
-api:dev: [2m2026-07-14T10:48:36.439Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR PrismaClientKnownRequestError: 
-api:dev: 
-api:dev: Invalid `prisma.session.findFirst()` invocation:
-api:dev: 
-api:dev: 
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev: 
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev:     at ei.handleRequestError (D:\My-Website\packages\database\generated\client\runtime\library.js:125:7268)
-api:dev:     at ei.handleAndLogRequestError (D:\My-Website\packages\database\generated\client\runtime\library.js:125:6593)
-api:dev:     at ei.request (D:\My-Website\packages\database\generated\client\runtime\library.js:125:6300)
-api:dev:     at async a (D:\My-Website\packages\database\generated\client\runtime\library.js:134:9551)
-api:dev:     at async Object.findOne (file:///D:/My-Website/node_modules/.pnpm/@better-auth+prisma-adapter_a611f82e6c3cc80b1d3eed4d7c30f28b/node_modules/@better-auth/prisma-adapter/dist/index.mjs:191:20)
-api:dev:     at async Object.findOne (file:///D:/My-Website/node_modules/.pnpm/@better-auth+core@1.6.23_@b_d48b109f1eea62b30e2346002f900f65/node_modules/@better-auth/core/dist/db/adapter/factory.mjs:557:16)
-api:dev:     at async Object.findSession (file:///D:/My-Website/node_modules/.pnpm/better-auth@1.6.23_@prisma+_6c44cdd132e11e231ea8c34054474320/node_modules/better-auth/dist/db/internal-adapter.mjs:246:19)
-api:dev:     at async file:///D:/My-Website/node_modules/.pnpm/better-auth@1.6.23_@prisma+_6c44cdd132e11e231ea8c34054474320/node_modules/better-auth/dist/api/routes/session.mjs:178:19
-api:dev:     at async wrapped (file:///D:/My-Website/node_modules/.pnpm/@better-auth+core@1.6.23_@b_d48b109f1eea62b30e2346002f900f65/node_modules/@better-auth/core/dist/api/index.mjs:40:11)
-api:dev:     at async internalHandler (D:\My-Website\node_modules\.pnpm\better-call@1.3.7_zod@4.4.3\node_modules\better-call\src\endpoint.ts:623:20) {
-api:dev:   code: 'P1001',
-api:dev:   meta: {
-api:dev:     modelName: 'Session',
-api:dev:     database_location: 'aws-1-ap-southeast-1.pooler.supabase.com:6543'
-api:dev:   },
-api:dev:   clientVersion: '6.19.3'
-api:dev: }
-api:dev: Unhandled promise rejection (server staying up): [APIError: Failed to get session] {
-api:dev:   status: 'INTERNAL_SERVER_ERROR',
-api:dev:   body: { message: 'Failed to get session', code: 'FAILED_TO_GET_SESSION' },
-api:dev:   headers: {},
-api:dev:   statusCode: 500
-api:dev: }
-api:dev: prisma:error 
-api:dev: Invalid `prisma.session.findFirst()` invocation:
-api:dev: 
-api:dev: 
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev: [2m2026-07-14T10:48:36.860Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR PrismaClientKnownRequestError: 
-api:dev: Invalid `prisma.session.findFirst()` invocation:
-api:dev: 
-api:dev: 
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev:     at ei.handleRequestError (D:\My-Website\packages\database\generated\client\runtime\library.js:125:7268)
-api:dev:     at ei.handleAndLogRequestError (D:\My-Website\packages\database\generated\client\runtime\library.js:125:6593)
-api:dev:     at ei.request (D:\My-Website\packages\database\generated\client\runtime\library.js:125:6300)
-api:dev:     at async a (D:\My-Website\packages\database\generated\client\runtime\library.js:134:9551)
-api:dev:     at async Object.findOne (file:///D:/My-Website/node_modules/.pnpm/@better-auth+prisma-adapter_a611f82e6c3cc80b1d3eed4d7c30f28b/node_modules/@better-auth/prisma-adapter/dist/index.mjs:191:20)
-api:dev:     at async Object.findOne (file:///D:/My-Website/node_modules/.pnpm/@better-auth+core@1.6.23_@b_d48b109f1eea62b30e2346002f900f65/node_modules/@better-auth/core/dist/db/adapter/factory.mjs:557:16)
-api:dev:     at async Object.findSession (file:///D:/My-Website/node_modules/.pnpm/better-auth@1.6.23_@prisma+_6c44cdd132e11e231ea8c34054474320/node_modules/better-auth/dist/db/internal-adapter.mjs:246:19)
-api:dev:     at async file:///D:/My-Website/node_modules/.pnpm/better-auth@1.6.23_@prisma+_6c44cdd132e11e231ea8c34054474320/node_modules/better-auth/dist/api/routes/session.mjs:178:19
-api:dev:     at async wrapped (file:///D:/My-Website/node_modules/.pnpm/@better-auth+core@1.6.23_@b_d48b109f1eea62b30e2346002f900f65/node_modules/@better-auth/core/dist/api/index.mjs:40:11)
-api:dev:     at async internalHandler (D:\My-Website\node_modules\.pnpm\better-call@1.3.7_zod@4.4.3\node_modules\better-call\src\endpoint.ts:623:20) {
-api:dev:   code: 'P1001',
-api:dev:   meta: {
-api:dev:     modelName: 'Session',
-api:dev:     database_location: 'aws-1-ap-southeast-1.pooler.supabase.com:6543'
-api:dev:   },
-api:dev:   clientVersion: '6.19.3'
-api:dev: }
-@agency/database:dev: 
-@agency/database:dev: 3:48:37 PM - Found 0 errors. Watching for file changes.
-web:dev:  GET / 200 in 51501ms
-@agency/types:dev: [2J[3J[H3:48:40 PM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-@agency/types:dev: 
-@agency/types:dev: 3:48:40 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 3:48:49 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H3:48:49 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 3:48:52 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H3:49:13 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/database:dev: [2J[3J[H3:49:13 PM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/database:dev: 
-@agency/database:dev: 3:49:14 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 3:49:15 PM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H3:49:30 PM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 3:49:31 PM - Found 0 errors. Watching for file changes.
-web:dev:  GET / 200 in 7218ms
+web:dev:  GET / 200 in 12363ms
+admin:dev:  ○ Compiling / ...
+admin:dev:  ✓ Compiled / in 61.5s
