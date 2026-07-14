@@ -185,6 +185,24 @@ export const homePageContentSchema = z.object({
   contactCtaButtonText: buttonTextSchema.nullable().optional(),
   contactCtaButtonHref: hrefSchema.nullable().optional(),
 
+  // Section headings/labels below the hero. May contain `**text**` emphasis
+  // markers -- rendered as italic serif by the shared Heading component
+  // (packages/ui/src/heading.tsx). Admins edit plain text only; they cannot
+  // change fonts directly.
+  storyHeading: z.string().nullable().optional(),
+  storyButtonLabel: buttonTextSchema.nullable().optional(),
+  storyMissionLabel: z.string().max(60).nullable().optional(),
+  servicesHeading: z.string().nullable().optional(),
+  servicesDescription: z.string().nullable().optional(),
+  servicesButtonLabel: buttonTextSchema.nullable().optional(),
+  portfolioHeading: z.string().nullable().optional(),
+  portfolioDescription: z.string().nullable().optional(),
+  portfolioButtonLabel: buttonTextSchema.nullable().optional(),
+  processHeading: z.string().nullable().optional(),
+  technologiesHeading: z.string().nullable().optional(),
+  whyHeading: z.string().nullable().optional(),
+  testimonialsHeading: z.string().nullable().optional(),
+
   // .nullable() matters here: GET returns `seo: null` (Prisma's shape for
   // an unset optional relation) whenever no SeoMeta row has been created
   // yet, and the route (pages.routes.ts) already treats null/undefined
@@ -206,6 +224,20 @@ export const aboutPageContentSchema = z.object({
   mission: z.string().min(1, "Mission is required"),
   vision: z.string().min(1, "Vision is required"),
   philosophy: z.string().min(1, "Philosophy is required"),
+
+  // Section headings/labels beyond the hero. May contain `**text**` emphasis
+  // markers -- see homePageContentSchema above for the same convention.
+  heroHeading: z.string().nullable().optional(),
+  missionLabel: z.string().max(60).nullable().optional(),
+  visionLabel: z.string().max(60).nullable().optional(),
+  philosophyLabel: z.string().max(60).nullable().optional(),
+  valuesHeading: z.string().nullable().optional(),
+  timelineHeading: z.string().nullable().optional(),
+  teamHeading: z.string().nullable().optional(),
+  skillsHeading: z.string().nullable().optional(),
+  certificationsHeading: z.string().nullable().optional(),
+  technologiesHeading: z.string().nullable().optional(),
+
   // .nullable() matters here: GET returns `seo: null` (Prisma's shape for
   // an unset optional relation) whenever no SeoMeta row has been created
   // yet, and the route (pages.routes.ts) already treats null/undefined
@@ -231,3 +263,50 @@ export const legalPageContentSchema = z.object({
   seo: seoMetaSchema.partial().nullable().optional(),
 });
 export type LegalPageContentInput = z.infer<typeof legalPageContentSchema>;
+
+// Singleton hero content for the four pages that don't have their own
+// bespoke content model (Services/Portfolio/Affiliate Tools/Contact are
+// otherwise static route components). Only a hero heading + paragraph --
+// the current layout has no separate "intro" section on any of these pages.
+// SEO for these pages stays on the existing PageSeo model (page-seo.routes.ts),
+// unchanged. heroHeading may contain `**text**` emphasis markers, same
+// convention as homePageContentSchema/aboutPageContentSchema above.
+export const servicesPageContentSchema = z.object({
+  heroHeading: z.string().min(1, "Hero heading is required"),
+  heroDescription: z.string().min(1, "Hero paragraph is required"),
+});
+export type ServicesPageContentInput = z.infer<typeof servicesPageContentSchema>;
+
+export const portfolioPageContentSchema = z.object({
+  heroHeading: z.string().min(1, "Hero heading is required"),
+  heroDescription: z.string().min(1, "Hero paragraph is required"),
+});
+export type PortfolioPageContentInput = z.infer<typeof portfolioPageContentSchema>;
+
+export const affiliateToolsPageContentSchema = z.object({
+  heroHeading: z.string().min(1, "Hero heading is required"),
+  heroDescription: z.string().min(1, "Hero paragraph is required"),
+  disclosureText: z.string().min(1, "Disclosure text is required"),
+});
+export type AffiliateToolsPageContentInput = z.infer<typeof affiliateToolsPageContentSchema>;
+
+export const contactPageContentSchema = z.object({
+  heroHeading: z.string().min(1, "Hero heading is required"),
+  heroDescription: z.string().min(1, "Hero paragraph is required"),
+  whatsappLabel: z.string().min(1, "WhatsApp button label is required").max(60),
+  calendlyLabel: z.string().min(1, "Calendly button label is required").max(60),
+});
+export type ContactPageContentInput = z.infer<typeof contactPageContentSchema>;
+
+// Sitewide default CTA copy -- CtaSection's fallback when a page doesn't pass
+// explicit headline/subheadline/ctaLabel/ctaHref overrides (only the Home
+// page does, via HomePageContent.contactCta*). Stored as the `default_cta`
+// SiteSetting key rather than its own table, since it's a single small blob
+// shared across many pages, not owned by any one page's content model.
+export const defaultCtaSchema = z.object({
+  headline: z.string().min(1, "Headline is required"),
+  subheadline: z.string().min(1, "Subheadline is required"),
+  ctaLabel: buttonTextSchema.min(1, "Button text is required"),
+  ctaHref: hrefSchema,
+});
+export type DefaultCtaInput = z.infer<typeof defaultCtaSchema>;

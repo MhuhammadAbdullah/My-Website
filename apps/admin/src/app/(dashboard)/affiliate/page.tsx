@@ -1,10 +1,11 @@
 "use client";
 
 import { Suspense } from "react";
-import { Badge } from "@agency/ui";
+import { Badge, Heading, Tabs, TabsContent, TabsList, TabsTrigger } from "@agency/ui";
 import { PaginatedResourceManager } from "@/components/resource-manager/paginated-resource-manager";
 import { createResourceClient, request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
+import { PageHeroContentForm } from "@/components/page-hero-content-form";
 
 interface AffiliateCategory {
   id: string;
@@ -117,8 +118,32 @@ function AffiliatePageInner() {
 
 export default function AffiliatePage() {
   return (
-    <Suspense fallback={null}>
-      <AffiliatePageInner />
-    </Suspense>
+    <Tabs defaultValue="list">
+      <TabsList>
+        <TabsTrigger value="list">All Tools</TabsTrigger>
+        <TabsTrigger value="content">Page Content</TabsTrigger>
+      </TabsList>
+      <TabsContent value="list">
+        <Suspense fallback={null}>
+          <AffiliatePageInner />
+        </Suspense>
+      </TabsContent>
+      <TabsContent value="content">
+        <Heading level={2}>Affiliate Tools Page Content</Heading>
+        <p className="mt-1 text-body-sm text-neutral-500">The hero heading, paragraph, and disclosure text at the top of the public Affiliate Tools page.</p>
+        <div className="mt-6">
+          <PageHeroContentForm
+            endpoint="/pages/affiliate-tools"
+            emptyValues={{ heroHeading: "", heroDescription: "", disclosureText: "" }}
+            fields={[
+              { key: "heroHeading", label: "Hero heading", isHeading: true, placeholder: "Tools we **actually** use." },
+              { key: "heroDescription", label: "Hero paragraph", type: "textarea" },
+              { key: "disclosureText", label: "Affiliate disclosure text (shown after the bold \"Affiliate disclosure:\" label)", type: "textarea" },
+            ]}
+            successMessage="Affiliate Tools page content updated"
+          />
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 }

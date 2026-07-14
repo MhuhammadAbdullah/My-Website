@@ -83,6 +83,11 @@ export default function SettingsPage() {
       business_hours_weekend: settings.business_hours?.sat_sun ?? "",
       currency: settings.currency ?? DEFAULT_CURRENCY,
       brand_name: settings.branding?.brandName ?? settings.company_name ?? "",
+      default_cta_headline: settings.default_cta?.headline ?? "",
+      default_cta_subheadline: settings.default_cta?.subheadline ?? "",
+      default_cta_label: settings.default_cta?.ctaLabel ?? "",
+      default_cta_href: settings.default_cta?.ctaHref ?? "",
+      faq_section_heading: settings.faq_section_heading ?? "",
       ...Object.fromEntries(SOCIAL_PLATFORM_IDS.map((id) => [`social_${id}`, settings.socials?.[id] ?? ""])),
     });
     setLogo({ mediaId: settings.branding?.logoMediaId ?? null, url: settings.branding?.logoUrl ?? null });
@@ -152,6 +157,18 @@ export default function SettingsPage() {
         }),
         request("/settings/socials", { method: "PUT", body: JSON.stringify({ value: parsed.data }) }),
         request("/settings/branding", { method: "PUT", body: JSON.stringify({ value: brandingParsed.data }) }),
+        request("/settings/default_cta", {
+          method: "PUT",
+          body: JSON.stringify({
+            value: {
+              headline: form.default_cta_headline,
+              subheadline: form.default_cta_subheadline,
+              ctaLabel: form.default_cta_label,
+              ctaHref: form.default_cta_href,
+            },
+          }),
+        }),
+        request("/settings/faq_section_heading", { method: "PUT", body: JSON.stringify({ value: form.faq_section_heading }) }),
       ]);
       toast.success("Settings saved");
     } catch (error) {
@@ -271,6 +288,63 @@ export default function SettingsPage() {
                 </p>
               )}
             </div>
+          </div>
+        </div>
+
+        <div className="mt-4 border-t border-neutral-200 pt-6">
+          <Heading level={3}>Default Call-to-Action</Heading>
+          <p className="mt-1 text-body-sm text-neutral-500">
+            Fallback CTA banner text shown on pages that don't set their own (About, Services, and project/service
+            detail pages). The Home page has its own CTA, set on the Home Page → Content tab.
+          </p>
+
+          <div className="mt-5 grid gap-5">
+            <div>
+              <div className="flex items-baseline justify-between">
+                <Label>Headline</Label>
+                <span className="text-body-sm text-neutral-400">wrap words in **bold** to italicize them</span>
+              </div>
+              <Input
+                value={form.default_cta_headline ?? ""}
+                onChange={(e) => setForm({ ...form, default_cta_headline: e.target.value })}
+                placeholder="Ready to build something **inevitable**?"
+              />
+            </div>
+            <div>
+              <Label>Subheadline</Label>
+              <Textarea
+                value={form.default_cta_subheadline ?? ""}
+                onChange={(e) => setForm({ ...form, default_cta_subheadline: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <Label>Button text</Label>
+                <Input
+                  value={form.default_cta_label ?? ""}
+                  onChange={(e) => setForm({ ...form, default_cta_label: e.target.value })}
+                  placeholder="Start a project"
+                />
+              </div>
+              <div>
+                <Label>Button URL</Label>
+                <Input
+                  value={form.default_cta_href ?? ""}
+                  onChange={(e) => setForm({ ...form, default_cta_href: e.target.value })}
+                  placeholder="/contact"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 border-t border-neutral-200 pt-6">
+          <Heading level={3}>FAQ Section</Heading>
+          <p className="mt-1 text-body-sm text-neutral-500">
+            The heading shown above the FAQ accordion on the Home, About, and Contact pages.
+          </p>
+          <div className="mt-5">
+            {field("faq_section_heading", "FAQ section heading")}
           </div>
         </div>
 

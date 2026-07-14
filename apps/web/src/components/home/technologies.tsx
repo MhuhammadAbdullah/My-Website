@@ -5,14 +5,16 @@ import { TechMarquee } from "@/components/marketing/tech-marquee";
 export function Technologies({
   technologies,
   displayStyle = "TAGS",
+  heading,
 }: {
   technologies: TechnologyRead[];
   displayStyle?: "TAGS" | "MARQUEE";
+  heading?: string | null;
 }) {
   return (
     <div className="text-center">
       <Reveal>
-        <Heading level={2}>The **stack** behind the work</Heading>
+        <Heading level={2}>{heading ?? "The **stack** behind the work"}</Heading>
       </Reveal>
       {displayStyle === "MARQUEE" ? (
         <Reveal delay={0.1} className="mt-10">

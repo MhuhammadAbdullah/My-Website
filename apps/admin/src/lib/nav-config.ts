@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   KeyRound,
   Home,
+  Send,
   FileText,
   Receipt,
   Wallet,
@@ -89,6 +90,7 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: "FAQs", href: "/faqs", icon: HelpCircle },
       { label: "Team", href: "/team", icon: Users },
       { label: "Affiliate Tools", href: "/affiliate", icon: Link2 },
+      { label: "Contact Page", href: "/contact", icon: Send },
     ],
   },
   {

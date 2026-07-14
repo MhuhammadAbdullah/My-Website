@@ -5,34 +5,36 @@ $ turbo run dev
    • Running dev in 9 packages
    • Remote caching disabled
 
-@agency/database:db:generate: cache bypass, force executing 5eb7dd88bc88708b
-admin:dev: cache bypass, force executing 3fedfc291849477f
-@agency/database:dev: cache bypass, force executing abf1cd81e34dcd58
-@agency/types:dev: cache bypass, force executing 6cec5bd03645a845
+@agency/database:db:generate: cache bypass, force executing c21ff56892310416
 @agency/utils:dev: cache bypass, force executing b94f293743142543
-web:dev: cache bypass, force executing d92c7150ce6d032c
+@agency/types:dev: cache bypass, force executing e5e5b27ae42e9e39
+@agency/database:dev: cache bypass, force executing 3e10e3343bd623ed
+admin:dev: cache bypass, force executing 5e1a3b94e0592a92
+web:dev: cache bypass, force executing bc5ade6890f1342f
 @agency/database:db:generate: $ prisma generate
-admin:dev: $ next dev --turbopack -p 3001
-@agency/types:dev: $ tsc -p tsconfig.build.json --watch
-@agency/database:dev: $ tsc -p tsconfig.build.json --watch
 @agency/utils:dev: $ tsc -p tsconfig.build.json --watch
-@agency/types:dev: [2J[3J[H9:15:02 AM - Starting compilation in watch mode...
-@agency/types:dev: 
+@agency/database:dev: $ tsc -p tsconfig.build.json --watch
+@agency/types:dev: $ tsc -p tsconfig.build.json --watch
+@agency/utils:dev: [2J[3J[H12:33:42 PM - Starting compilation in watch mode...
+@agency/utils:dev: 
+@agency/database:dev: [2J[3J[H12:33:42 PM - Starting compilation in watch mode...
+@agency/database:dev: 
 web:dev: $ next dev --turbopack -p 3000
-@agency/database:dev: [2J[3J[H9:15:03 AM - Starting compilation in watch mode...
-@agency/database:dev: 
-@agency/utils:dev: [2J[3J[H9:15:05 AM - Starting compilation in watch mode...
-@agency/utils:dev: 
+admin:dev: $ next dev --turbopack -p 3001
+@agency/types:dev: [2J[3J[H12:33:44 PM - Starting compilation in watch mode...
 @agency/types:dev: 
-@agency/types:dev: 9:15:06 AM - Found 0 errors. Watching for file changes.
+@agency/types:dev: 
+@agency/types:dev: 12:33:47 PM - Found 0 errors. Watching for file changes.
 @agency/utils:dev: 
-@agency/utils:dev: 9:15:13 AM - Found 0 errors. Watching for file changes.
+@agency/utils:dev: 12:33:48 PM - Found 0 errors. Watching for file changes.
 @agency/database:dev: 
-@agency/database:dev: 9:15:14 AM - Found 0 errors. Watching for file changes.
+@agency/database:dev: 12:33:51 PM - Found 0 errors. Watching for file changes.
 @agency/database:db:generate: Loaded Prisma config from prisma.config.ts.
 @agency/database:db:generate: 
 @agency/database:db:generate: Prisma config detected, skipping environment variable loading.
 @agency/database:db:generate: Prisma schema loaded from prisma\schema.prisma
+@agency/database:dev: [2J[3J[H12:33:58 PM - File change detected. Starting incremental compilation...
+@agency/database:dev: 
 web:dev:    ▲ Next.js 15.5.20 (Turbopack)
 web:dev:    - Local:        http://localhost:3000
 web:dev:    - Network:      http://192.168.100.118:3000
@@ -45,616 +47,264 @@ admin:dev:    - Network:      http://192.168.100.118:3001
 admin:dev:    - Environments: .env.local
 admin:dev: 
 admin:dev:  ✓ Starting...
-@agency/database:dev: [2J[3J[H9:15:22 AM - File change detected. Starting incremental compilation...
 @agency/database:dev: 
+@agency/database:dev: 12:34:01 PM - Found 0 errors. Watching for file changes.
 @agency/database:db:generate: 
-@agency/database:db:generate: ✔ Generated Prisma Client (v6.19.3) to .\generated\client in 4.50s
+@agency/database:db:generate: ✔ Generated Prisma Client (v6.19.3) to .\generated\client in 5.02s
 @agency/database:db:generate: 
 @agency/database:db:generate: Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
 @agency/database:db:generate: 
 @agency/database:db:generate: Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
 @agency/database:db:generate: 
-@agency/database:dev: 
-@agency/database:dev: 9:15:25 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: cache bypass, force executing 2bdd0d8ea950e796
-api:dev: cache bypass, force executing d6c320df0ac6359a
+api:dev: cache bypass, force executing fd5859d12b706804
+@agency/auth:dev: cache bypass, force executing f449cc0758a65f95
 admin:dev:  ○ Compiling middleware ...
-web:dev:  ✓ Ready in 11.3s
-@agency/auth:dev: $ tsc -p tsconfig.build.json --watch
 api:dev: $ tsx watch --env-file=.env src/index.ts
-@agency/auth:dev: [2J[3J[H9:15:30 AM - Starting compilation in watch mode...
+@agency/auth:dev: $ tsc -p tsconfig.build.json --watch
+@agency/auth:dev: [2J[3J[H12:34:07 PM - Starting compilation in watch mode...
 @agency/auth:dev: 
-admin:dev:  ✓ Compiled middleware in 5.9s
-admin:dev:  ✓ Ready in 18.8s
+web:dev:  ✓ Ready in 11.2s
+admin:dev:  ✓ Compiled middleware in 7.7s
+admin:dev:  ✓ Ready in 21.6s
 @agency/auth:dev: 
-@agency/auth:dev: 9:15:44 AM - Found 0 errors. Watching for file changes.
+@agency/auth:dev: 12:34:21 PM - Found 0 errors. Watching for file changes.
 api:dev: API listening on http://localhost:4000
-web:dev:  ○ Compiling / ...
+web:dev:  ○ Compiling /contact ...
 admin:dev:  ○ Compiling / ...
-admin:dev:  ✓ Compiled / in 66.5s
-admin:dev:  GET / 200 in 72969ms
-web:dev:  ✓ Compiled / in 81.2s
-web:dev:  GET / 200 in 97327ms
-admin:dev:  ○ Compiling /categories ...
-admin:dev:  ✓ Compiled /categories in 8.1s
-admin:dev:  GET /categories 200 in 8605ms
-web:dev:  GET / 200 in 5425ms
-web:dev:  GET / 200 in 8186ms
-web:dev:  ○ Compiling /portfolio ...
-web:dev:  ✓ Compiled /portfolio in 11.4s
-web:dev:  GET /portfolio 200 in 12203ms
-web:dev:  GET /portfolio 200 in 1451ms
-web:dev:  ○ Compiling /portfolio/[slug] ...
-web:dev:  ✓ Compiled /portfolio/[slug] in 5s
-web:dev:  GET /portfolio/wordpress-web-development 200 in 12347ms
-web:dev:  GET /portfolio/fieldstone-capital-investor-portal 200 in 3710ms
-@agency/types:dev: [2J[3J[H9:57:29 AM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-@agency/types:dev: 
-@agency/types:dev: 9:57:32 AM - Found 0 errors. Watching for file changes.
-api:dev: 9:57:32 AM [tsx] change in ./..\..\packages\types\dist\project.js Restarting...
-@agency/types:dev: [2J[3J[H9:57:34 AM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-api:dev: c9:57:38 AM [tsx] change in ./..\..\packages\types\dist\project.js Restarting...
-@agency/types:dev: 
-@agency/types:dev: 9:57:39 AM - Found 0 errors. Watching for file changes.
-web:dev:  ✓ Compiled in 9.5s
-admin:dev:  ✓ Compiled in 10.8s
-api:dev: cAPI listening on http://localhost:4000
-api:dev: 9:58:09 AM [tsx] change in ./..\..\packages\database\generated\client\index.js Restarting...
-@agency/database:dev: [2J[3J[H9:58:10 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-api:dev: c9:58:10 AM [tsx] change in ./..\..\packages\database\generated\client\index.js Restarting...
-@agency/auth:dev: [2J[3J[H9:58:10 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-api:dev: c9:58:10 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
-api:dev: c9:58:11 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
-@agency/auth:dev: 
-@agency/auth:dev: 9:58:17 AM - Found 0 errors. Watching for file changes.
-@agency/database:dev: 
-@agency/database:dev: 9:58:28 AM - Found 0 errors. Watching for file changes.
-web:dev:  ○ Compiling /portfolio/[slug] ...
-web:dev:  ✓ Compiled /portfolio/[slug] in 1763ms
-web:dev:  GET /portfolio/fieldstone-capital-investor-portal 200 in 7892ms
-api:dev: cAPI listening on http://localhost:4000
-api:dev: prisma:error 
-api:dev: Invalid `prisma.project.findMany()` invocation in
-api:dev: D:\My-Website\apps\api\src\routes\projects.routes.ts:47:22
-api:dev: 
-api:dev:   44 };
-api:dev:   45 
-api:dev:   46 const [items, total] = await Promise.all([
-api:dev: → 47   prisma.project.findMany(
-api:dev: The column `projects.sections` does not exist in the current database.
-api:dev: PrismaClientKnownRequestError: 
-api:dev: Invalid `prisma.project.findMany()` invocation in
-api:dev: D:\My-Website\apps\api\src\routes\projects.routes.ts:47:22
-api:dev: 
-api:dev:   44 };
-api:dev:   45 
-api:dev:   46 const [items, total] = await Promise.all([
-api:dev: → 47   prisma.project.findMany(
-api:dev: The column `projects.sections` does not exist in the current database.
-api:dev:     at ei.handleRequestError (D:\My-Website\packages\database\generated\client\runtime\library.js:125:7268)
-api:dev:     at ei.handleAndLogRequestError (D:\My-Website\packages\database\generated\client\runtime\library.js:125:6593)
-api:dev:     at ei.request (D:\My-Website\packages\database\generated\client\runtime\library.js:125:6300)
-api:dev:     at async a (D:\My-Website\packages\database\generated\client\runtime\library.js:134:9551)
-api:dev:     at async Promise.all (index 0)
-api:dev:     at async <anonymous> (D:\My-Website\apps\api\src\routes\projects.routes.ts:46:28) {
-api:dev:   code: 'P2022',
-api:dev:   meta: { modelName: 'Project', column: 'projects.sections' },
-api:dev:   clientVersion: '6.19.3'
-api:dev: }
-api:dev: 9:58:56 AM [tsx] unlink in ./..\..\packages\database\generated\client\index.js Restarting...
-@agency/database:dev: [2J[3J[H9:58:56 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H9:58:56 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-api:dev: c9:58:57 AM [tsx] change in ./..\..\packages\database\generated\client\index.js Restarting...
-api:dev: c9:58:58 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
-@agency/auth:dev: ../database/generated/client/index.d.ts(30266,194): error TS1002: Unterminated string literal.
-@agency/auth:dev: 
-@agency/auth:dev: 9:58:59 AM - Found 1 error. Watching for file changes.
-@agency/auth:dev: [2J[3J[H9:59:00 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 9:59:04 AM - Found 0 errors. Watching for file changes.
-@agency/database:dev: generated/client/index.d.ts(30266,194): error TS1002: Unterminated string literal.
-@agency/database:dev: 
-@agency/database:dev: 9:59:07 AM - Found 1 error. Watching for file changes.
-@agency/database:dev: [2J[3J[H9:59:07 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-web:dev:  GET /portfolio/fieldstone-capital-investor-portal 200 in 3905ms
-api:dev: cAPI listening on http://localhost:4000
-@agency/database:dev: 
-@agency/database:dev: 9:59:19 AM - Found 0 errors. Watching for file changes.
-@agency/database:dev: [2J[3J[H9:59:24 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/database:dev: 
-@agency/database:dev: 9:59:24 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H9:59:24 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 9:59:24 AM - Found 0 errors. Watching for file changes.
-web:dev:  GET /portfolio/fieldstone-capital-investor-portal 200 in 1849ms
-web:dev:  GET /portfolio/fieldstone-capital-investor-portal 200 in 13710ms
-web:dev:  GET /portfolio/fieldstone-capital-investor-portal 200 in 1900ms
-web:dev:  GET /portfolio/fieldstone-capital-investor-portal 200 in 2323ms
-api:dev: 10:00:26 AM [tsx] change in ./src\routes\projects.routes.ts Restarting...
-api:dev: cAPI listening on http://localhost:4000
-admin:dev:  ✓ Compiled in 1539ms
-web:dev:  ✓ Compiled in 3.2s
-web:dev:  ✓ Compiled in 1484ms
-admin:dev:  ✓ Compiled in 1625ms
-web:dev:  ✓ Compiled in 1476ms
-web:dev:  ✓ Compiled in 1127ms
-web:dev:  ○ Compiling /portfolio/[slug] ...
-web:dev:  ✓ Compiled /portfolio/[slug] in 958ms
-web:dev:  ⨯ ReferenceError: caseStudySections is not defined
-web:dev:     at ProjectDetailPage (src\app\portfolio\[slug]\page.tsx:104:14)
-web:dev:   102 |         <Container className="grid gap-12 lg:grid-cols-[2fr_1fr]">
-web:dev:   103 |           <div className="space-y-12">
-web:dev: > 104 |             {caseStudySections.map(({ key, title }) => {
-web:dev:       |              ^
-web:dev:   105 |               const content = project[key];
-web:dev:   106 |               if (!content || typeof content !== "string") return null;
-web:dev:   107 |               return ( {
-web:dev:   digest: '881693284'
-web:dev: }
-web:dev:  GET /portfolio/fieldstone-capital-investor-portal 200 in 3929ms
-web:dev:  ✓ Compiled in 20.7s
-web:dev:  GET /portfolio/fieldstone-capital-investor-portal 200 in 11674ms
-web:dev:  ✓ Compiled /portfolio/[slug] in 277ms
-web:dev:  ⨯ TypeError: Cannot read properties of undefined (reading 'map')
-web:dev:     at ProjectDetailPage (src\app\portfolio\[slug]\page.tsx:104:31)
-web:dev:   102 |         <Container className="grid gap-12 lg:grid-cols-[2fr_1fr]">
-web:dev:   103 |           <div className="space-y-10">
-web:dev: > 104 |             {project.sections.map((section) => (
-web:dev:       |                               ^
-web:dev:   105 |               <ProjectSectionCard key={section.id} section={section} />
-web:dev:   106 |             ))}
-web:dev:   107 |           </div> {
-web:dev:   digest: '3728186810'
-web:dev: }
-api:dev: 10:05:30 AM [tsx] change in ./..\..\packages\database\generated\client\index.js Restarting...
-@agency/database:dev: [2J[3J[H10:05:31 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H10:05:31 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-api:dev: c10:05:31 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
-api:dev: c10:05:33 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
-@agency/database:dev: 
-@agency/database:dev: 10:05:36 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 10:05:38 AM - Found 0 errors. Watching for file changes.
-api:dev: cAPI listening on http://localhost:4000
-api:dev: 10:08:00 AM [tsx] unlink in ./..\..\packages\database\generated\client\index.js Restarting...
-@agency/database:dev: [2J[3J[H10:08:01 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H10:08:01 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-api:dev: c10:08:01 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
-api:dev: c10:08:03 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
-@agency/auth:dev: 
-@agency/auth:dev: 10:08:08 AM - Found 0 errors. Watching for file changes.
-api:dev: cAPI listening on http://localhost:4000
-@agency/database:dev: 
-@agency/database:dev: 10:08:20 AM - Found 0 errors. Watching for file changes.
-api:dev: 10:08:54 AM [tsx] unlink in ./..\..\packages\database\generated\client\index.js Restarting...
-@agency/auth:dev: [2J[3J[H10:08:54 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/database:dev: [2J[3J[H10:08:55 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-api:dev: c10:09:01 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
-api:dev: c10:09:02 AM [tsx] change in ./..\..\packages\database\generated\client\index.js Restarting...
-@agency/auth:dev: 
-@agency/auth:dev: 10:09:04 AM - Found 0 errors. Watching for file changes.
-@agency/database:dev: 
-@agency/database:dev: 10:09:04 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H10:09:04 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/database:dev: [2J[3J[H10:09:05 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 10:09:08 AM - Found 0 errors. Watching for file changes.
-@agency/database:dev: 
-@agency/database:dev: 10:09:08 AM - Found 0 errors. Watching for file changes.
-api:dev: cAPI listening on http://localhost:4000
-@agency/auth:dev: [2J[3J[H10:13:59 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/database:dev: [2J[3J[H10:14:03 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 10:14:03 AM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: [2J[3J[H10:14:03 AM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/auth:dev: [2J[3J[H10:14:03 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/utils:dev: 
-@agency/utils:dev: 10:14:06 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 10:14:06 AM - Found 0 errors. Watching for file changes.
-@agency/database:dev: 
-@agency/database:dev: 10:14:07 AM - Found 0 errors. Watching for file changes.
-web:dev:  GET /portfolio/wordpress-web-development 200 in 17187ms
-@agency/utils:dev: [2J[3J[H10:17:09 AM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/database:dev: [2J[3J[H10:17:09 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H10:17:09 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/utils:dev: 
-@agency/utils:dev: 10:17:09 AM - Found 0 errors. Watching for file changes.
-@agency/types:dev: [2J[3J[H10:17:09 AM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-@agency/database:dev: 
-@agency/database:dev: 10:17:09 AM - Found 0 errors. Watching for file changes.
-@agency/types:dev: 
-@agency/types:dev: 10:17:10 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 10:17:10 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H10:17:11 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/utils:dev: [2J[3J[H10:17:11 AM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/database:dev: [2J[3J[H10:17:11 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/database:dev: 
-@agency/database:dev: 10:17:11 AM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: 
-@agency/utils:dev: 10:17:12 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 10:17:12 AM - Found 0 errors. Watching for file changes.
-@agency/types:dev: [2J[3J[H10:17:12 AM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-@agency/types:dev: 
-@agency/types:dev: 10:17:12 AM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: [2J[3J[H10:17:15 AM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/database:dev: [2J[3J[H10:17:15 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H10:17:15 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/database:dev: 
-@agency/database:dev: 10:17:15 AM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: 
-@agency/utils:dev: 10:17:15 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 10:17:16 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H10:17:17 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 10:17:18 AM - Found 0 errors. Watching for file changes.
-api:dev: prisma:error 
-api:dev: Invalid `prisma.siteSetting.findMany()` invocation in
-api:dev: D:\My-Website\apps\api\src\routes\settings.routes.ts:37:43
-api:dev: 
-api:dev:   34 settingsRouter.get(
-api:dev:   35   "/",
-api:dev:   36   asyncHandler(async (_req, res) => {
-api:dev: → 37     const rows = await prisma.siteSetting.findMany(
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev: prisma:error 
-api:dev: Invalid `prisma.project.findUnique()` invocation in
-api:dev: D:\My-Website\apps\api\src\routes\projects.routes.ts:120:39
-api:dev: 
-api:dev:   117 projectsRouter.get(
-api:dev:   118   "/:slug",
-api:dev:   119   asyncHandler(async (req, res) => {
-api:dev: → 120     const item = await prisma.project.findUnique(
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-web:dev: [web] Failed to load site settings — using fallback. API request to /settings failed with 503
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev: Database unreachable on GET /api/v1/settings 
-api:dev: Invalid `prisma.siteSetting.findMany()` invocation in
-api:dev: D:\My-Website\apps\api\src\routes\settings.routes.ts:37:43
-api:dev: 
-api:dev:   34 settingsRouter.get(
-api:dev:   35   "/",
-api:dev:   36   asyncHandler(async (_req, res) => {
-api:dev: → 37     const rows = await prisma.siteSetting.findMany(
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev: Database unreachable on GET /api/v1/projects/wordpress-web-development 
-api:dev: Invalid `prisma.project.findUnique()` invocation in
-api:dev: D:\My-Website\apps\api\src\routes\projects.routes.ts:120:39
-api:dev: 
-api:dev:   117 projectsRouter.get(
-api:dev:   118   "/:slug",
-api:dev:   119   asyncHandler(async (req, res) => {
-api:dev: → 120     const item = await prisma.project.findUnique(
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev: prisma:error 
-api:dev: Invalid `delegate.findMany()` invocation in
-api:dev: D:\My-Website\apps\api\src\lib\create-crud-router.ts:63:36
-api:dev: 
-api:dev:   60 router.get(
-api:dev:   61   "/",
-api:dev:   62   asyncHandler(async (_req, res) => {
-api:dev: → 63     const items = await delegate.findMany(
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-api:dev: Database unreachable on GET /api/v1/navigation 
-api:dev: Invalid `delegate.findMany()` invocation in
-api:dev: D:\My-Website\apps\api\src\lib\create-crud-router.ts:63:36
-api:dev: 
-api:dev:   60 router.get(
-api:dev:   61   "/",
-api:dev:   62   asyncHandler(async (_req, res) => {
-api:dev: → 63     const items = await delegate.findMany(
-api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
-api:dev: 
-api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
-web:dev: [web] Failed to load header navigation — using fallback. API request to /navigation failed with 503
-web:dev: [web] Failed to load footer navigation — using fallback. API request to /navigation failed with 503
-web:dev:  GET /portfolio/wordpress-web-development 200 in 13034ms
-web:dev:  GET /portfolio/wordpress-web-development 200 in 11621ms
-web:dev:  GET /portfolio/fieldstone-capital-investor-portal 200 in 20551ms
-web:dev:  GET /portfolio/wordpress-web-development 200 in 19908ms
-web:dev:  GET /portfolio/wordpress-web-development 200 in 5094ms
-@agency/auth:dev: [2J[3J[H10:28:43 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 10:28:46 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H10:28:47 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 10:28:47 AM - Found 0 errors. Watching for file changes.
-admin:dev:  ○ Compiling /portfolio ...
-web:dev:  GET /portfolio/fieldstone-capital-investor-portal 200 in 19301ms
-admin:dev:  ✓ Compiled /portfolio in 38.9s
-admin:dev:  GET /portfolio 200 in 41224ms
-web:dev:  ○ Compiling /portfolio ...
-web:dev:  ✓ Compiled /portfolio in 626ms
-web:dev:  GET /portfolio 200 in 2087ms
-web:dev:  GET /portfolio/modern-grocery-store-website-design 200 in 4325ms
-@agency/types:dev: [2J[3J[H10:46:51 AM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-@agency/types:dev: 
-@agency/types:dev: 10:46:51 AM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: [2J[3J[H10:46:51 AM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/database:dev: [2J[3J[H10:46:51 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H10:46:52 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/types:dev: [2J[3J[H10:46:52 AM - File change detected. Starting incremental compilation...
-@agency/types:dev: 
-@agency/utils:dev: 
-@agency/utils:dev: 10:46:52 AM - Found 0 errors. Watching for file changes.
-@agency/database:dev: 
-@agency/database:dev: 10:46:52 AM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: [2J[3J[H10:46:52 AM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/database:dev: [2J[3J[H10:46:52 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/database:dev: 
-@agency/database:dev: 10:46:52 AM - Found 0 errors. Watching for file changes.
-@agency/types:dev: 
-@agency/types:dev: 10:46:53 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 10:46:53 AM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: 
-@agency/utils:dev: 10:46:54 AM - Found 0 errors. Watching for file changes.
-admin:dev:  ✓ Compiled in 1581ms
-admin:dev:  ✓ Compiled in 1553ms
-web:dev:  ✓ Compiled in 2.1s
-@agency/database:dev: [2J[3J[H11:06:18 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H11:06:18 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 11:06:22 AM - Found 0 errors. Watching for file changes.
-@agency/database:dev: 
-@agency/database:dev: 11:06:39 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H11:06:39 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 11:06:41 AM - Found 0 errors. Watching for file changes.
-@agency/database:dev: [2J[3J[H11:06:47 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H11:06:47 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/database:dev: 
-@agency/database:dev: 11:06:47 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 11:06:49 AM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: [2J[3J[H11:06:49 AM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/database:dev: [2J[3J[H11:06:49 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H11:06:49 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: 
-@agency/database:dev: 11:06:50 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 11:06:51 AM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: 
-@agency/utils:dev: 11:06:55 AM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: [2J[3J[H11:06:56 AM - File change detected. Starting incremental compilation...
-@agency/utils:dev: 
-@agency/utils:dev: 
-@agency/utils:dev: 11:06:57 AM - Found 0 errors. Watching for file changes.
-@agency/database:dev: [2J[3J[H11:07:19 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H11:07:20 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-api:dev: 11:07:22 AM [tsx] change in ./..\..\packages\database\generated\client\index.js Restarting...
-api:dev: 11:07:23 AM [tsx] change in ./..\..\packages\database\generated\client\index.js Process hasn't exited. Killing process...
-api:dev: 11:07:26 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Process hasn't exited. Killing process...
-api:dev: 11:07:28 AM [tsx] Process didn't exit in 5s. Force killing...
-@agency/auth:dev: 
-@agency/auth:dev: 11:07:37 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H11:07:38 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/database:dev: 
-@agency/database:dev: 11:07:43 AM - Found 0 errors. Watching for file changes.
-@agency/database:dev: [2J[3J[H11:07:44 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 11:07:45 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H11:07:45 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 11:07:47 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H11:07:48 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/database:dev: 
-@agency/database:dev: 11:07:51 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 11:07:52 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H11:07:53 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 11:07:54 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H11:07:55 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 11:07:59 AM - Found 0 errors. Watching for file changes.
-api:dev: cAPI listening on http://localhost:4000
-api:dev: 11:10:06 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
-@agency/database:dev: [2J[3J[H11:10:08 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H11:10:08 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-api:dev: c11:10:08 AM [tsx] change in ./..\..\packages\database\generated\client\index.js Restarting...
-api:dev: c11:10:10 AM [tsx] change in ./..\..\packages\database\generated\client\runtime\library.js Restarting...
-@agency/database:dev: 
-@agency/database:dev: 11:10:24 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: 
-@agency/auth:dev: 11:10:32 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H11:10:52 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 11:10:58 AM - Found 0 errors. Watching for file changes.
-api:dev: cAPI listening on http://localhost:4000
+web:dev:  ✓ Compiled /contact in 118.8s
+web:dev:  GET /contact 200 in 133748ms
 web:dev:  ○ Compiling / ...
-admin:dev:  ○ Compiling /portfolio ...
-admin:dev:  ✓ Compiled in 1016s
-admin:dev:  ✓ Compiled /portfolio in 91.7s
-admin:dev:  GET /portfolio 200 in 753687ms
-admin:dev:  GET /portfolio 200 in 106770ms
-web:dev:  ✓ Compiled / in 1378.2s
-web:dev:  GET / 200 in 1138469ms
-web:dev:  GET / 200 in 970654ms
-web:dev:  GET / 200 in 1454659ms
+web:dev:  ✓ Compiled / in 82.1s
+web:dev:  GET / 200 in 89663ms
+admin:dev:  ✓ Compiled / in 185.4s
+admin:dev:  GET / 200 in 193843ms
+admin:dev:  ○ Compiling /home ...
+admin:dev:  ✓ Compiled /home in 35.3s
+admin:dev:  GET /home 200 in 36399ms
+admin:dev:  GET /home 200 in 2033ms
+api:dev: prisma:error 
+api:dev: Invalid `delegate.count()` invocation in
+api:dev: D:\My-Website\apps\api\src\lib\create-crud-router.ts:88:18
+api:dev: 
+api:dev:   85 
+api:dev:   86 const [items, total] = await Promise.all([
+api:dev: Database unreachable on GET /api/v1/home-stats/admin 
+api:dev:   87   delegate.findMany({ where, orderBy: { [sortBy]: sortOrder }, skip, take: limit, include }),
+api:dev: → 88   delegate.count(
+api:dev: Invalid `delegate.count()` invocation in
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev: D:\My-Website\apps\api\src\lib\create-crud-router.ts:88:18
+api:dev: 
+api:dev:   85 
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+api:dev:   86 const [items, total] = await Promise.all([
+api:dev:   87   delegate.findMany({ where, orderBy: { [sortBy]: sortOrder }, skip, take: limit, include }),
+api:dev: → 88   delegate.count(
+api:dev: Can't reach database server at `aws-1-ap-southeast-1.pooler.supabase.com:6543`
+api:dev: 
+api:dev: Please make sure your database server is running at `aws-1-ap-southeast-1.pooler.supabase.com:6543`.
+web:dev:  GET / 200 in 10579ms
+web:dev:  GET / 200 in 13875ms
+web:dev:  GET / 200 in 7914ms
+admin:dev:  ○ Compiling /about ...
 web:dev:  ○ Compiling /about ...
-web:dev:  ✓ Compiled /about in 370.4s
-web:dev:  GET /portfolio/modern-grocery-store-website-design 200 in 80899ms
-web:dev:  GET /about 200 in 401996ms
-web:dev:  ⨯ Failed to generate static paths for /portfolio/[slug]:
-web:dev: [Error: spawn UNKNOWN] {
-web:dev:   errno: -4094,
-web:dev:   code: 'UNKNOWN',
-web:dev:   syscall: 'spawn'
-web:dev: }
-web:dev: [?25h
-@agency/auth:dev: [2J[3J[H11:44:03 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 11:44:05 AM - Found 0 errors. Watching for file changes.
-@agency/utils:dev: [2J[3J[H11:44:05 AM - File change detected. Starting incremental compilation...
+admin:dev:  ✓ Compiled /about in 59.1s
+admin:dev:  GET /about 200 in 61205ms
+admin:dev:  GET /about 200 in 7765ms
+admin:dev:  GET /about 200 in 5860ms
+admin:dev:  GET /about 200 in 1635ms
+admin:dev:  GET /about 200 in 4622ms
+web:dev:  ✓ Compiled /about in 130.1s
+web:dev:  GET /about 200 in 138032ms
+web:dev:  GET /about 200 in 109181ms
+admin:dev:  ○ Compiling /services ...
+admin:dev:  ✓ Compiled /services in 64.7s
+admin:dev:  GET /services 200 in 66236ms
+web:dev:  ○ Compiling /services ...
+admin:dev:  GET /about 200 in 6417ms
+web:dev:  GET /about 200 in 12339ms
+web:dev:  ✓ Compiled /services in 219.6s
+web:dev:  GET /about 200 in 8269ms
+web:dev:  GET /about 200 in 10820ms
+admin:dev:  GET /services 200 in 1107ms
+admin:dev:  ○ Compiling /categories ...
+@agency/utils:dev: [2J[3J[H1:02:56 PM - File change detected. Starting incremental compilation...
 @agency/utils:dev: 
-@agency/database:dev: [2J[3J[H11:44:05 AM - File change detected. Starting incremental compilation...
-@agency/database:dev: 
-@agency/auth:dev: [2J[3J[H11:44:06 AM - File change detected. Starting incremental compilation...
-@agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 11:44:08 AM - Found 0 errors. Watching for file changes.
 @agency/utils:dev: 
-@agency/utils:dev: 11:44:10 AM - Found 0 errors. Watching for file changes.
+@agency/utils:dev: 1:02:57 PM - Found 0 errors. Watching for file changes.
+@agency/database:dev: [2J[3J[H1:02:57 PM - File change detected. Starting incremental compilation...
 @agency/database:dev: 
-@agency/database:dev: 11:44:13 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H11   ▲ Next.js 15.5.20 (Turbopack)
-   - Local:        http://localhost:3000
-   - Network:      http://192.168.100.118:3000
+@agency/utils:dev: [2J[3J[H1:02:57 PM - File change detected. Starting incremental compilation...
+@agency/utils:dev: 
+@agency/auth:dev: [2J[3J[H1:02:57 PM - File change detected. Starting incremental compilation...
+@agency/auth:dev: 
+@agency/utils:dev: 
+@agency/utils:dev: 1:02:58 PM - Found 0 errors. Watching for file changes.
+@agency/auth:dev: 
+@agency/auth:dev: 1:03:01 PM - Found 0 errors. Watching for file changes.
+@agency/auth:dev: [2J[3J[H1:03:02 PM - File change detected. Starting incremental compilation...
+@agency/auth:dev: 
+@agency/auth:dev: 
+@agency/auth:dev: 1:03:02 PM - Found 0 errors. Watching for file changes.
+@agency/database:dev: 
+@agency/database:dev: 1:03:03 PM - Found 0 errors. Watching for file changes.
+admin:dev:  GET /categories 200 in 64340ms
+admin:dev:  GET /categories 200 in 14110ms
+admin:dev:  GET /categories 200 in 98545ms
+web:dev:  GET /about 200 in 16289ms
+admin:dev:  GET /categories?tech_limit=25 200 in 24907ms
+admin:dev:  GET /categories?tech_limit=25 200 in 5748ms
+admin:dev:  ✓ Compiled /categories in 237.1s
+admin:dev:  GET /Portfolio 404 in 3031ms
+admin:dev:  ○ Compiling /portfolio ...
+admin:dev:  GET /Portfolio 404 in 7456ms
+admin:dev:  GET /categories 200 in 15756ms
+admin:dev:  ✓ Compiled /portfolio in 184s
+admin:dev:  GET /portfolio 200 in 54616ms
+admin:dev:  GET /portfolio 200 in 24861ms
+web:dev:  GET /about 200 in 7696ms
+web:dev:  ○ Compiling /portfolio ...
+web:dev:  ✓ Compiled /portfolio in 59.2s
+web:dev:  GET /portfolio 200 in 76226ms
+web:dev:  GET /portfolio 200 in 16428ms
+web:dev:  GET /portfolio 200 in 3425ms
+admin:dev:  ○ Compiling /testimonials ...
+admin:dev:  ✓ Compiled /testimonials in 114.2s
+admin:dev:  GET /testimonials 200 in 117223ms
+admin:dev:  GET /testimonials 200 in 99093ms
+admin:dev: [?25h
+@agency/auth:dev: [2J[3J[H1:25:43 PM - File change detected. Starting incremental compilation...
+@agency/auth:dev: 
+@agency/auth:dev: 
+@agency/auth:dev: 1:25:43 PM - Found 0 errors. Watching for file changes.
+web:dev:  GET / 200 in 3926ms
+@agency/auth:dev: [2J[3J[H1:   ▲ Next.js 15.5.20 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.100.118:3001
    - Environments: .env.local
 
  ✓ Starting...
- ✓ Ready in 8.9s
- ○ Compiling / ...
- ✓ Compiled / in 193.6s
-Failed to set fetch cache http://localhost:4000/api/v1/settings [Error [TimeoutError]: The operation was aborted due to timeout] {
-  code: 23,
-  INDEX_SIZE_ERR: 1,
-  DOMSTRING_SIZE_ERR: 2,
-  HIERARCHY_REQUEST_ERR: 3,
-  WRONG_DOCUMENT_ERR: 4,
-  INVALID_CHARACTER_ERR: 5,
-  NO_DATA_ALLOWED_ERR: 6,
-  NO_MODIFICATION_ALLOWED_ERR: 7,
-  NOT_FOUND_ERR: 8,
-  NOT_SUPPORTED_ERR: 9,
-  INUSE_ATTRIBUTE_ERR: 10,
-  INVALID_STATE_ERR: 11,
-  SYNTAX_ERR: 12,
-  INVALID_MODIFICATION_ERR: 13,
-  NAMESPACE_ERR: 14,
-  INVALID_ACCESS_ERR: 15,
-  VALIDATION_ERR: 16,
-  TYPE_MISMATCH_ERR: 17,
-  SECURITY_ERR: 18,
-  NETWORK_ERR: 19,
-  ABORT_ERR: 20,
-  URL_MISMATCH_ERR: 21,
-  QUOTA_EXCEEDED_ERR: 22,
-  TIMEOUT_ERR: 23,
-  INVALID_NODE_TYPE_ERR: 24,
-  DATA_CLONE_ERR: 25
-}
-[web] Failed to load site settings — using fallback. The operation was aborted due to timeout
-[web] Failed to load about content — using fallback. The operation was aborted due to timeout
-[web] Failed to load technologies — using fallback. The operation was aborted due to timeout
-[web] Failed to load faqs — using fallback. The operation was aborted due to timeout
-[web] Failed to load site settings — using fallback. The operation was aborted due to timeout
-[web] Failed to load about content — using fallback. The operation was aborted due to timeout
-[web] Failed to load technologies — using fallback. The operation was aborted due to timeout
-[web] Failed to load faqs — using fallback. The operation was aborted due to timeout
-[web] Failed to load site settings — using fallback. The operation was aborted due to timeout
-[web] Failed to load about content — using fallback. The operation was aborted due to timeout
-[web] Failed to load technologies — using fallback. The operation was aborted due to timeout
-[web] Failed to load faqs — using fallback. The operation was aborted due to timeout
- GET / 200 in 51070ms
- GET / 200 in 41327ms
- ○ Compiling /about ...
- GET / 200 in 48509ms
- ✓ Compiled /about in 443.4s
- GET /about 200 in 96439ms
- GET /portfolio/harbor-analytics-dashboard 200 in 437348ms
- GET /portfolio/modern-grocery-store-website-design 200 in 395311ms
- GET /portfolio/modern-grocery-store-website-design 200 in 384387ms
- GET /portfolio/modern-grocery-store-website-design 200 in 406056ms
- GET /portfolio/modern-grocery-store-website-design 200 in 431235ms
- GET /portfolio/modern-grocery-store-website-design 200 in 387242ms
- ○ Compiling /portfolio ...
- GET /portfolio/modern-grocery-store-website-design 200 in 20820ms
- GET /portfolio/modern-grocery-store-website-design 200 in 20837ms
- GET /portfolio/modern-grocery-store-website-design 200 in 20836ms
- GET /portfolio/modern-grocery-store-website-design 200 in 20839ms
- GET / 200 in 24218ms
- ✓ Compiled /portfolio in 111.6s
- GET /portfolio 200 in 1621ms
- GET /portfolio/modern-grocery-store-website-design 200 in 4773ms
- GET /portfolio/modern-grocery-store-website-design 200 in 2273ms
-/auth:dev: 
-@agency/auth:dev: 11:47:15 AM - Found 0 errors. Watching for file changes.
-@agency/auth:dev: [2J[3J[H11:47:15 AM - File change detected. Starting incremental compilation...
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 3s
+ ✓ Ready in 11.2s
+ ○ Compiling /testimonials ...
+ ✓ Compiled /testimonials in 56.7s
+ GET /testimonials 200 in 87282ms
+ ○ Compiling /faqs ...
+ ✓ Compiled /faqs in 48.8s
+ GET /faqs 200 in 52323ms
+ ○ Compiling /team ...
+ ✓ Compiled /team in 56.9s
+ GET /team 200 in 59901ms
+ ○ Compiling /_not-found/page ...
+ ✓ Compiled /_not-found/page in 56.1s
+ GET /affiliate-tools 404 in 59050ms
+ GET /affiliate-tool 404 in 506ms
+ GET /affiliate-tools 404 in 664ms
+ GET /team 200 in 2670ms
+ ○ Compiling /affiliate ...
+ ✓ Compiled /affiliate in 46.2s
+ GET /affiliate 200 in 22003ms
+ GET /affiliate 200 in 16910ms
+ GET /affiliate 200 in 48186ms
+ GET /affiliate?limit=25 200 in 1044ms
+ ○ Compiling /contact ...
+ ✓ Compiled /contact in 160.2s
+ GET /contact 200 in 67237ms
+ GET /contact 200 in 164583ms
+ GET /contact 200 in 67119ms
+ GET /contact 200 in 90087ms
+ GET /contact 200 in 74613ms
+ ○ Compiling /settings ...
+ ✓ Compiled /settings in 164.7s
+ GET /settings 200 in 170319ms
+ GET /settings 200 in 143224ms
+ ○ Compiling /users ...
+pilation...
+@agency/utils:dev: 
 @agency/auth:dev: 
-@agency/auth:dev: 
-@agency/auth:dev: 11:47:15 AM - Found 0 errors. Watching for file changes.
-@agency/types:dev: [2J[3J[H11:49:36 AM - File change detected. Starting incremental compilation...
+@agency/auth:dev: 1:30:53 PM - Found 0 errors. Watching for file changes.
+@agency/utils:dev: 
+@agency/utils:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
+@agency/types:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
 @agency/types:dev: 
 @agency/types:dev: 
-@agency/types:dev: 11:49:36 AM - Found 0 errors. Watching for file changes.
-admin:dev:  ○ Compiling / ...
-admin:dev:  ✓ Compiled / in 18.4s
-admin:dev:  GET / 200 in 9789ms
-admin:dev:  GET /portfolio 200 in 9228ms
-admin:dev: [?25h
+@agency/types:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
+@agency/utils:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
+@agency/utils:dev: 
+@agency/utils:dev: 
+@agency/utils:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
+@agency/database:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
+@agency/database:dev: 
+@agency/database:dev: 
+@agency/database:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
+@agency/auth:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
+@agency/auth:dev: 
+@agency/types:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
+@agency/types:dev: 
+@agency/types:dev: 
+@agency/types:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
+@agency/utils:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
+@agency/utils:dev: 
+@agency/utils:dev: 
+@agency/utils:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
+@agency/database:dev: [2J[3J[H1:30:54 PM - File change detected. Starting incremental compilation...
+@agency/database:dev: 
+@agency/database:dev: 
+@agency/database:dev: 1:30:54 PM - Found 0 errors. Watching for file changes.
+@agency/auth:dev: 
+@agency/auth:dev: 1:30:55 PM - Found 0 errors. Watching for file changes.
+@agency/auth:dev: [2J[3J[H1:30:55 PM - File change detected. Starting incremental compilation...
+@agency/auth:dev: 
+@agency/auth:dev: 
+@agency/auth:dev: 1:30:55 PM - Found 0 errors. Watching for file changes.
+@agency/types:dev: [2J[3J[H1:31:06 PM - File change detected. Starting incremental compilation...
+@agency/types:dev: 
+@agency/types:dev: 
+@agency/types:dev: 1:31:06 PM - Found 0 errors. Watching for file changes.
+web:dev:  GET / 200 in 2247ms
+web:dev:  GET /contact 200 in 1146ms
+api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
+api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
+api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
+api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
+api:dev: prisma:error Error in PostgreSQL connection: Error { kind: Io, cause: Some(Os { code: 10054, kind: ConnectionReset, message: "An existing connection was forcibly closed by the remote host." }) }
+web:dev:  GET /portfolio 200 in 4660ms
+web:dev:  GET /about 200 in 6361ms
+web:dev:  GET /about 200 in 10080ms
+web:dev:  GET /about 200 in 13040ms
+web:dev:  GET /about 200 in 18805ms
+web:dev:  GET / 200 in 5812ms
+web:dev:  GET /about 200 in 7245ms
+web:dev:  ○ Compiling /affiliate-tools ...
+web:dev:  ✓ Compiled /affiliate-tools in 144.4s
+web:dev:  GET /affiliate-tools 200 in 125512ms
+web:dev:  GET /affiliate-tools 200 in 157286ms
+web:dev:  GET /affiliate-tools 200 in 73970ms
+web:dev:  GET /affiliate-tools 200 in 126360ms
+web:dev:  GET /affiliate-tools 200 in 128509ms
+web:dev:  GET /affiliate-tools 200 in 43662ms
+@agency/utils:dev: [2J[3J[H2:16:44 PM - File change detected. Starting incremental compilation...
+@agency/utils:dev: 
+@agency/utils:dev: 
+@agency/utils:dev: 2:16:45 PM - Found 0 errors. Watching for file changes.
+@agency/database:dev: [2J[3J[H2:16:45 PM - File change detected. Starting incremental compilation...
+@agency/database:dev: 
+@agency/utils:dev: [2J[3J[H2:16:46 PM - File change detected. Starting incremental compilation...
+@agency/utils:dev: 
+@agency/auth:dev: [2J[3J[H2:16:46 PM - File change detected. Starting incremental compilation...
+@agency/auth:dev: 
+@agency/utils:dev: 
+@agency/utils:dev: 2:16:48 PM - Found 0 errors. Watching for file changes.
+@agency/database:dev: 
+@agency/database:dev: 2:16:48 PM - Found 0 errors. Watching for file changes.
+@agency/auth:dev: 
+@agency/auth:dev: 2:16:50 PM - Found 0 errors. Watching for file changes.
+@agency/auth:dev: [2J[3J[H2:16:51 PM - File change detected. Starting incremental compilation...
+@agency/auth:dev: 
+@agency/auth:dev: 
+@agency/auth:dev: 2:16:52 PM - Found 0 errors. Watching for file changes.
+web:dev:  GET /contact 200 in 5761ms
+web:dev:  GET /contact 200 in 976ms
+web:dev:  GET / 200 in 19169ms

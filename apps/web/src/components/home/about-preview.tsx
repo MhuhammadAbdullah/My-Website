@@ -1,20 +1,28 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Button, Heading, Reveal } from "@agency/ui";
-import type { AboutContentRead, HomeStatRead } from "@/lib/types";
+import type { AboutContentRead, HomeContentRead, HomeStatRead } from "@/lib/types";
 
-export function AboutPreview({ about, stats }: { about: AboutContentRead; stats: HomeStatRead[] }) {
+export function AboutPreview({
+  about,
+  home,
+  stats,
+}: {
+  about: AboutContentRead;
+  home: HomeContentRead;
+  stats: HomeStatRead[];
+}) {
   const yearsInBusiness = stats.find((s) => s.highlightKey === "YEARS_IN_BUSINESS");
   const projectsShipped = stats.find((s) => s.highlightKey === "PROJECTS_SHIPPED");
 
   return (
     <div className="grid gap-10 md:grid-cols-2 md:items-center">
       <Reveal>
-        <Heading level={2}>**Design and engineering** — one discipline, not a handoff.</Heading>
+        <Heading level={2}>{home.storyHeading ?? "**Design and engineering** — one discipline, not a handoff."}</Heading>
         <p className="mt-5 text-body-lg text-body">{about.story}</p>
         <Button asChild variant="outline" className="mt-6">
           <Link href="/about">
-            More about us <ArrowUpRight />
+            {home.storyButtonLabel ?? "More about us"} <ArrowUpRight />
           </Link>
         </Button>
       </Reveal>
@@ -25,7 +33,7 @@ export function AboutPreview({ about, stats }: { about: AboutContentRead; stats:
               {yearsInBusiness.number}
               {yearsInBusiness.suffix}
             </p>
-            <p className="mt-1 text-body-sm text-neutral-500">Years in business</p>
+            <p className="mt-1 text-body-sm text-neutral-500">{yearsInBusiness.title}</p>
           </div>
         )}
         {projectsShipped && (
@@ -34,11 +42,11 @@ export function AboutPreview({ about, stats }: { about: AboutContentRead; stats:
               {projectsShipped.number}
               {projectsShipped.suffix}
             </p>
-            <p className="mt-1 text-body-sm text-neutral-500">Projects shipped</p>
+            <p className="mt-1 text-body-sm text-neutral-500">{projectsShipped.title}</p>
           </div>
         )}
         <div className="col-span-2 rounded-2xl bg-neutral-950 p-6 text-white">
-          <p className="text-body-sm text-neutral-400">Our mission</p>
+          <p className="text-body-sm text-neutral-400">{home.storyMissionLabel ?? "Our mission"}</p>
           <p className="mt-1 text-body">{about.mission}</p>
         </div>
       </Reveal>

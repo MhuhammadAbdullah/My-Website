@@ -2,21 +2,22 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Button, Heading, Reveal } from "@agency/ui";
 import { ProjectCard } from "@/components/marketing/project-card";
-import type { ProjectListItem } from "@/lib/types";
+import type { HomeContentRead, ProjectListItem } from "@/lib/types";
 
-export function PortfolioPreview({ projects }: { projects: ProjectListItem[] }) {
+export function PortfolioPreview({ projects, home }: { projects: ProjectListItem[]; home: HomeContentRead }) {
   return (
     <div>
       <Reveal className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <Heading level={2}>Recent **work**</Heading>
+          <Heading level={2}>{home.portfolioHeading ?? "Recent **work**"}</Heading>
           <p className="mt-3 max-w-lg text-body-lg text-body">
-            A handful of the products we&apos;ve designed, built, and shipped to production.
+            {home.portfolioDescription ??
+              "A handful of the products we've designed, built, and shipped to production."}
           </p>
         </div>
         <Button asChild variant="ghost">
           <Link href="/portfolio">
-            Full portfolio <ArrowUpRight />
+            {home.portfolioButtonLabel ?? "Full portfolio"} <ArrowUpRight />
           </Link>
         </Button>
       </Reveal>

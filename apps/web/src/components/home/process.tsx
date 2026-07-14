@@ -1,14 +1,14 @@
 import { Heading, Reveal } from "@agency/ui";
 import type { HomeProcessStepRead } from "@/lib/types";
 
-export function Process({ steps }: { steps: HomeProcessStepRead[] }) {
+export function Process({ steps, heading }: { steps: HomeProcessStepRead[]; heading?: string | null }) {
   if (steps.length === 0) return null;
 
   return (
     <div>
       <Reveal>
         <Heading level={2} className="text-center">
-          How we **work**
+          {heading ?? "How we **work**"}
         </Heading>
       </Reveal>
       <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">

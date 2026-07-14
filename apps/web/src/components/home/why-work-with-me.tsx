@@ -1,14 +1,14 @@
 import { DynamicIcon, Heading, Reveal } from "@agency/ui";
 import type { HomeWhyReasonRead } from "@/lib/types";
 
-export function WhyWorkWithMe({ reasons }: { reasons: HomeWhyReasonRead[] }) {
+export function WhyWorkWithMe({ reasons, heading }: { reasons: HomeWhyReasonRead[]; heading?: string | null }) {
   if (reasons.length === 0) return null;
 
   return (
     <div>
       <Reveal>
         <Heading level={2} className="text-center">
-          Why work with **us**
+          {heading ?? "Why work with **us**"}
         </Heading>
       </Reveal>
       <div className="mt-12 grid gap-6 sm:grid-cols-2">

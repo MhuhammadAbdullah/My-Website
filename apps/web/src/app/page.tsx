@@ -82,37 +82,41 @@ export default async function HomePage() {
 
       <Section>
         <Container>
-          <AboutPreview about={about} stats={stats} />
+          <AboutPreview about={about} home={home} stats={stats} />
         </Container>
       </Section>
 
       <Section className="bg-neutral-50">
         <Container>
-          <ServicesPreview services={services} />
+          <ServicesPreview services={services} home={home} />
         </Container>
       </Section>
 
       <Section>
         <Container>
-          <PortfolioPreview projects={projectsPage.items} />
+          <PortfolioPreview projects={projectsPage.items} home={home} />
         </Container>
       </Section>
 
       <Section className="bg-neutral-50">
         <Container>
-          <Process steps={processSteps} />
+          <Process steps={processSteps} heading={home.processHeading} />
         </Container>
       </Section>
 
       <Section>
         <Container>
-          <Technologies technologies={technologies} displayStyle={settings.tech_stack_display ?? "TAGS"} />
+          <Technologies
+            technologies={technologies}
+            displayStyle={settings.tech_stack_display ?? "TAGS"}
+            heading={home.technologiesHeading}
+          />
         </Container>
       </Section>
 
       <Section className="bg-neutral-50">
         <Container>
-          <WhyWorkWithMe reasons={whyReasons} />
+          <WhyWorkWithMe reasons={whyReasons} heading={home.whyHeading} />
         </Container>
       </Section>
 
@@ -120,7 +124,7 @@ export default async function HomePage() {
         <Container>
           <Reveal>
             <Heading level={2} className="text-center">
-              What clients **say**
+              {home.testimonialsHeading ?? "What clients **say**"}
             </Heading>
           </Reveal>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

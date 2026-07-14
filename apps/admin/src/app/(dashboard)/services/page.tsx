@@ -29,6 +29,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   Textarea,
   toast,
 } from "@agency/ui";
@@ -38,6 +42,7 @@ import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
+import { PageHeroContentForm } from "@/components/page-hero-content-form";
 
 const billingTypeOptions = [
   { value: "ONE_TIME", label: "One-time" },
@@ -745,8 +750,31 @@ function ServicesPageInner() {
 
 export default function ServicesPage() {
   return (
-    <Suspense fallback={null}>
-      <ServicesPageInner />
-    </Suspense>
+    <Tabs defaultValue="list">
+      <TabsList>
+        <TabsTrigger value="list">All Services</TabsTrigger>
+        <TabsTrigger value="content">Page Content</TabsTrigger>
+      </TabsList>
+      <TabsContent value="list">
+        <Suspense fallback={null}>
+          <ServicesPageInner />
+        </Suspense>
+      </TabsContent>
+      <TabsContent value="content">
+        <Heading level={2}>Services Page Content</Heading>
+        <p className="mt-1 text-body-sm text-neutral-500">The hero heading and paragraph at the top of the public Services page.</p>
+        <div className="mt-6">
+          <PageHeroContentForm
+            endpoint="/pages/services"
+            emptyValues={{ heroHeading: "", heroDescription: "" }}
+            fields={[
+              { key: "heroHeading", label: "Hero heading", isHeading: true, placeholder: "Services built to **ship**, not just to pitch." },
+              { key: "heroDescription", label: "Hero paragraph", type: "textarea" },
+            ]}
+            successMessage="Services page content updated"
+          />
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 }

@@ -690,6 +690,24 @@ model HomePageContent {
   contactCtaButtonText String?
   contactCtaButtonHref String?
 
+  // Section headings/labels below the hero. Nullable so the existing row
+  // keeps working untouched; the frontend falls back to the current copy
+  // (via `??`) whenever one of these is null. May contain `**text**`
+  // emphasis markers -- see Heading component in packages/ui.
+  storyHeading          String?
+  storyButtonLabel      String?
+  storyMissionLabel     String?
+  servicesHeading       String?
+  servicesDescription   String?
+  servicesButtonLabel   String?
+  portfolioHeading      String?
+  portfolioDescription  String?
+  portfolioButtonLabel  String?
+  processHeading        String?
+  technologiesHeading   String?
+  whyHeading             String?
+  testimonialsHeading   String?
+
   seoId     String?  @unique
   updatedAt DateTime @updatedAt
 
@@ -748,12 +766,75 @@ model AboutPageContent {
   mission   String
   vision    String
   philosophy String
+
+  // Section headings/labels beyond the hero paragraph above. Nullable so the
+  // existing row keeps working untouched; the frontend falls back to the
+  // current copy (via `??`) whenever one of these is null. May contain
+  // `**text**` emphasis markers -- see Heading component in packages/ui.
+  heroHeading            String?
+  missionLabel           String?
+  visionLabel            String?
+  philosophyLabel        String?
+  valuesHeading          String?
+  timelineHeading        String?
+  teamHeading            String?
+  skillsHeading          String?
+  certificationsHeading  String?
+  technologiesHeading    String?
+
   seoId     String?  @unique
   updatedAt DateTime @updatedAt
 
   seo SeoMeta? @relation(fields: [seoId], references: [id])
 
   @@map("about_page_content")
+}
+
+// ---------------------------------------------------------------------------
+// Singleton page content for pages without their own bespoke model (Services/
+// Portfolio/Affiliate Tools/Contact are otherwise static route components).
+// Only a hero heading + paragraph -- the current layout has no separate
+// "intro" section on any of these pages, so no unrendered fields are added.
+// SEO for these pages stays on PageSeo, unchanged.
+// ---------------------------------------------------------------------------
+
+model ServicesPageContent {
+  id              String   @id @default(cuid())
+  heroHeading     String
+  heroDescription String
+  updatedAt       DateTime @updatedAt
+
+  @@map("services_page_content")
+}
+
+model PortfolioPageContent {
+  id              String   @id @default(cuid())
+  heroHeading     String
+  heroDescription String
+  updatedAt       DateTime @updatedAt
+
+  @@map("portfolio_page_content")
+}
+
+model AffiliateToolsPageContent {
+  id              String   @id @default(cuid())
+  heroHeading     String
+  heroDescription String
+  disclosureText  String
+  updatedAt       DateTime @updatedAt
+
+  @@map("affiliate_tools_page_content")
+}
+
+model ContactPageContent {
+  id              String   @id @default(cuid())
+  heroHeading     String
+  heroDescription String
+  whatsappLabel   String   @default("Chat on WhatsApp")
+  calendlyLabel   String   @default("Book an intro call")
+  updatedAt       DateTime @updatedAt
+
+  @@map("contact_page_content")
 }
 
 // `content` only ever gets written by the publish action, so the public

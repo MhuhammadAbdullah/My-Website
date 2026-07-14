@@ -1,6 +1,13 @@
 import { Router } from "express";
 import { prisma, type Prisma } from "@agency/database";
-import { homePageContentSchema, aboutPageContentSchema } from "@agency/types";
+import {
+  homePageContentSchema,
+  aboutPageContentSchema,
+  servicesPageContentSchema,
+  portfolioPageContentSchema,
+  affiliateToolsPageContentSchema,
+  contactPageContentSchema,
+} from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
 
@@ -39,6 +46,19 @@ pagesRouter.put(
       contactCtaDescription: data.contactCtaDescription,
       contactCtaButtonText: data.contactCtaButtonText,
       contactCtaButtonHref: data.contactCtaButtonHref,
+      storyHeading: data.storyHeading,
+      storyButtonLabel: data.storyButtonLabel,
+      storyMissionLabel: data.storyMissionLabel,
+      servicesHeading: data.servicesHeading,
+      servicesDescription: data.servicesDescription,
+      servicesButtonLabel: data.servicesButtonLabel,
+      portfolioHeading: data.portfolioHeading,
+      portfolioDescription: data.portfolioDescription,
+      portfolioButtonLabel: data.portfolioButtonLabel,
+      processHeading: data.processHeading,
+      technologiesHeading: data.technologiesHeading,
+      whyHeading: data.whyHeading,
+      testimonialsHeading: data.testimonialsHeading,
     };
     const existing = await prisma.homePageContent.findFirst();
 
@@ -94,6 +114,16 @@ pagesRouter.put(
       mission: data.mission,
       vision: data.vision,
       philosophy: data.philosophy,
+      heroHeading: data.heroHeading,
+      missionLabel: data.missionLabel,
+      visionLabel: data.visionLabel,
+      philosophyLabel: data.philosophyLabel,
+      valuesHeading: data.valuesHeading,
+      timelineHeading: data.timelineHeading,
+      teamHeading: data.teamHeading,
+      skillsHeading: data.skillsHeading,
+      certificationsHeading: data.certificationsHeading,
+      technologiesHeading: data.technologiesHeading,
     };
     const existing = await prisma.aboutPageContent.findFirst();
 
@@ -130,5 +160,100 @@ pagesRouter.get(
       prisma.certification.findMany({ orderBy: { order: "asc" } }),
     ]);
     res.json({ team, values, timeline, certifications });
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// Services / Portfolio / Affiliate Tools / Contact -- singleton hero content.
+// No `seo` relation on these models (SEO stays on PageSeo, see
+// page-seo.routes.ts), so these are simpler find-or-create singletons than
+// /home and /about above.
+// ---------------------------------------------------------------------------
+
+pagesRouter.get(
+  "/services",
+  asyncHandler(async (_req, res) => {
+    const item = await prisma.servicesPageContent.findFirst();
+    res.json({ item });
+  }),
+);
+
+pagesRouter.put(
+  "/services",
+  requireAuth,
+  requirePermission("services", "update"),
+  asyncHandler(async (req, res) => {
+    const data = servicesPageContentSchema.parse(req.body);
+    const existing = await prisma.servicesPageContent.findFirst();
+    const item = existing
+      ? await prisma.servicesPageContent.update({ where: { id: existing.id }, data })
+      : await prisma.servicesPageContent.create({ data });
+    res.json({ item });
+  }),
+);
+
+pagesRouter.get(
+  "/portfolio",
+  asyncHandler(async (_req, res) => {
+    const item = await prisma.portfolioPageContent.findFirst();
+    res.json({ item });
+  }),
+);
+
+pagesRouter.put(
+  "/portfolio",
+  requireAuth,
+  requirePermission("portfolio", "update"),
+  asyncHandler(async (req, res) => {
+    const data = portfolioPageContentSchema.parse(req.body);
+    const existing = await prisma.portfolioPageContent.findFirst();
+    const item = existing
+      ? await prisma.portfolioPageContent.update({ where: { id: existing.id }, data })
+      : await prisma.portfolioPageContent.create({ data });
+    res.json({ item });
+  }),
+);
+
+pagesRouter.get(
+  "/affiliate-tools",
+  asyncHandler(async (_req, res) => {
+    const item = await prisma.affiliateToolsPageContent.findFirst();
+    res.json({ item });
+  }),
+);
+
+pagesRouter.put(
+  "/affiliate-tools",
+  requireAuth,
+  requirePermission("affiliate", "update"),
+  asyncHandler(async (req, res) => {
+    const data = affiliateToolsPageContentSchema.parse(req.body);
+    const existing = await prisma.affiliateToolsPageContent.findFirst();
+    const item = existing
+      ? await prisma.affiliateToolsPageContent.update({ where: { id: existing.id }, data })
+      : await prisma.affiliateToolsPageContent.create({ data });
+    res.json({ item });
+  }),
+);
+
+pagesRouter.get(
+  "/contact",
+  asyncHandler(async (_req, res) => {
+    const item = await prisma.contactPageContent.findFirst();
+    res.json({ item });
+  }),
+);
+
+pagesRouter.put(
+  "/contact",
+  requireAuth,
+  requirePermission("contact", "update"),
+  asyncHandler(async (req, res) => {
+    const data = contactPageContentSchema.parse(req.body);
+    const existing = await prisma.contactPageContent.findFirst();
+    const item = existing
+      ? await prisma.contactPageContent.update({ where: { id: existing.id }, data })
+      : await prisma.contactPageContent.create({ data });
+    res.json({ item });
   }),
 );

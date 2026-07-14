@@ -67,6 +67,19 @@ interface HomeContent {
   contactCtaDescription: string | null;
   contactCtaButtonText: string | null;
   contactCtaButtonHref: string | null;
+  storyHeading: string | null;
+  storyButtonLabel: string | null;
+  storyMissionLabel: string | null;
+  servicesHeading: string | null;
+  servicesDescription: string | null;
+  servicesButtonLabel: string | null;
+  portfolioHeading: string | null;
+  portfolioDescription: string | null;
+  portfolioButtonLabel: string | null;
+  processHeading: string | null;
+  technologiesHeading: string | null;
+  whyHeading: string | null;
+  testimonialsHeading: string | null;
   seo: SeoContent | null;
 }
 
@@ -105,10 +118,29 @@ const EMPTY_FORM: HomeContent = {
   contactCtaDescription: null,
   contactCtaButtonText: null,
   contactCtaButtonHref: null,
+  storyHeading: null,
+  storyButtonLabel: null,
+  storyMissionLabel: null,
+  servicesHeading: null,
+  servicesDescription: null,
+  servicesButtonLabel: null,
+  portfolioHeading: null,
+  portfolioDescription: null,
+  portfolioButtonLabel: null,
+  processHeading: null,
+  technologiesHeading: null,
+  whyHeading: null,
+  testimonialsHeading: null,
   seo: null,
 };
 
 const ROBOTS_OPTIONS = ["index, follow", "noindex, follow", "index, nofollow", "noindex, nofollow"];
+
+// Shown next to every heading field's label -- the site renders `**word**`
+// in italic serif and everything else in the regular sans font (see the
+// Heading component in packages/ui). Admins can mark which words get that
+// treatment; they can't change fonts directly.
+const HEADING_HINT = "wrap words in **bold** to italicize them";
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -321,6 +353,71 @@ export default function HomeContentPage() {
                   <Input value={form.contactCtaButtonHref ?? ""} onChange={(e) => set("contactCtaButtonHref", e.target.value || null)} placeholder="/contact" />
                 </Field>
               </div>
+            </SectionCard>
+
+            <SectionCard title="Story preview" description="The section right below the hero, previewing the About page.">
+              <Field label="Heading" hint={HEADING_HINT}>
+                <Input value={form.storyHeading ?? ""} onChange={(e) => set("storyHeading", e.target.value || null)} placeholder="**Design and engineering** — one discipline, not a handoff." />
+              </Field>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <Field label="Button text">
+                  <Input value={form.storyButtonLabel ?? ""} onChange={(e) => set("storyButtonLabel", e.target.value || null)} placeholder="More about us" />
+                </Field>
+                <Field label="Mission card label">
+                  <Input value={form.storyMissionLabel ?? ""} onChange={(e) => set("storyMissionLabel", e.target.value || null)} placeholder="Our mission" />
+                </Field>
+              </div>
+              <p className="-mt-2 text-body-sm text-neutral-400">
+                The story text itself, and the "years in business"/"projects shipped" figures, are managed on the About Page and Home Page → Statistics.
+              </p>
+            </SectionCard>
+
+            <SectionCard title="Services preview">
+              <Field label="Heading" hint={HEADING_HINT}>
+                <Input value={form.servicesHeading ?? ""} onChange={(e) => set("servicesHeading", e.target.value || null)} placeholder="What we **build**" />
+              </Field>
+              <Field label="Description">
+                <Textarea value={form.servicesDescription ?? ""} onChange={(e) => set("servicesDescription", e.target.value || null)} />
+              </Field>
+              <Field label="Button text">
+                <Input value={form.servicesButtonLabel ?? ""} onChange={(e) => set("servicesButtonLabel", e.target.value || null)} placeholder="All services" />
+              </Field>
+            </SectionCard>
+
+            <SectionCard title="Portfolio preview">
+              <Field label="Heading" hint={HEADING_HINT}>
+                <Input value={form.portfolioHeading ?? ""} onChange={(e) => set("portfolioHeading", e.target.value || null)} placeholder="Recent **work**" />
+              </Field>
+              <Field label="Description">
+                <Textarea value={form.portfolioDescription ?? ""} onChange={(e) => set("portfolioDescription", e.target.value || null)} />
+              </Field>
+              <Field label="Button text">
+                <Input value={form.portfolioButtonLabel ?? ""} onChange={(e) => set("portfolioButtonLabel", e.target.value || null)} placeholder="Full portfolio" />
+              </Field>
+            </SectionCard>
+
+            <SectionCard title="Process" description='The "How we work" steps section heading — steps themselves are on the How We Work tab.'>
+              <Field label="Heading" hint={HEADING_HINT}>
+                <Input value={form.processHeading ?? ""} onChange={(e) => set("processHeading", e.target.value || null)} placeholder="How we **work**" />
+              </Field>
+            </SectionCard>
+
+            <SectionCard title="Technologies">
+              <Field label="Heading" hint={HEADING_HINT}>
+                <Input value={form.technologiesHeading ?? ""} onChange={(e) => set("technologiesHeading", e.target.value || null)} placeholder="The **stack** behind the work" />
+              </Field>
+            </SectionCard>
+
+            <SectionCard title="Why work with us" description="Section heading — reasons themselves are on the Why Work With Us tab.">
+              <Field label="Heading" hint={HEADING_HINT}>
+                <Input value={form.whyHeading ?? ""} onChange={(e) => set("whyHeading", e.target.value || null)} placeholder="Why work with **us**" />
+              </Field>
+            </SectionCard>
+
+            <SectionCard title="Testimonials">
+              <Field label="Heading" hint={HEADING_HINT}>
+                <Input value={form.testimonialsHeading ?? ""} onChange={(e) => set("testimonialsHeading", e.target.value || null)} placeholder="What clients **say**" />
+              </Field>
             </SectionCard>
           </div>
         </TabsContent>

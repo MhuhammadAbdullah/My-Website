@@ -32,7 +32,7 @@ async function main() {
   // ---------------------------------------------------------------------
   const resources = [
     "home", "about", "services", "pricing", "portfolio", "projects", "categories",
-    "testimonials", "faqs", "team", "affiliate", "media", "navigation",
+    "testimonials", "faqs", "team", "affiliate", "contact", "media", "navigation",
     "footer", "seo", "analytics", "settings", "users", "roles", "permissions",
     "clients", "quotations", "invoices", "payments", "financeSettings", "legal",
   ];

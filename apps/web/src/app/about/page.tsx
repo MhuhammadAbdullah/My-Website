@@ -59,7 +59,7 @@ export default async function AboutPage() {
         <Container>
           <PageHeading breadcrumb={[{ label: "Home", href: "/" }, { label: "About" }]}>
             <Heading level={1} display>
-              Our **story**, in plain terms.
+              {about.heroHeading ?? "Our **story**, in plain terms."}
             </Heading>
             <p className="mt-5 text-body-lg text-body">{about.story}</p>
           </PageHeading>
@@ -69,16 +69,16 @@ export default async function AboutPage() {
       <Section>
         <Container className="grid gap-6 sm:grid-cols-3">
           <div className="rounded-2xl border border-neutral-200 p-6">
-            <Heading level={3}>Mission</Heading>
+            <Heading level={3}>{about.missionLabel ?? "Mission"}</Heading>
             <p className="mt-2 text-body-sm text-body">{about.mission}</p>
           </div>
           <div className="rounded-2xl border border-neutral-200 p-6">
-            <Heading level={3}>Vision</Heading>
+            <Heading level={3}>{about.visionLabel ?? "Vision"}</Heading>
             <p className="mt-2 text-body-sm text-body">{about.vision}</p>
           </div>
           <div className="rounded-2xl bg-neutral-950 p-6 text-white">
             <Heading level={3} className="text-white">
-              Philosophy
+              {about.philosophyLabel ?? "Philosophy"}
             </Heading>
             <p className="mt-2 text-body-sm text-neutral-300">{about.philosophy}</p>
           </div>
@@ -88,7 +88,7 @@ export default async function AboutPage() {
       <Section className="bg-neutral-50">
         <Container>
           <Heading level={2} className="text-center">
-            Core **values**
+            {about.valuesHeading ?? "Core **values**"}
           </Heading>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {teamData.values.map((value, i) => (
@@ -104,7 +104,7 @@ export default async function AboutPage() {
 
       <Section>
         <Container>
-          <Heading level={2}>Our **timeline**</Heading>
+          <Heading level={2}>{about.timelineHeading ?? "Our **timeline**"}</Heading>
           <ol className="mt-10 space-y-8 border-l border-neutral-200 pl-8">
             {teamData.timeline.map((event) => (
               <li key={event.id} className="relative">
@@ -121,7 +121,7 @@ export default async function AboutPage() {
       <Section className="bg-neutral-50">
         <Container>
           <Heading level={2} className="text-center">
-            Meet the **team**
+            {about.teamHeading ?? "Meet the **team**"}
           </Heading>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {teamData.team.map((member) => (
@@ -160,7 +160,7 @@ export default async function AboutPage() {
       <Section>
         <Container className="grid gap-12 lg:grid-cols-2">
           <div>
-            <Heading level={2}>Skills</Heading>
+            <Heading level={2}>{about.skillsHeading ?? "Skills"}</Heading>
             <div className="mt-6 space-y-5">
               {skills.map((skill) => (
                 <div key={skill.id}>
@@ -174,7 +174,7 @@ export default async function AboutPage() {
             </div>
           </div>
           <div>
-            <Heading level={2}>Certifications</Heading>
+            <Heading level={2}>{about.certificationsHeading ?? "Certifications"}</Heading>
             <ul className="mt-6 space-y-4">
               {teamData.certifications.map((cert) => (
                 <li key={cert.id} className="rounded-2xl border border-neutral-200 p-4">
@@ -189,7 +189,11 @@ export default async function AboutPage() {
 
       <Section>
         <Container>
-          <Technologies technologies={technologies} displayStyle={settings.tech_stack_display ?? "TAGS"} />
+          <Technologies
+            technologies={technologies}
+            displayStyle={settings.tech_stack_display ?? "TAGS"}
+            heading={about.technologiesHeading}
+          />
         </Container>
       </Section>
 

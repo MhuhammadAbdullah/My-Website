@@ -2,21 +2,22 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Button, Heading, Reveal } from "@agency/ui";
 import { ServiceCard } from "@/components/marketing/service-card";
-import type { ServiceListItem } from "@/lib/types";
+import type { HomeContentRead, ServiceListItem } from "@/lib/types";
 
-export function ServicesPreview({ services }: { services: ServiceListItem[] }) {
+export function ServicesPreview({ services, home }: { services: ServiceListItem[]; home: HomeContentRead }) {
   return (
     <div>
       <Reveal className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <Heading level={2}>What we **build**</Heading>
+          <Heading level={2}>{home.servicesHeading ?? "What we **build**"}</Heading>
           <p className="mt-3 max-w-lg text-body-lg text-body">
-            From marketing sites to full product builds — scoped, priced, and delivered on a real timeline.
+            {home.servicesDescription ??
+              "From marketing sites to full product builds — scoped, priced, and delivered on a real timeline."}
           </p>
         </div>
         <Button asChild variant="ghost">
           <Link href="/services">
-            All services <ArrowUpRight />
+            {home.servicesButtonLabel ?? "All services"} <ArrowUpRight />
           </Link>
         </Button>
       </Reveal>

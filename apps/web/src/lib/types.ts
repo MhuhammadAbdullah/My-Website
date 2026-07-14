@@ -206,6 +206,19 @@ export interface HomeContentRead {
   contactCtaDescription: string | null;
   contactCtaButtonText: string | null;
   contactCtaButtonHref: string | null;
+  storyHeading: string | null;
+  storyButtonLabel: string | null;
+  storyMissionLabel: string | null;
+  servicesHeading: string | null;
+  servicesDescription: string | null;
+  servicesButtonLabel: string | null;
+  portfolioHeading: string | null;
+  portfolioDescription: string | null;
+  portfolioButtonLabel: string | null;
+  processHeading: string | null;
+  technologiesHeading: string | null;
+  whyHeading: string | null;
+  testimonialsHeading: string | null;
   seo: SeoRead | null;
 }
 
@@ -214,7 +227,49 @@ export interface AboutContentRead {
   mission: string;
   vision: string;
   philosophy: string;
+  heroHeading: string | null;
+  missionLabel: string | null;
+  visionLabel: string | null;
+  philosophyLabel: string | null;
+  valuesHeading: string | null;
+  timelineHeading: string | null;
+  teamHeading: string | null;
+  skillsHeading: string | null;
+  certificationsHeading: string | null;
+  technologiesHeading: string | null;
   seo: SeoRead | null;
+}
+
+// Singleton hero content for the four pages with no bespoke content model
+// (SEO for these stays on PageSeoRead above, unchanged).
+export interface ServicesPageContentRead {
+  heroHeading: string;
+  heroDescription: string;
+}
+
+export interface PortfolioPageContentRead {
+  heroHeading: string;
+  heroDescription: string;
+}
+
+export interface AffiliateToolsPageContentRead {
+  heroHeading: string;
+  heroDescription: string;
+  disclosureText: string;
+}
+
+export interface ContactPageContentRead {
+  heroHeading: string;
+  heroDescription: string;
+  whatsappLabel: string;
+  calendlyLabel: string;
+}
+
+export interface DefaultCtaRead {
+  headline: string;
+  subheadline: string;
+  ctaLabel: string;
+  ctaHref: string;
 }
 
 // Privacy Policy / Terms & Conditions -- `null` on GET means the page has
@@ -257,6 +312,8 @@ export interface SiteSettings {
     displayMode: "LOGO" | "TEXT";
   };
   tech_stack_display?: "TAGS" | "MARQUEE";
+  default_cta?: DefaultCtaRead;
+  faq_section_heading?: string;
 }
 
 export interface NavItemRead {

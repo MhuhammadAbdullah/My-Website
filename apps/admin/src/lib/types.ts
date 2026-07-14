@@ -16,4 +16,11 @@ export interface SiteSettings {
     logoUrl: string | null;
     displayMode: "LOGO" | "TEXT";
   };
+  default_cta?: {
+    headline: string;
+    subheadline: string;
+    ctaLabel: string;
+    ctaHref: string;
+  };
+  faq_section_heading?: string;
 }

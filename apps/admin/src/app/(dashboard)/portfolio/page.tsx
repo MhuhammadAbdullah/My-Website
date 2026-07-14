@@ -28,6 +28,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   Textarea,
   toast,
 } from "@agency/ui";
@@ -40,6 +44,7 @@ import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { GalleryField, VideoField, type GalleryImageItem, type VideoItem } from "./media-fields";
 import { ProjectFinanceDialog } from "@/components/finance/project-finance-dialog";
 import { ProjectSectionsField, newProjectSection, type ProjectSectionForm } from "@/components/portfolio/project-sections-field";
+import { PageHeroContentForm } from "@/components/page-hero-content-form";
 
 interface Category {
   id: string;
@@ -514,8 +519,31 @@ function PortfolioPageInner() {
 
 export default function PortfolioPage() {
   return (
-    <Suspense fallback={null}>
-      <PortfolioPageInner />
-    </Suspense>
+    <Tabs defaultValue="list">
+      <TabsList>
+        <TabsTrigger value="list">All Projects</TabsTrigger>
+        <TabsTrigger value="content">Page Content</TabsTrigger>
+      </TabsList>
+      <TabsContent value="list">
+        <Suspense fallback={null}>
+          <PortfolioPageInner />
+        </Suspense>
+      </TabsContent>
+      <TabsContent value="content">
+        <Heading level={2}>Portfolio Page Content</Heading>
+        <p className="mt-1 text-body-sm text-neutral-500">The hero heading and paragraph at the top of the public Portfolio page.</p>
+        <div className="mt-6">
+          <PageHeroContentForm
+            endpoint="/pages/portfolio"
+            emptyValues={{ heroHeading: "", heroDescription: "" }}
+            fields={[
+              { key: "heroHeading", label: "Hero heading", isHeading: true, placeholder: "Work we're **proud** to put our name on." },
+              { key: "heroDescription", label: "Hero paragraph", type: "textarea" },
+            ]}
+            successMessage="Portfolio page content updated"
+          />
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 }

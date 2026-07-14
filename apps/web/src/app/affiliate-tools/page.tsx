@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Info } from "lucide-react";
 import { Container, Section, Heading, Reveal } from "@agency/ui";
-import { getAffiliateCategories, getAffiliateTools, getPageSeo } from "@/lib/api";
+import { getAffiliateCategories, getAffiliateTools, getPageSeo, getAffiliateToolsPageContent } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
-import { emptyPage } from "@/lib/fallbacks";
+import { emptyPage, EMPTY_AFFILIATE_TOOLS_PAGE_CONTENT } from "@/lib/fallbacks";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { AffiliateFilters } from "@/components/affiliate/affiliate-filters";
 import { AffiliateToolCard } from "@/components/affiliate/affiliate-tool-card";
@@ -36,7 +36,7 @@ export default async function AffiliateToolsPage({
   const page = Number(params.page ?? 1);
   const pageSize = Number(params.pageSize ?? 12);
 
-  const [toolsPage, categories] = await Promise.all([
+  const [toolsPage, categories, content] = await Promise.all([
     withFallback(
       getAffiliateTools({
         page,
@@ -51,6 +51,9 @@ export default async function AffiliateToolsPage({
       "affiliate tools",
     ),
     withFallback(getAffiliateCategories(), [], "affiliate categories"),
+    withFallback(getAffiliateToolsPageContent(), null, "affiliate tools page content").then(
+      (item) => item ?? EMPTY_AFFILIATE_TOOLS_PAGE_CONTENT,
+    ),
   ]);
 
   return (
@@ -59,19 +62,14 @@ export default async function AffiliateToolsPage({
         <Container>
           <PageHeading breadcrumb={[{ label: "Home", href: "/" }, { label: "Affiliate Tools" }]}>
             <Heading level={1} display>
-              Tools we **actually** use.
+              {content.heroHeading}
             </Heading>
-            <p className="mt-5 text-body-lg text-body">
-              Every product below is something we run our own business and client projects on — not a
-              rented banner ad.
-            </p>
+            <p className="mt-5 text-body-lg text-body">{content.heroDescription}</p>
           </PageHeading>
           <Reveal delay={0.1} className="mt-6 flex items-start gap-3 rounded-2xl border border-accent-200 bg-accent-50 p-4 text-body-sm text-accent-800">
             <Info className="mt-0.5 size-5 shrink-0" />
             <p>
-              <strong>Affiliate disclosure:</strong> some links below are affiliate links. If you sign up
-              through them, we may earn a commission at no additional cost to you — and in several cases
-              our partners extend an exclusive discount to our visitors, called out on each card.
+              <strong>Affiliate disclosure:</strong> {content.disclosureText}
             </p>
           </Reveal>
         </Container>

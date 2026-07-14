@@ -1,6 +1,13 @@
 import { Router } from "express";
 import { prisma, type Prisma } from "@agency/database";
-import { socialLinksSchema, currencySchema, brandingSchema, techStackDisplaySchema } from "@agency/types";
+import {
+  socialLinksSchema,
+  currencySchema,
+  brandingSchema,
+  techStackDisplaySchema,
+  defaultCtaSchema,
+} from "@agency/types";
+import { z } from "zod";
 import { isGoogleMapsUrl, extractGoogleMapsEmbedSrc } from "@agency/utils";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
@@ -29,6 +36,13 @@ const settingValidators: Record<string, (value: unknown) => Prisma.InputJsonValu
     }
     return value;
   },
+  // Sitewide default CTA copy (CtaSection's fallback when a page doesn't
+  // pass explicit override props) and FAQ section heading (FaqSection's
+  // default `title`) -- both live here rather than their own tables since
+  // each is a single small blob reused across many pages, not owned by one
+  // page's content model.
+  default_cta: (value) => defaultCtaSchema.parse(value),
+  faq_section_heading: (value) => z.string().min(1, "FAQ heading is required").parse(value),
 };
 
 settingsRouter.get(

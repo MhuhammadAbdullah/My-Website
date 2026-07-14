@@ -3,6 +3,8 @@ import type {
   AboutContentRead,
   AffiliateCategoryRead,
   AffiliateToolRead,
+  AffiliateToolsPageContentRead,
+  ContactPageContentRead,
   FaqRead,
   HomeContentRead,
   HomeProcessStepRead,
@@ -12,10 +14,12 @@ import type {
   NavItemRead,
   PageSeoRead,
   PaginatedResponse,
+  PortfolioPageContentRead,
   ProjectDetail,
   ProjectListItem,
   ServiceDetail,
   ServiceListItem,
+  ServicesPageContentRead,
   SiteSettings,
   SkillRead,
   TeamMemberRead,
@@ -124,6 +128,18 @@ export const getPageSeo = (page: "services" | "portfolio" | "affiliate-tools" | 
   apiFetch<{ item: PageSeoRead | null }>(`/page-seo/${page}`).then((r) => r.item);
 
 export const getAboutContent = () => apiFetch<{ item: AboutContentRead }>("/pages/about").then((r) => r.item);
+
+export const getServicesPageContent = () =>
+  apiFetch<{ item: ServicesPageContentRead | null }>("/pages/services").then((r) => r.item);
+
+export const getPortfolioPageContent = () =>
+  apiFetch<{ item: PortfolioPageContentRead | null }>("/pages/portfolio").then((r) => r.item);
+
+export const getAffiliateToolsPageContent = () =>
+  apiFetch<{ item: AffiliateToolsPageContentRead | null }>("/pages/affiliate-tools").then((r) => r.item);
+
+export const getContactPageContent = () =>
+  apiFetch<{ item: ContactPageContentRead | null }>("/pages/contact").then((r) => r.item);
 
 // `item` is null whenever the page has never been published -- callers use
 // withFallback()/EMPTY_PRIVACY_POLICY_CONTENT (or EMPTY_TERMS_CONTENT) the

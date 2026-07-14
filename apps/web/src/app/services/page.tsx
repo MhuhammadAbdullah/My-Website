@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Container, Section, Heading, Reveal } from "@agency/ui";
-import { getPageSeo, getServices } from "@/lib/api";
+import { getPageSeo, getServices, getServicesPageContent } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
+import { EMPTY_SERVICES_PAGE_CONTENT } from "@/lib/fallbacks";
 import { ServiceCard } from "@/components/marketing/service-card";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { PageHeading } from "@/components/marketing/page-heading";
@@ -17,7 +18,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ServicesPage() {
-  const services = await withFallback(getServices(), [], "services");
+  const [services, content] = await Promise.all([
+    withFallback(getServices(), [], "services"),
+    withFallback(getServicesPageContent(), null, "services page content").then(
+      (item) => item ?? EMPTY_SERVICES_PAGE_CONTENT,
+    ),
+  ]);
 
   return (
     <>
@@ -25,12 +31,9 @@ export default async function ServicesPage() {
         <Container>
           <PageHeading breadcrumb={[{ label: "Home", href: "/" }, { label: "Services" }]}>
             <Heading level={1} display>
-              Services built to **ship**, not just to pitch.
+              {content.heroHeading}
             </Heading>
-            <p className="mt-5 text-body-lg text-body">
-              Every engagement is scoped, fixed-price by default, and comes with an admin panel so you can
-              keep it running long after we hand it off.
-            </p>
+            <p className="mt-5 text-body-lg text-body">{content.heroDescription}</p>
           </PageHeading>
         </Container>
       </Section>

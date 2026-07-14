@@ -3,8 +3,9 @@ import Link from "next/link";
 import { Mail, MapPin, MessageCircle, Clock, CalendarClock } from "lucide-react";
 import { Container, Section, Heading, Reveal } from "@agency/ui";
 import { resolveGoogleMapsEmbedSrc } from "@agency/utils";
-import { getFaqs, getPageSeo, getSettings } from "@/lib/api";
+import { getFaqs, getPageSeo, getSettings, getContactPageContent } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
+import { EMPTY_CONTACT_PAGE_CONTENT } from "@/lib/fallbacks";
 import { ContactForm } from "@/components/contact/contact-form";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { PageHeading } from "@/components/marketing/page-heading";
@@ -20,9 +21,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactPage() {
-  const [settings, faqs] = await Promise.all([
+  const [settings, faqs, content] = await Promise.all([
     withFallback(getSettings(), {}, "site settings"),
     withFallback(getFaqs("CONTACT"), [], "faqs"),
+    withFallback(getContactPageContent(), null, "contact page content").then(
+      (item) => item ?? EMPTY_CONTACT_PAGE_CONTENT,
+    ),
   ]);
   const hours = settings.business_hours ?? {};
   const mapSrc = resolveGoogleMapsEmbedSrc(settings.google_maps_embed_code, settings.google_maps_embed);
@@ -33,11 +37,9 @@ export default async function ContactPage() {
         <Container>
           <PageHeading breadcrumb={[{ label: "Home", href: "/" }, { label: "Contact" }]}>
             <Heading level={1} display>
-              Let&apos;s build something **worth talking about**.
+              {content.heroHeading}
             </Heading>
-            <p className="mt-5 text-body-lg text-body">
-              Fill out the form, or reach us directly — most people hear back within one business day.
-            </p>
+            <p className="mt-5 text-body-lg text-body">{content.heroDescription}</p>
           </PageHeading>
         </Container>
       </Section>
@@ -62,7 +64,7 @@ export default async function ContactPage() {
                   rel="noreferrer"
                   className="flex items-center gap-3 text-body-sm text-heading hover:text-accent-600"
                 >
-                  <MessageCircle className="size-5 text-accent-500" /> Chat on WhatsApp
+                  <MessageCircle className="size-5 text-accent-500" /> {content.whatsappLabel}
                 </a>
               )}
               {settings.address && (
@@ -89,7 +91,7 @@ export default async function ContactPage() {
                   rel="noreferrer"
                   className="flex items-center gap-3 text-body-sm text-heading hover:text-accent-600"
                 >
-                  <CalendarClock className="size-5 text-accent-500" /> Book an intro call
+                  <CalendarClock className="size-5 text-accent-500" /> {content.calendlyLabel}
                 </Link>
               )}
             </div>
