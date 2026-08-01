@@ -28,6 +28,7 @@ import {
   Globe,
   Lock,
   Scale,
+  Plug,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -114,6 +115,7 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: "Navigation", href: "/navigation", icon: Compass },
       { label: "Footer", href: "/footer", icon: PanelBottom },
       { label: "SEO", href: "/seo", icon: SearchCheck },
+      { label: "Integrations", href: "/integrations", icon: Plug },
       { label: "Messages", href: "/analytics", icon: Mail },
       { label: "Settings", href: "/settings", icon: Settings },
       { label: "Privacy Policy", href: "/privacy-policy", icon: ShieldCheck },

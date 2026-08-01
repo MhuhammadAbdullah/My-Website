@@ -61,6 +61,7 @@ export interface ServiceListItem {
   heroMedia: MediaRead | null;
   // A service shows pricing if and only if this has at least one entry.
   pricingPlans: PricingPlanRead[];
+  updatedAt?: string;
 }
 
 export interface ServiceDetail extends ServiceListItem {
@@ -108,6 +109,7 @@ export interface ProjectListItem {
   isFeatured: boolean;
   category: { id: string; name: string; slug: string } | null;
   gallery: ProjectImageRead[];
+  updatedAt?: string;
 }
 
 export interface ProjectSection {
@@ -314,6 +316,20 @@ export interface SiteSettings {
   tech_stack_display?: "TAGS" | "MARQUEE";
   default_cta?: DefaultCtaRead;
   faq_section_heading?: string;
+  integrations?: IntegrationsSettings;
+}
+
+export interface IntegrationsSettings {
+  gtmId?: string;
+  ga4Id?: string;
+  metaPixelId?: string;
+  googleAdsId?: string;
+  googleAdsConversionLabel?: string;
+  clarityId?: string;
+  googleSiteVerification?: string;
+  headScript?: string;
+  bodyScript?: string;
+  footerScript?: string;
 }
 
 export interface NavItemRead {

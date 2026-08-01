@@ -26,14 +26,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const serviceRoutes = services.map((s) => ({
     url: `${env.NEXT_PUBLIC_SITE_URL}/services/${s.slug}`,
-    lastModified: new Date(),
+    lastModified: s.updatedAt ? new Date(s.updatedAt) : new Date(),
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
   const projectRoutes = projectsPage.items.map((p) => ({
     url: `${env.NEXT_PUBLIC_SITE_URL}/portfolio/${p.slug}`,
-    lastModified: new Date(),
+    lastModified: p.updatedAt ? new Date(p.updatedAt) : new Date(),
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));

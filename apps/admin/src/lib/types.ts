@@ -23,4 +23,18 @@ export interface SiteSettings {
     ctaHref: string;
   };
   faq_section_heading?: string;
+  integrations?: IntegrationsSettings;
+}
+
+export interface IntegrationsSettings {
+  gtmId?: string;
+  ga4Id?: string;
+  metaPixelId?: string;
+  googleAdsId?: string;
+  googleAdsConversionLabel?: string;
+  clarityId?: string;
+  googleSiteVerification?: string;
+  headScript?: string;
+  bodyScript?: string;
+  footerScript?: string;
 }

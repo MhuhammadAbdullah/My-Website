@@ -19,6 +19,7 @@ import {
   toast,
 } from "@agency/ui";
 import { submitContactForm } from "@/lib/api";
+import { trackContactFormConversion } from "@/lib/tracking-events";
 
 export function ContactForm() {
   const {
@@ -36,6 +37,7 @@ export function ContactForm() {
     try {
       await submitContactForm({ ...data, source: "contact-page" });
       toast.success("Message sent — we'll reply within one business day.");
+      trackContactFormConversion();
       reset();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong. Please try again.");

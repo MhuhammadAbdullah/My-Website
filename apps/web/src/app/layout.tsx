@@ -7,6 +7,9 @@ import { resolveBranding } from "@/lib/branding";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { env } from "@/lib/env";
+import { TrackingScripts } from "@/lib/tracking";
+import { CustomScript } from "@/lib/custom-script-injector";
+import { extractGoogleSiteVerificationCode } from "@/lib/seo-verification";
 import "./globals.css";
 
 // Dynamic (not a static `export const metadata`) so the template suffix
@@ -17,6 +20,7 @@ import "./globals.css";
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings().catch(() => null);
   const brandName = resolveBranding(settings ?? {}, "MAB Digital").name;
+  const googleVerification = extractGoogleSiteVerificationCode(settings?.integrations?.googleSiteVerification);
 
   return {
     metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
@@ -25,6 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${brandName}`,
     },
     description: `${brandName} designs and engineers premium web products for startups and teams who refuse to ship something average.`,
+    ...(googleVerification ? { verification: { google: googleVerification } } : {}),
   };
 }
 
@@ -48,6 +53,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     sameAs: Object.values(settings.socials ?? {}),
   };
 
+  const integrations = settings.integrations;
+
   return (
     <html lang="en" className={`${manrope.variable} ${playfairDisplay.variable} ${ibmPlexMono.variable}`}>
       <body>
@@ -55,10 +62,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
+        <CustomScript html={integrations?.headScript} target="head" id="head-script" />
+        <CustomScript html={integrations?.bodyScript} target="body-start" id="body-script" />
+        <TrackingScripts integrations={integrations} />
         <SiteHeader navItems={headerNav} branding={branding} />
         <main className="pt-32">{children}</main>
         <SiteFooter navItems={footerNav} settings={settings} branding={branding} />
         <Toaster />
+        <CustomScript html={integrations?.footerScript} target="body-end" id="footer-script" />
       </body>
     </html>
   );
