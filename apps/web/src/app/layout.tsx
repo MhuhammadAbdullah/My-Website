@@ -8,7 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { env } from "@/lib/env";
 import { TrackingScripts } from "@/lib/tracking";
-import { CustomScript } from "@/lib/custom-script-injector";
+import { renderRawHtml } from "@/lib/raw-html-to-elements";
 import { extractGoogleSiteVerificationCode } from "@/lib/seo-verification";
 import "./globals.css";
 
@@ -62,14 +62,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
-        <CustomScript html={integrations?.headScript} target="head" id="head-script" />
-        <CustomScript html={integrations?.bodyScript} target="body-start" id="body-script" />
+        {renderRawHtml(integrations?.headScript, "head-script")}
+        {renderRawHtml(integrations?.bodyScript, "body-script")}
         <TrackingScripts integrations={integrations} />
         <SiteHeader navItems={headerNav} branding={branding} />
         <main className="pt-32">{children}</main>
         <SiteFooter navItems={footerNav} settings={settings} branding={branding} />
         <Toaster />
-        <CustomScript html={integrations?.footerScript} target="body-end" id="footer-script" />
+        {renderRawHtml(integrations?.footerScript, "footer-script")}
       </body>
     </html>
   );

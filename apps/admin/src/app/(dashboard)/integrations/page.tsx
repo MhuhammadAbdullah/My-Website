@@ -219,8 +219,9 @@ export default function IntegrationsPage() {
           </div>
           <p className="mt-1 text-body-sm text-neutral-500">
             Proves site ownership so Search Console can show indexing/search performance data. Paste the value
-            Google gives you for the "HTML tag" verification method — the full <code>&lt;meta&gt;</code> tag, or
-            just the code, both work.
+            Google gives you for the "HTML tag" verification method here — the full <code>&lt;meta&gt;</code> tag, or
+            just the code, both work. Use this field, not Custom Scripts below — it's what actually renders the tag
+            for Google to find.
           </p>
           <div className="mt-4">
             <Label>Site Verification Code</Label>
