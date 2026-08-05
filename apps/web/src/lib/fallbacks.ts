@@ -56,9 +56,9 @@ export const EMPTY_ABOUT_CONTENT: AboutContentRead = {
   valuesHeading: null,
   timelineHeading: null,
   teamHeading: null,
-  skillsHeading: null,
   certificationsHeading: null,
   technologiesHeading: null,
+  certificationsEnabled: true,
   seo: null,
 };
 

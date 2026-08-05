@@ -16,11 +16,19 @@ const contactSortableFields = ["name", "email", "status", "createdAt", "updatedA
 
 // Tighter limit on the public write endpoint specifically — this is the
 // most likely target for spam/abuse on the whole API.
+//
+// `message` as an object (not a string) matters: express-rate-limit's
+// handler does `response.send(message)`, and Express's res.send() only
+// delegates to res.json() for object/array bodies -- a plain string message
+// (the library's default) comes back as text/plain, which silently breaks
+// every client-side `res.json()` call site and surfaces as a generic
+// "Something went wrong" instead of a real rate-limit message.
 const contactFormLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  message: { error: "Too many messages submitted. Please try again in a few minutes." },
 });
 
 contactRouter.post(

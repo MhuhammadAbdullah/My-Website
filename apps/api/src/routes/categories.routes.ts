@@ -176,3 +176,42 @@ categoriesRouter.delete(
     res.status(204).send();
   }),
 );
+
+categoriesRouter.get(
+  "/influencers",
+  asyncHandler(async (_req, res) => {
+    res.json({ items: await prisma.influencerCategory.findMany({ where: { isEnabled: true }, orderBy: { order: "asc" } }) });
+  }),
+);
+categoriesRouter.get(
+  "/influencers/admin",
+  requireAuth,
+  requirePermission("influencerCategories", "view"),
+  asyncHandler((req, res) => paginatedCategoryList(req, res, prisma.influencerCategory)),
+);
+categoriesRouter.post(
+  "/influencers",
+  requireAuth,
+  requirePermission("influencerCategories", "create"),
+  asyncHandler(async (req, res) => {
+    res.status(201).json({ item: await prisma.influencerCategory.create({ data: req.body }) });
+  }),
+);
+categoriesRouter.patch(
+  "/influencers/:id",
+  requireAuth,
+  requirePermission("influencerCategories", "update"),
+  asyncHandler(async (req, res) => {
+    const data = pickCategoryFields(req.body);
+    res.json({ item: await prisma.influencerCategory.update({ where: { id: req.params.id }, data }) });
+  }),
+);
+categoriesRouter.delete(
+  "/influencers/:id",
+  requireAuth,
+  requirePermission("influencerCategories", "delete"),
+  asyncHandler(async (req, res) => {
+    await prisma.influencerCategory.delete({ where: { id: req.params.id } });
+    res.status(204).send();
+  }),
+);

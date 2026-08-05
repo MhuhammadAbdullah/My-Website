@@ -24,6 +24,31 @@ export interface SiteSettings {
   };
   faq_section_heading?: string;
   integrations?: IntegrationsSettings;
+  influencer_flags?: InfluencerFlagsSettings;
+  influencer_video_guide?: InfluencerVideoGuideSettings;
+  influencer_insights_guide?: InfluencerInsightsGuideSettings;
+}
+
+export interface InfluencerFlagsSettings {
+  marketplaceEnabled: boolean;
+  registrationEnabled: boolean;
+  bookingsEnabled: boolean;
+  maintenanceNotice: string;
+  registrationClosedMessage: string;
+  bookingsDisabledMessage: string;
+}
+
+export interface InfluencerVideoGuideSettings {
+  content: string;
+}
+
+export interface InfluencerInsightsGuideSettings {
+  instagram: string;
+  tiktok: string;
+  youtube: string;
+  facebook: string;
+  linkedin: string;
+  x: string;
 }
 
 export interface IntegrationsSettings {

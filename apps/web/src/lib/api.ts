@@ -11,6 +11,7 @@ import type {
   HomeStatRead,
   HomeWhyReasonRead,
   LegalPageContentRead,
+  MediaRead,
   NavItemRead,
   PageSeoRead,
   PaginatedResponse,
@@ -21,11 +22,11 @@ import type {
   ServiceListItem,
   ServicesPageContentRead,
   SiteSettings,
-  SkillRead,
   TeamMemberRead,
   TechnologyRead,
   TestimonialRead,
 } from "./types";
+import type { InfluencerCardRead, InfluencerDetailRead } from "./influencer-types";
 
 // A hung request (e.g. a cold-starting backend) would otherwise block static
 // generation indefinitely instead of failing fast enough for callers'
@@ -76,8 +77,6 @@ export const getFaqs = (context?: string) =>
 
 export const getTeam = () => apiFetch<{ items: TeamMemberRead[] }>("/team").then((r) => r.items);
 
-export const getSkills = () => apiFetch<{ items: SkillRead[] }>("/skills").then((r) => r.items);
-
 export const getTechnologies = () =>
   apiFetch<{ items: TechnologyRead[] }>("/categories/technologies").then((r) => r.items);
 
@@ -86,7 +85,15 @@ export const getAboutTeamData = () =>
     team: TeamMemberRead[];
     values: { id: string; title: string; description: string; icon: string }[];
     timeline: { id: string; year: string; title: string; description: string }[];
-    certifications: { id: string; name: string; issuer: string; year: string; url: string | null }[];
+    certifications: {
+      id: string;
+      name: string;
+      issuer: string;
+      year: string;
+      description: string | null;
+      image: MediaRead | null;
+      url: string | null;
+    }[];
   }>("/pages/about/team");
 
 export const getAffiliateCategories = () =>
@@ -149,10 +156,42 @@ export const getPrivacyPolicyContent = () =>
 
 export const getTermsContent = () => apiFetch<{ item: LegalPageContentRead | null }>("/pages/terms").then((r) => r.item);
 
-export const getSettings = () => apiFetch<{ settings: SiteSettings }>("/settings").then((r) => r.settings);
+export const getSettings = (init?: RequestInit & { next?: NextFetchRequestConfig }) =>
+  apiFetch<{ settings: SiteSettings }>("/settings", init).then((r) => r.settings);
 
 export const getNav = (location: "HEADER" | "FOOTER") =>
   apiFetch<{ items: NavItemRead[] }>("/navigation").then((r) => r.items.filter((n) => n.location === location));
+
+export interface InfluencerListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  platform?: string;
+  country?: string;
+  city?: string;
+  language?: string;
+  priceMin?: number;
+  priceMax?: number;
+  followersMin?: number;
+  engagementMin?: number;
+  availability?: boolean;
+  verified?: boolean;
+  featured?: boolean;
+  sortBy?: "ratingAverage" | "ratingCount" | "createdAt";
+  sortOrder?: "asc" | "desc";
+}
+
+export const getInfluencers = (params: InfluencerListParams = {}) => {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== "") query.set(key, String(value));
+  }
+  return apiFetch<PaginatedResponse<InfluencerCardRead>>(`/influencers?${query.toString()}`);
+};
+
+export const getInfluencer = (username: string) =>
+  apiFetch<{ item: InfluencerDetailRead }>(`/influencers/${username}`).then((r) => r.item);
 
 export async function submitContactForm(data: {
   name: string;

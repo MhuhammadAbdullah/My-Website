@@ -6,7 +6,6 @@ import {
   type FaqContext,
   type Technology,
   type Faq,
-  type Skill,
 } from "../generated/client/index.js";
 
 const prisma = new PrismaClient();
@@ -35,6 +34,9 @@ async function main() {
     "testimonials", "faqs", "team", "affiliate", "contact", "media", "navigation",
     "footer", "seo", "analytics", "settings", "users", "roles", "permissions",
     "clients", "quotations", "invoices", "payments", "financeSettings", "legal",
+    // Influencer Marketplace
+    "influencers", "influencerApplications", "influencerCategories", "bookings",
+    "discounts", "influencerBadges", "influencerPayouts", "influencerSettings",
   ];
   const actions = ["view", "create", "update", "delete"];
 
@@ -88,6 +90,49 @@ async function main() {
       permissions: {
         create: permissions
           .filter((p) => !["users", "roles", "permissions", "settings"].includes(p.resource))
+          .map((p) => ({ permissionId: p.id })),
+      },
+    },
+  });
+
+  // Two starter roles for the Influencer Marketplace (brief §26) -- not
+  // `isSystem` (unlike Super Admin/Editor above) since they're example
+  // presets an admin should be free to edit or delete via the Roles page,
+  // not roles the platform's own bootstrapping depends on.
+  const managerExcludedResources = ["users", "roles", "permissions", "settings", "financeSettings"];
+  await prisma.role.upsert({
+    where: { slug: "manager" },
+    update: {},
+    create: {
+      name: "Manager",
+      slug: "manager",
+      description: "Runs day-to-day content and Influencer Marketplace operations; no access control or finance settings.",
+      isSystem: false,
+      permissions: {
+        create: permissions
+          .filter((p) => !managerExcludedResources.includes(p.resource))
+          .map((p) => ({ permissionId: p.id })),
+      },
+    },
+  });
+
+  const financeFullResources = ["clients", "quotations", "invoices", "payments", "financeSettings", "influencerPayouts", "influencerSettings", "discounts"];
+  const financeViewOnlyResources = ["bookings", "influencers", "influencerApplications"];
+  await prisma.role.upsert({
+    where: { slug: "finance" },
+    update: {},
+    create: {
+      name: "Finance",
+      slug: "finance",
+      description: "Manages billing, commission, and payouts; read-only on bookings and influencer profiles.",
+      isSystem: false,
+      permissions: {
+        create: permissions
+          .filter(
+            (p) =>
+              financeFullResources.includes(p.resource) ||
+              (financeViewOnlyResources.includes(p.resource) && p.action === "view"),
+          )
           .map((p) => ({ permissionId: p.id })),
       },
     },
@@ -465,19 +510,11 @@ async function main() {
   // ---------------------------------------------------------------------
   // Team / About
   // ---------------------------------------------------------------------
-  const skillSeed = ["Product Strategy", "System Design", "Interface Design", "Frontend Engineering", "Backend Engineering", "DevOps"];
-  const skills: Skill[] = [];
-  for (const [i, name] of skillSeed.entries()) {
-    skills.push(
-      await prisma.skill.upsert({ where: { name }, update: {}, create: { name, proficiency: 85 + (i % 3) * 5, order: i } }),
-    );
-  }
-
   const teamSeed = [
-    { name: "Amara Osei", role: "Founder & Principal Engineer", bio: "Ten years building product for startups from seed to Series C. Leads every architecture decision at MAB Digital.", skillIdx: [0, 1, 3] },
-    { name: "Julian Voss", role: "Design Director", bio: "Formerly design lead at two YC-backed startups. Obsessed with type systems and restraint.", skillIdx: [0, 2] },
-    { name: "Nadia Farrow", role: "Senior Backend Engineer", bio: "Databases, APIs, and the boring infrastructure that makes everything else possible.", skillIdx: [1, 4, 5] },
-    { name: "Chen Liu", role: "Frontend Engineer", bio: "Ships pixel-accurate interfaces fast, and cares more about accessibility than anyone should have to.", skillIdx: [3, 2] },
+    { name: "Amara Osei", role: "Founder & Principal Engineer", bio: "Ten years building product for startups from seed to Series C. Leads every architecture decision at MAB Digital." },
+    { name: "Julian Voss", role: "Design Director", bio: "Formerly design lead at two YC-backed startups. Obsessed with type systems and restraint." },
+    { name: "Nadia Farrow", role: "Senior Backend Engineer", bio: "Databases, APIs, and the boring infrastructure that makes everything else possible." },
+    { name: "Chen Liu", role: "Frontend Engineer", bio: "Ships pixel-accurate interfaces fast, and cares more about accessibility than anyone should have to." },
   ];
   for (const [i, t] of teamSeed.entries()) {
     await prisma.teamMember.create({
@@ -486,7 +523,6 @@ async function main() {
         role: t.role,
         bio: t.bio,
         order: i,
-        skills: { connect: t.skillIdx.map((idx) => ({ id: skills[idx]!.id })) },
       },
     });
   }
@@ -548,7 +584,12 @@ async function main() {
     { title: "Years in business", number: "6", suffix: "", highlightKey: "YEARS_IN_BUSINESS" },
   ];
   for (const [i, s] of homeStatSeed.entries()) {
-    await prisma.homeStat.create({ data: { ...s, order: i } });
+    if (s.highlightKey) {
+      await prisma.homeStat.upsert({ where: { highlightKey: s.highlightKey }, update: {}, create: { ...s, order: i } });
+    } else {
+      const existing = await prisma.homeStat.findFirst({ where: { title: s.title } });
+      if (!existing) await prisma.homeStat.create({ data: { ...s, order: i } });
+    }
   }
 
   const homeProcessStepSeed = [
@@ -676,6 +717,62 @@ async function main() {
   ];
   for (const s of settings) {
     await prisma.siteSetting.upsert({ where: { key: s.key }, update: { value: s.value }, create: s });
+  }
+
+  // ---------------------------------------------------------------------
+  // Influencer Marketplace — admin-managed catalogs (brief §8, §7, §14)
+  // ---------------------------------------------------------------------
+  const influencerCategorySeed = [
+    "Food", "Travel", "Lifestyle", "Fashion", "Beauty", "Technology", "Gaming",
+    "Education", "Finance", "Health", "Fitness", "Parenting", "Business",
+    "Comedy", "Photography", "Cars", "Pets", "Luxury", "Music", "Sports",
+  ];
+  for (const [i, name] of influencerCategorySeed.entries()) {
+    await prisma.influencerCategory.upsert({
+      where: { slug: name.toLowerCase() },
+      update: {},
+      create: { name, slug: name.toLowerCase(), order: i },
+    });
+  }
+
+  const deliverableTypeSeed: Array<{ key: Prisma.InfluencerDeliverableTypeCreateInput["key"]; label: string }> = [
+    { key: "INSTAGRAM_STORY", label: "Instagram Story" },
+    { key: "INSTAGRAM_REEL", label: "Instagram Reel" },
+    { key: "INSTAGRAM_FEED_POST", label: "Instagram Feed Post" },
+    { key: "TIKTOK_VIDEO", label: "TikTok Video" },
+    { key: "YOUTUBE_SHORTS", label: "YouTube Shorts" },
+    { key: "DEDICATED_VIDEO", label: "Dedicated Video" },
+    { key: "PRODUCT_REVIEW", label: "Product Review" },
+    { key: "BRAND_MENTION", label: "Brand Mention" },
+    { key: "UGC", label: "UGC" },
+    { key: "CUSTOM", label: "Custom Package" },
+  ];
+  for (const [i, d] of deliverableTypeSeed.entries()) {
+    await prisma.influencerDeliverableType.upsert({
+      where: { key: d.key },
+      update: {},
+      create: { key: d.key, label: d.label, order: i },
+    });
+  }
+
+  const badgeSeed: Array<{ key: string; label: string; description: string; iconKey: string; color: string }> = [
+    { key: "top-performer", label: "Top Performer", description: "Consistently ranks among the highest-earning, highest-rated influencers.", iconKey: "Trophy", color: "amber" },
+    { key: "fast-growing", label: "Fast Growing", description: "Follower count is growing significantly faster than average.", iconKey: "TrendingUp", color: "emerald" },
+    { key: "highly-engaged", label: "Highly Engaged", description: "Engagement rate well above the platform average.", iconKey: "Flame", color: "orange" },
+    { key: "client-favorite", label: "Client Favorite", description: "High rate of repeat bookings from the same clients.", iconKey: "Heart", color: "rose" },
+    { key: "trusted-creator", label: "Trusted Creator", description: "Long track record of on-time, on-brief campaign delivery.", iconKey: "ShieldCheck", color: "blue" },
+    { key: "trending", label: "Trending", description: "Seeing a recent spike in bookings or profile views.", iconKey: "Sparkles", color: "violet" },
+    { key: "verified", label: "Verified", description: "Identity and platform ownership manually verified by the agency.", iconKey: "BadgeCheck", color: "sky" },
+    { key: "authority", label: "Authority", description: "Recognized voice within their content category.", iconKey: "Crown", color: "yellow" },
+    { key: "premium", label: "Premium", description: "Consistently delivers premium-tier campaign results.", iconKey: "Gem", color: "purple" },
+    { key: "rising-star", label: "Rising Star", description: "New to the platform but already standing out.", iconKey: "Star", color: "pink" },
+  ];
+  for (const [i, b] of badgeSeed.entries()) {
+    await prisma.influencerBadge.upsert({
+      where: { key: b.key },
+      update: {},
+      create: { ...b, order: i },
+    });
   }
 
   console.log("Seed complete.");

@@ -16,7 +16,7 @@ interface Faq {
 
 const client = createResourceClient<Faq>("/faqs");
 
-const contextOptions = ["GENERAL", "SERVICE", "PORTFOLIO", "CONTACT", "AFFILIATE"].map((v) => ({
+const contextOptions = ["GENERAL", "SERVICE", "PORTFOLIO", "CONTACT", "AFFILIATE", "INFLUENCER"].map((v) => ({
   value: v,
   label: v.charAt(0) + v.slice(1).toLowerCase(),
 }));
@@ -27,7 +27,7 @@ function FaqsPageInner() {
   return (
     <PaginatedResourceManager
       title="FAQs"
-      description="Frequently asked questions shown on the home, service, portfolio, contact, and affiliate pages."
+      description="Frequently asked questions shown on the home, service, portfolio, contact, affiliate, and influencer marketplace pages."
       resourceClient={client}
       searchPlaceholder="Search questions and answers…"
       sortOptions={[

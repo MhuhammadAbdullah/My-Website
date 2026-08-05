@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import {
   Button,
@@ -216,19 +217,25 @@ function CategoryList({ endpoint, paramPrefix, label }: { endpoint: string; para
 }
 
 function CategoriesPageInner() {
+  // Lets the Influencer Marketplace nav group deep-link straight to its own
+  // categories (?tab=influencers) instead of landing on "Services" and
+  // making the admin click over manually.
+  const initialTab = useSearchParams().get("tab") ?? "services";
+
   return (
     <div>
       <Heading level={2}>Categories</Heading>
       <p className="mt-1 text-body-sm text-neutral-500">
-        Organize services, portfolio projects, technologies, and affiliate tools.
+        Organize services, portfolio projects, technologies, affiliate tools, and influencer marketplace categories.
       </p>
 
-      <Tabs defaultValue="services" className="mt-6">
+      <Tabs defaultValue={initialTab} className="mt-6">
         <TabsList>
           <TabsTrigger value="services">Service categories</TabsTrigger>
           <TabsTrigger value="projects">Project categories</TabsTrigger>
           <TabsTrigger value="technologies">Technologies</TabsTrigger>
           <TabsTrigger value="affiliate">Affiliate categories</TabsTrigger>
+          <TabsTrigger value="influencers">Influencer categories</TabsTrigger>
         </TabsList>
         <TabsContent value="services">
           <CategoryList endpoint="/categories/services" paramPrefix="svc" label="Category" />
@@ -241,6 +248,9 @@ function CategoriesPageInner() {
         </TabsContent>
         <TabsContent value="affiliate">
           <CategoryList endpoint="/affiliate/categories" paramPrefix="aff" label="Category" />
+        </TabsContent>
+        <TabsContent value="influencers">
+          <CategoryList endpoint="/categories/influencers" paramPrefix="inf" label="Category" />
         </TabsContent>
       </Tabs>
     </div>

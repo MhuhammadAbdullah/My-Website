@@ -132,12 +132,6 @@ export interface ProjectDetail extends ProjectListItem {
   seo: SeoRead | null;
 }
 
-export interface SkillRead {
-  id: string;
-  name: string;
-  proficiency: number;
-}
-
 export interface TeamMemberRead {
   id: string;
   name: string;
@@ -145,7 +139,6 @@ export interface TeamMemberRead {
   bio: string;
   avatar: MediaRead | null;
   socials: Record<string, string> | null;
-  skills: SkillRead[];
 }
 
 export interface AffiliateToolRead {
@@ -236,9 +229,9 @@ export interface AboutContentRead {
   valuesHeading: string | null;
   timelineHeading: string | null;
   teamHeading: string | null;
-  skillsHeading: string | null;
   certificationsHeading: string | null;
   technologiesHeading: string | null;
+  certificationsEnabled: boolean;
   seo: SeoRead | null;
 }
 
@@ -317,6 +310,31 @@ export interface SiteSettings {
   default_cta?: DefaultCtaRead;
   faq_section_heading?: string;
   integrations?: IntegrationsSettings;
+  influencer_flags?: InfluencerFlags;
+  influencer_video_guide?: InfluencerVideoGuide;
+  influencer_insights_guide?: InfluencerInsightsGuide;
+}
+
+export interface InfluencerFlags {
+  marketplaceEnabled: boolean;
+  registrationEnabled: boolean;
+  bookingsEnabled: boolean;
+  maintenanceNotice: string;
+  registrationClosedMessage: string;
+  bookingsDisabledMessage: string;
+}
+
+export interface InfluencerVideoGuide {
+  content: string;
+}
+
+export interface InfluencerInsightsGuide {
+  instagram: string;
+  tiktok: string;
+  youtube: string;
+  facebook: string;
+  linkedin: string;
+  x: string;
 }
 
 export interface IntegrationsSettings {

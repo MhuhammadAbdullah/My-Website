@@ -7,6 +7,9 @@ import {
   techStackDisplaySchema,
   defaultCtaSchema,
   integrationsSchema,
+  influencerFlagsSchema,
+  influencerVideoGuideSchema,
+  influencerInsightsGuideSchema,
 } from "@agency/types";
 import { z } from "zod";
 import { isGoogleMapsUrl, extractGoogleMapsEmbedSrc } from "@agency/utils";
@@ -45,6 +48,9 @@ const settingValidators: Record<string, (value: unknown) => Prisma.InputJsonValu
   default_cta: (value) => defaultCtaSchema.parse(value),
   faq_section_heading: (value) => z.string().min(1, "FAQ heading is required").parse(value),
   integrations: (value) => integrationsSchema.parse(value),
+  influencer_flags: (value) => influencerFlagsSchema.parse(value),
+  influencer_video_guide: (value) => influencerVideoGuideSchema.parse(value),
+  influencer_insights_guide: (value) => influencerInsightsGuideSchema.parse(value),
 };
 
 settingsRouter.get(

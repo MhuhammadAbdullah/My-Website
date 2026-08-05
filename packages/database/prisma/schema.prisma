@@ -42,6 +42,7 @@ enum FaqContext {
   PORTFOLIO
   CONTACT
   AFFILIATE
+  INFLUENCER
 }
 
 enum NavLocation {
@@ -111,23 +112,136 @@ enum PaymentMethod {
   CUSTOM
 }
 
+// -- Influencer Marketplace enums --------------------------------------------
+
+enum InfluencerStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  NEEDS_MORE_INFO
+  SUSPENDED
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  TIKTOK
+  YOUTUBE
+  FACEBOOK
+  LINKEDIN
+  TWITTER_X
+  PINTEREST
+  SNAPCHAT
+  THREADS
+}
+
+enum DeliverableType {
+  INSTAGRAM_STORY
+  INSTAGRAM_REEL
+  INSTAGRAM_FEED_POST
+  TIKTOK_VIDEO
+  YOUTUBE_SHORTS
+  DEDICATED_VIDEO
+  PRODUCT_REVIEW
+  BRAND_MENTION
+  UGC
+  CUSTOM
+}
+
+// Encodes the full booking workflow (brief:11) as a single field with a
+// server-validated allowed-transition table, rather than several booleans.
+enum BookingStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  AWAITING_PAYMENT
+  PAYMENT_RECEIVED
+  APPROVED
+  INFLUENCER_NOTIFIED
+  ACCEPTED_BY_INFLUENCER
+  DECLINED_BY_INFLUENCER
+  IN_PROGRESS
+  DELIVERED
+  CLIENT_APPROVED
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum DiscountScope {
+  ALL
+  INFLUENCER
+  CATEGORY
+  FIRST_BOOKING
+}
+
+enum DiscountApprovalStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum PayoutMethodType {
+  BANK_ACCOUNT
+  IBAN
+  EASYPAISA
+  JAZZCASH
+  PAYPAL
+  WISE
+  PAYONEER
+}
+
+enum PayoutMethodStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum BadgeAwardStatus {
+  RECOMMENDED
+  APPROVED
+  REJECTED
+}
+
+enum BadgeSource {
+  AUTOMATIC
+  MANUAL
+}
+
+enum AudienceLocationLevel {
+  COUNTRY
+  STATE
+  CITY
+}
+
+enum NotificationRecipientType {
+  STAFF
+  INFLUENCER
+}
+
 // ---------------------------------------------------------------------------
 // Auth (Better Auth — Prisma adapter shape) + RBAC
 // ---------------------------------------------------------------------------
 
 model User {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // Better Auth "admin" plugin baseline
-  banned         Boolean   @default(false)
-  banReason      String?
-  banExpires     DateTime?
+  banned     Boolean   @default(false)
+  banReason  String?
+  banExpires DateTime?
 
   // Granular RBAC extension
   roleId String?
@@ -139,6 +253,14 @@ model User {
   createdQuotations Quotation[]
   createdInvoices   Invoice[]
   createdPayments   Payment[]
+
+  // Influencer Marketplace — staff review/processing actions
+  reviewedInfluencers   Influencer[]
+  reviewedBadgeAwards   InfluencerBadgeAward[]
+  reviewedPayoutMethods InfluencerPayoutMethod[]
+  processedPayouts      InfluencerPayout[]
+  bookingStatusChanges  BookingStatusHistory[]
+  notifications         Notification[]
 
   @@map("users")
 }
@@ -233,26 +355,42 @@ model RolePermission {
 // ---------------------------------------------------------------------------
 
 model Media {
-  id         String   @id @default(cuid())
-  publicId   String   @unique
-  url        String
-  width      Int?
-  height     Int?
-  format     String?
-  bytes      Int?
-  altText    String?
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  publicId  String   @unique
+  url       String
+  width     Int?
+  height    Int?
+  format    String?
+  bytes     Int?
+  altText   String?
+  // True for assets uploaded with Cloudinary's "authenticated" delivery
+  // type (identity documents -- CNIC/passport scans) -- `url` on these rows
+  // is NOT a working public link; a fresh signed URL must be generated
+  // per-request (see apps/api/src/lib/cloudinary.ts signPrivateMediaUrl)
+  // and only ever handed to an authenticated, permissioned admin.
+  isPrivate Boolean  @default(false)
+  createdAt DateTime @default(now())
 
-  serviceHero      Service[]      @relation("ServiceHeroMedia")
-  technologyLogo   Technology[]
-  testimonialAvatar Testimonial[]
-  teamMemberAvatar TeamMember[]
-  affiliateToolLogo AffiliateTool[]
-  ogImages         SeoMeta[]      @relation("SeoOgImage")
-  twitterImages    SeoMeta[]      @relation("SeoTwitterImage")
+  serviceHero         Service[]         @relation("ServiceHeroMedia")
+  technologyLogo      Technology[]
+  testimonialAvatar   Testimonial[]
+  teamMemberAvatar    TeamMember[]
+  affiliateToolLogo   AffiliateTool[]
+  ogImages            SeoMeta[]         @relation("SeoOgImage")
+  twitterImages       SeoMeta[]         @relation("SeoTwitterImage")
   homeHeroBackgrounds HomePageContent[]
-  paymentAttachments Payment[]
-  pageSeoImages    PageSeo[]
+  paymentAttachments  Payment[]
+  pageSeoImages       PageSeo[]
+  certificationImages Certification[]
+
+  // Influencer Marketplace
+  influencerProfilePhotos      InfluencerProfile[]       @relation("InfluencerProfilePhoto")
+  influencerCoverImages        InfluencerProfile[]       @relation("InfluencerCoverImage")
+  influencerIntroVideos        InfluencerProfile[]       @relation("InfluencerIntroVideo")
+  influencerPortfolioItems     InfluencerPortfolioItem[]
+  influencerCollaborationLogos InfluencerCollaboration[]
+  bookingAttachments           BookingAttachment[]
+  influencerIdentityDocuments  Influencer[]
 
   @@map("media")
 }
@@ -303,12 +441,13 @@ model SeoMeta {
   ogImage      Media? @relation("SeoOgImage", fields: [ogImageId], references: [id])
   twitterImage Media? @relation("SeoTwitterImage", fields: [twitterImageId], references: [id])
 
-  service       Service?
-  project       Project?
-  homePage      HomePageContent?
-  aboutPage     AboutPageContent?
+  service           Service?
+  project           Project?
+  homePage          HomePageContent?
+  aboutPage         AboutPageContent?
   privacyPolicyPage PrivacyPolicyContent?
   termsPage         TermsContent?
+  influencerProfile InfluencerProfile?
 
   @@map("seo_meta")
 }
@@ -332,17 +471,17 @@ model Technology {
 }
 
 model Testimonial {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   author    String
   role      String?
   company   String?
   avatarId  String?
   quote     String
-  rating    Int      @default(5)
+  rating    Int           @default(5)
   status    ContentStatus @default(PUBLISHED)
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  order     Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
   avatar   Media?    @relation(fields: [avatarId], references: [id])
   services Service[]
@@ -352,14 +491,14 @@ model Testimonial {
 }
 
 model Faq {
-  id        String     @id @default(cuid())
+  id        String        @id @default(cuid())
   question  String
   answer    String
-  context   FaqContext @default(GENERAL)
-  order     Int        @default(0)
+  context   FaqContext    @default(GENERAL)
+  order     Int           @default(0)
   status    ContentStatus @default(PUBLISHED)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
   services Service[]
 
@@ -384,31 +523,31 @@ model ServiceCategory {
 }
 
 model Service {
-  id          String        @id @default(cuid())
-  categoryId  String?
-  name        String
-  slug        String        @unique
-  tagline     String
-  description String
-  benefits    String[]
-  process     Json // ordered [{ title, description }]
+  id           String        @id @default(cuid())
+  categoryId   String?
+  name         String
+  slug         String        @unique
+  tagline      String
+  description  String
+  benefits     String[]
+  process      Json // ordered [{ title, description }]
   deliverables String[]
-  timeline    String
-  heroMediaId String?
-  status      ContentStatus @default(DRAFT)
-  isFeatured  Boolean       @default(false)
-  order       Int           @default(0)
-  seoId       String?       @unique
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  timeline     String
+  heroMediaId  String?
+  status       ContentStatus @default(DRAFT)
+  isFeatured   Boolean       @default(false)
+  order        Int           @default(0)
+  seoId        String?       @unique
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
-  category      ServiceCategory? @relation(fields: [categoryId], references: [id])
-  heroMedia     Media?           @relation("ServiceHeroMedia", fields: [heroMediaId], references: [id])
-  seo           SeoMeta?         @relation(fields: [seoId], references: [id])
-  technologies  Technology[]     @relation("ServiceTechnologies")
-  pricingPlans  PricingPlan[]
-  faqs          Faq[]
-  testimonials  Testimonial[]
+  category     ServiceCategory? @relation(fields: [categoryId], references: [id])
+  heroMedia    Media?           @relation("ServiceHeroMedia", fields: [heroMediaId], references: [id])
+  seo          SeoMeta?         @relation(fields: [seoId], references: [id])
+  technologies Technology[]     @relation("ServiceTechnologies")
+  pricingPlans PricingPlan[]
+  faqs         Faq[]
+  testimonials Testimonial[]
 
   relatedFrom Service[] @relation("RelatedServices")
   relatedTo   Service[] @relation("RelatedServices")
@@ -426,11 +565,11 @@ model PricingPlan {
   priceLabel    String? // e.g. "Starting from"
   currency      String? // ISO 4217 code; null = use the site's global currency setting
   features      String[]
-  isFeatured    Boolean  @default(false) // Custom Quote card
-  isCustomQuote Boolean  @default(false)
-  ctaLabel      String   @default("Get Started")
-  ctaHref       String   @default("/contact")
-  order         Int      @default(0)
+  isFeatured    Boolean     @default(false) // Custom Quote card
+  isCustomQuote Boolean     @default(false)
+  ctaLabel      String      @default("Get Started")
+  ctaHref       String      @default("/contact")
+  order         Int         @default(0)
 
   service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
@@ -455,26 +594,26 @@ model ProjectCategory {
 }
 
 model Project {
-  id             String        @id @default(cuid())
-  categoryId     String?
-  title          String
-  slug           String        @unique
-  client         String?
-  summary        String
-  sections       Json     @default("[]") // ordered [{ id, title, content, icon, order }]
-  results        Json // ordered [{ label, value }]
-  liveUrl        String?
-  githubUrl      String?
-  videoUrl       String?
-  videoPublicId  String?
-  timelineStart  DateTime?
-  timelineEnd    DateTime?
-  status         ContentStatus @default(DRAFT)
-  isFeatured     Boolean       @default(false)
-  order          Int           @default(0)
-  seoId          String?       @unique
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id            String        @id @default(cuid())
+  categoryId    String?
+  title         String
+  slug          String        @unique
+  client        String?
+  summary       String
+  sections      Json          @default("[]") // ordered [{ id, title, content, icon, order }]
+  results       Json // ordered [{ label, value }]
+  liveUrl       String?
+  githubUrl     String?
+  videoUrl      String?
+  videoPublicId String?
+  timelineStart DateTime?
+  timelineEnd   DateTime?
+  status        ContentStatus @default(DRAFT)
+  isFeatured    Boolean       @default(false)
+  order         Int           @default(0)
+  seoId         String?       @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   category     ProjectCategory? @relation(fields: [categoryId], references: [id])
   seo          SeoMeta?         @relation(fields: [seoId], references: [id])
@@ -523,22 +662,9 @@ model TeamMember {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
-  avatar Media? @relation(fields: [avatarId], references: [id])
-  skills Skill[]
+  avatar Media?  @relation(fields: [avatarId], references: [id])
 
   @@map("team_members")
-}
-
-model Skill {
-  id          String  @id @default(cuid())
-  name        String  @unique
-  proficiency Int     @default(80) // 0-100
-  order       Int     @default(0)
-  isEnabled   Boolean @default(true)
-
-  teamMembers TeamMember[]
-
-  @@map("skills")
 }
 
 model CoreValue {
@@ -552,22 +678,26 @@ model CoreValue {
 }
 
 model TimelineEvent {
-  id          String   @id @default(cuid())
+  id          String @id @default(cuid())
   year        String
   title       String
   description String
-  order       Int      @default(0)
+  order       Int    @default(0)
 
   @@map("timeline_events")
 }
 
 model Certification {
-  id       String  @id @default(cuid())
-  name     String
-  issuer   String
-  year     String
-  url      String?
-  order    Int     @default(0)
+  id          String  @id @default(cuid())
+  name        String
+  issuer      String
+  year        String
+  description String?
+  imageId     String?
+  url         String?
+  order       Int     @default(0)
+
+  image Media? @relation(fields: [imageId], references: [id])
 
   @@map("certifications")
 }
@@ -666,7 +796,7 @@ model SiteSetting {
 // ---------------------------------------------------------------------------
 
 model HomePageContent {
-  id     String @id @default(cuid())
+  id String @id @default(cuid())
 
   // Hero
   heroBadgeText         String?
@@ -685,34 +815,34 @@ model HomePageContent {
   heroSecondaryCtaNewTab  Boolean @default(false)
 
   // Contact CTA (the single CTA block at the bottom of the home page)
-  contactCtaHeading    String?
+  contactCtaHeading     String?
   contactCtaDescription String?
-  contactCtaButtonText String?
-  contactCtaButtonHref String?
+  contactCtaButtonText  String?
+  contactCtaButtonHref  String?
 
   // Section headings/labels below the hero. Nullable so the existing row
   // keeps working untouched; the frontend falls back to the current copy
   // (via `??`) whenever one of these is null. May contain `**text**`
   // emphasis markers -- see Heading component in packages/ui.
-  storyHeading          String?
-  storyButtonLabel      String?
-  storyMissionLabel     String?
-  servicesHeading       String?
-  servicesDescription   String?
-  servicesButtonLabel   String?
-  portfolioHeading      String?
-  portfolioDescription  String?
-  portfolioButtonLabel  String?
-  processHeading        String?
-  technologiesHeading   String?
-  whyHeading             String?
-  testimonialsHeading   String?
+  storyHeading         String?
+  storyButtonLabel     String?
+  storyMissionLabel    String?
+  servicesHeading      String?
+  servicesDescription  String?
+  servicesButtonLabel  String?
+  portfolioHeading     String?
+  portfolioDescription String?
+  portfolioButtonLabel String?
+  processHeading       String?
+  technologiesHeading  String?
+  whyHeading           String?
+  testimonialsHeading  String?
 
   seoId     String?  @unique
   updatedAt DateTime @updatedAt
 
-  heroBackgroundImage Media?     @relation(fields: [heroBackgroundImageId], references: [id])
-  seo                 SeoMeta?   @relation(fields: [seoId], references: [id])
+  heroBackgroundImage Media?   @relation(fields: [heroBackgroundImageId], references: [id])
+  seo                 SeoMeta? @relation(fields: [seoId], references: [id])
 
   @@map("home_page_content")
 }
@@ -761,26 +891,29 @@ model HomeWhyReason {
 }
 
 model AboutPageContent {
-  id        String   @id @default(cuid())
-  story     String
-  mission   String
-  vision    String
+  id         String @id @default(cuid())
+  story      String
+  mission    String
+  vision     String
   philosophy String
 
   // Section headings/labels beyond the hero paragraph above. Nullable so the
   // existing row keeps working untouched; the frontend falls back to the
   // current copy (via `??`) whenever one of these is null. May contain
   // `**text**` emphasis markers -- see Heading component in packages/ui.
-  heroHeading            String?
-  missionLabel           String?
-  visionLabel            String?
-  philosophyLabel        String?
-  valuesHeading          String?
-  timelineHeading        String?
-  teamHeading            String?
-  skillsHeading          String?
-  certificationsHeading  String?
-  technologiesHeading    String?
+  heroHeading           String?
+  missionLabel          String?
+  visionLabel           String?
+  philosophyLabel       String?
+  valuesHeading         String?
+  timelineHeading       String?
+  teamHeading           String?
+  certificationsHeading String?
+  technologiesHeading   String?
+
+  // Lets admins hide the whole Certifications section from the About page
+  // without deleting the certification rows themselves.
+  certificationsEnabled Boolean @default(true)
 
   seoId     String?  @unique
   updatedAt DateTime @updatedAt
@@ -893,6 +1026,7 @@ model Client {
 
   quotations Quotation[]
   invoices   Invoice[]
+  bookings   Booking[]
 
   @@map("finance_clients")
 }
@@ -975,6 +1109,7 @@ model Invoice {
   createdBy User?         @relation(fields: [createdById], references: [id])
   items     InvoiceItem[]
   payments  Payment[]
+  booking   Booking?
 
   @@map("finance_invoices")
 }
@@ -1037,4 +1172,668 @@ model FinanceSettings {
   updatedAt           DateTime @updatedAt
 
   @@map("finance_settings")
+}
+
+// ---------------------------------------------------------------------------
+// Influencer Marketplace
+//
+// A deliberately SEPARATE principal type from `User` (see Influencer /
+// InfluencerSession / InfluencerAuthAccount / InfluencerVerification below) —
+// a second Better Auth instance (packages/auth/src/influencer-server.ts) is
+// bound to these tables instead of users/sessions/accounts/verifications.
+// Self-registering marketplace vendors (CNIC uploads, payout details, public
+// profiles) don't share the admin-staff RBAC/ban semantics `User` was built
+// for. `Influencer` itself doubles as the application record: a row with
+// status=PENDING has no live public profile yet.
+// ---------------------------------------------------------------------------
+
+model Influencer {
+  id              String           @id @default(cuid())
+  name            String
+  email           String           @unique
+  emailVerified   Boolean          @default(false)
+  image           String?
+  status          InfluencerStatus @default(PENDING)
+  appliedAt       DateTime         @default(now())
+  reviewedAt      DateTime?
+  reviewedById    String?
+  rejectionReason String?
+
+  // Identity verification (brief §16) -- collected at application time,
+  // only ever readable by staff with `influencerApplications:view` via a
+  // freshly signed Cloudinary URL (see isPrivate on Media above), never
+  // exposed on any public endpoint.
+  identityDocumentType String? // "CNIC" | "PASSPORT"
+  identityDocumentId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reviewedBy       User?  @relation(fields: [reviewedById], references: [id])
+  identityDocument Media? @relation(fields: [identityDocumentId], references: [id])
+
+  sessions InfluencerSession[]
+  accounts InfluencerAuthAccount[]
+
+  profile InfluencerProfile?
+
+  bookings             Booking[]
+  statusHistoryChanges BookingStatusHistory[]
+  payoutMethods        InfluencerPayoutMethod[]
+  payouts              InfluencerPayout[]
+  badgeAwards          InfluencerBadgeAward[]
+  reviews              InfluencerReview[]
+  discounts            Discount[]
+  discountResponses    DiscountInfluencerResponse[]
+  notifications        Notification[]
+
+  @@map("influencers")
+}
+
+model InfluencerSession {
+  id           String   @id @default(cuid())
+  token        String   @unique
+  influencerId String
+  expiresAt    DateTime
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  influencer Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+
+  @@map("influencer_sessions")
+}
+
+model InfluencerAuthAccount {
+  id                    String    @id @default(cuid())
+  influencerId          String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  influencer Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("influencer_auth_accounts")
+}
+
+model InfluencerVerification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("influencer_verifications")
+}
+
+model InfluencerCategory {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  order     Int      @default(0)
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  influencers InfluencerProfile[]
+  discounts   Discount[]
+
+  @@map("influencer_categories")
+}
+
+model InfluencerProfile {
+  id                        String            @id @default(cuid())
+  influencerId              String            @unique
+  username                  String            @unique
+  tagline                   String?
+  bio                       String?
+  profilePhotoId            String?
+  coverImageId              String?
+  introVideoId              String?
+  countryCode               String?
+  city                      String?
+  languages                 String[]          @default([])
+  isVerified                Boolean           @default(false)
+  isFeatured                Boolean           @default(false)
+  featuredOrder             Int               @default(0)
+  availableForBooking       Boolean           @default(true)
+  ratingAverage             Decimal           @default(0)
+  ratingCount               Int               @default(0)
+  commissionOverridePercent Decimal?
+  publicStatus              ContentStatus     @default(DRAFT)
+  // Collected at application time (brief §15 "Payout Preferences") -- which
+  // method type they'd like to use, not the actual account details. Real
+  // payout details are a separate, approval-gated submission (see
+  // InfluencerPayoutMethod / brief §19).
+  preferredPayoutMethod     PayoutMethodType?
+  seoId                     String?           @unique
+  createdAt                 DateTime          @default(now())
+  updatedAt                 DateTime          @updatedAt
+
+  influencer   Influencer           @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  profilePhoto Media?               @relation("InfluencerProfilePhoto", fields: [profilePhotoId], references: [id])
+  coverImage   Media?               @relation("InfluencerCoverImage", fields: [coverImageId], references: [id])
+  introVideo   Media?               @relation("InfluencerIntroVideo", fields: [introVideoId], references: [id])
+  seo          SeoMeta?             @relation(fields: [seoId], references: [id])
+  categories   InfluencerCategory[]
+
+  platforms      InfluencerPlatform[]
+  pricingItems   InfluencerPricingItem[]
+  pricingCards   InfluencerPricingCard[]
+  portfolioItems InfluencerPortfolioItem[]
+  collaborations InfluencerCollaboration[]
+
+  @@map("influencer_profiles")
+}
+
+// Numbers are self-reported by the influencer (from their own platform
+// Insights dashboards), not synced live from each platform's official API --
+// see becomeInfluencerForm/dashboard "Platform Analytics" tab. `engagementRate`
+// is NOT directly editable -- it's server-computed from avgLikes/avgComments/
+// avgShares/followers on every save (see influencer-me.routes.ts), so the
+// displayed figure is always a real calculation, never a typed guess.
+// `accountReach` (period-level "accounts reached") is distinct from
+// `avgReach` (average reach per individual post, labelled "Average Content
+// Reach" in the UI) -- these are two different metrics on every platform's
+// own Insights screen, both raw/self-reported since neither can be derived
+// from the other. Audience demographics (gender/age/location) are scoped
+// PER PLATFORM here (brief §19/§20: each platform tab shows its own
+// audience breakdown), not one profile-wide blend.
+model InfluencerPlatform {
+  id                  String         @id @default(cuid())
+  influencerProfileId String
+  platform            SocialPlatform
+  handle              String?
+  profileUrl          String?
+  followers           Int            @default(0)
+  following           Int            @default(0)
+  posts               Int            @default(0)
+  engagementRate      Decimal        @default(0)
+  accountReach        Int            @default(0)
+  avgReach            Int            @default(0)
+  avgViews            Int            @default(0)
+  avgLikes            Int            @default(0)
+  avgComments         Int            @default(0)
+  avgShares           Int            @default(0)
+  avgSaves            Int            @default(0)
+  isPrimary           Boolean        @default(false)
+  order               Int            @default(0)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  profile           InfluencerProfile            @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  audienceInsight   InfluencerAudienceInsight?
+  audienceLocations InfluencerAudienceLocation[]
+
+  @@unique([influencerProfileId, platform])
+  @@map("influencer_platforms")
+}
+
+model InfluencerAudienceInsight {
+  id                   String   @id @default(cuid())
+  influencerPlatformId String   @unique
+  genderMalePercent    Decimal  @default(0)
+  genderFemalePercent  Decimal  @default(0)
+  genderOtherPercent   Decimal  @default(0)
+  ageGroups            Json     @default("{}") // { "13-17": 12, "18-24": 30, ... }
+  updatedAt            DateTime @updatedAt
+
+  platform InfluencerPlatform @relation(fields: [influencerPlatformId], references: [id], onDelete: Cascade)
+
+  @@map("influencer_audience_insights")
+}
+
+model InfluencerAudienceLocation {
+  id                   String                @id @default(cuid())
+  influencerPlatformId String
+  level                AudienceLocationLevel
+  name                 String
+  percentage           Decimal
+  order                Int                   @default(0)
+
+  platform InfluencerPlatform @relation(fields: [influencerPlatformId], references: [id], onDelete: Cascade)
+
+  @@index([influencerPlatformId])
+  @@map("influencer_audience_locations")
+}
+
+// Admin-managed catalog -- "Admin can enable or disable pricing fields"
+// (brief §7) controls which deliverable types are offerable platform-wide;
+// each influencer then sets their own price for whichever enabled types
+// they support via InfluencerPricingItem.
+model InfluencerDeliverableType {
+  id                String          @id @default(cuid())
+  key               DeliverableType @unique
+  label             String
+  isEnabledGlobally Boolean         @default(true)
+  order             Int             @default(0)
+
+  pricingItems InfluencerPricingItem[]
+
+  @@map("influencer_deliverable_types")
+}
+
+model InfluencerPricingItem {
+  id                  String  @id @default(cuid())
+  influencerProfileId String
+  deliverableTypeId   String
+  customLabel         String? // used when deliverableType.key == CUSTOM
+  price               Decimal
+  currency            String?
+  isEnabled           Boolean @default(true)
+  order               Int     @default(0)
+
+  profile         InfluencerProfile         @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  deliverableType InfluencerDeliverableType @relation(fields: [deliverableTypeId], references: [id])
+
+  @@unique([influencerProfileId, deliverableTypeId])
+  @@map("influencer_pricing_items")
+}
+
+// "Package" cards (Instagram Reel, TikTok Video, Brand Mention, etc) --
+// these now ARE what a client books against (see bookingSubmissionSchema's
+// `pricingCardId`), replacing InfluencerPricingItem's old "Required
+// deliverables" role above (that model/UI is retired but left in place,
+// still read by the public marketplace price filter/badge scoring).
+// `isCustomQuote` cards have no fixed price (`price` is null) -- the client
+// still picks them from the same dropdown, but the influencer negotiates
+// the actual amount afterward (admin sets the real gross amount at the
+// AWAITING_PAYMENT transition, same override path used for any manual
+// adjustment). `features` is a plain string array (bullet points), not a
+// separate table -- no per-feature metadata is ever needed.
+model InfluencerPricingCard {
+  id                    String   @id @default(cuid())
+  influencerProfileId   String
+  title                 String
+  price                 Decimal?
+  currency              String?
+  estimatedDeliveryTime String?
+  description           String?
+  features              String[]
+  isCustomQuote         Boolean  @default(false)
+  isEnabled             Boolean  @default(true)
+  order                 Int      @default(0)
+  createdAt             DateTime @default(now())
+
+  profile InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+
+  @@map("influencer_pricing_cards")
+}
+
+// Video-only showcase reel (image upload deliberately removed -- keeping
+// exactly one media type eliminates the isVideo(format) guessing that was
+// misrendering items). No metadata fields by design -- just the video,
+// visibility, and manual sort order.
+model InfluencerPortfolioItem {
+  id                  String   @id @default(cuid())
+  influencerProfileId String
+  mediaId             String
+  isPublic            Boolean  @default(true)
+  order               Int      @default(0)
+  createdAt           DateTime @default(now())
+
+  profile InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  media   Media             @relation(fields: [mediaId], references: [id])
+
+  @@map("influencer_portfolio_items")
+}
+
+// Showcase case-study blurbs, distinct from actual Booking records -- an
+// influencer can list pre-platform brand work here even without a matching
+// Booking.
+model InfluencerCollaboration {
+  id                  String   @id @default(cuid())
+  influencerProfileId String
+  brandName           String
+  brandLogoId         String?
+  description         String?
+  resultSummary       String?
+  order               Int      @default(0)
+  createdAt           DateTime @default(now())
+
+  profile   InfluencerProfile @relation(fields: [influencerProfileId], references: [id], onDelete: Cascade)
+  brandLogo Media?            @relation(fields: [brandLogoId], references: [id])
+
+  @@map("influencer_collaborations")
+}
+
+// Created at booking-completion time (by the client or backfilled by admin)
+// -- also feeds the Top Performers ranking, so this is the one review table
+// for both the public reviews section and internal scoring.
+model InfluencerReview {
+  id            String        @id @default(cuid())
+  influencerId  String
+  bookingId     String?       @unique
+  authorName    String
+  authorCompany String?
+  rating        Int
+  comment       String
+  status        ContentStatus @default(PUBLISHED)
+  createdAt     DateTime      @default(now())
+
+  influencer Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  booking    Booking?   @relation(fields: [bookingId], references: [id])
+
+  // [influencerId, status] backs both the admin's GROUP BY influencerId
+  // aggregate (influencer-reviews.routes.ts's /admin/summary) and the
+  // public detail route's `where: { influencerId, status: PUBLISHED }` --
+  // status alone backs the admin flat list filtering by status across
+  // every influencer at once (no influencerId in that query).
+  @@index([influencerId, status])
+  @@index([status])
+  @@map("influencer_reviews")
+}
+
+// Badge catalog, seeded with the 10 badges from brief §14.
+model InfluencerBadge {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  label       String
+  description String?
+  iconKey     String?
+  color       String?
+  isAutomated Boolean @default(true)
+  order       Int     @default(0)
+
+  awards InfluencerBadgeAward[]
+
+  @@map("influencer_badges")
+}
+
+// A scoring pass (run on-demand from the admin panel, not a cron, for
+// Phase 5) upserts RECOMMENDED rows here; admin approves/rejects each.
+model InfluencerBadgeAward {
+  id           String           @id @default(cuid())
+  influencerId String
+  badgeId      String
+  status       BadgeAwardStatus @default(RECOMMENDED)
+  source       BadgeSource      @default(AUTOMATIC)
+  awardedAt    DateTime?
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  influencer Influencer      @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  badge      InfluencerBadge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  reviewedBy User?           @relation(fields: [reviewedById], references: [id])
+
+  @@unique([influencerId, badgeId])
+  @@map("influencer_badge_awards")
+}
+
+// The central transactional entity -- `status` encodes the full workflow
+// from brief §10 as one field with a server-validated allowed-transition
+// table (see apps/api booking routes), not several booleans. Money fields
+// are snapshotted at approval/completion time so later changes to the
+// global commission rate or a deliverable's catalog price never retroactively
+// alter a historical booking.
+model Booking {
+  id            String        @id @default(cuid())
+  bookingNumber String        @unique
+  influencerId  String
+  status        BookingStatus @default(SUBMITTED)
+
+  // Client brief (brief §9)
+  businessName         String
+  businessWebsite      String?
+  contactPerson        String
+  contactEmail         String
+  contactPhone         String
+  campaignObjective    String
+  industry             String
+  product              String
+  budget               Decimal
+  campaignType         String
+  targetAudience       String
+  requiredDeliverables Json // snapshot [{ deliverableTypeKey, label, price, currency }]
+  timeline             String
+  notes                String?
+  termsAcceptedAt      DateTime?
+
+  // Finance linkage -- reuses the existing Client/Invoice models directly
+  // rather than duplicating billing.
+  clientId   String?
+  invoiceId  String? @unique
+  discountId String?
+
+  grossAmount          Decimal @default(0)
+  discountAmount       Decimal @default(0)
+  commissionPercent    Decimal @default(0)
+  commissionAmount     Decimal @default(0)
+  platformFees         Decimal @default(0)
+  taxAmount            Decimal @default(0)
+  netInfluencerEarning Decimal @default(0)
+
+  completedAt  DateTime?
+  cancelledAt  DateTime?
+  cancelReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  influencer Influencer @relation(fields: [influencerId], references: [id])
+  client     Client?    @relation(fields: [clientId], references: [id])
+  invoice    Invoice?   @relation(fields: [invoiceId], references: [id])
+  discount   Discount?  @relation(fields: [discountId], references: [id])
+
+  attachments    BookingAttachment[]
+  statusHistory  BookingStatusHistory[]
+  review         InfluencerReview?
+  payoutBookings InfluencerPayoutBooking[]
+
+  @@index([influencerId])
+  @@index([status])
+  @@map("bookings")
+}
+
+model BookingAttachment {
+  id        String @id @default(cuid())
+  bookingId String
+  mediaId   String
+  order     Int    @default(0)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  media   Media   @relation(fields: [mediaId], references: [id])
+
+  @@map("booking_attachments")
+}
+
+// Audit trail -- a 12-state workflow with money attached needs a paper
+// trail; exactly one of changedById (staff) / changedByInfluencerId
+// (self-service accept/decline) is set per row.
+model BookingStatusHistory {
+  id                    String         @id @default(cuid())
+  bookingId             String
+  fromStatus            BookingStatus?
+  toStatus              BookingStatus
+  changedById           String?
+  changedByInfluencerId String?
+  note                  String?
+  createdAt             DateTime       @default(now())
+
+  booking             Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  changedBy           User?       @relation(fields: [changedById], references: [id])
+  changedByInfluencer Influencer? @relation(fields: [changedByInfluencerId], references: [id])
+
+  @@index([bookingId])
+  @@map("booking_status_history")
+}
+
+// The one genuinely new discount concept in the app -- Quotation/Invoice
+// line items only ever had a per-line PERCENT/FIXED modifier (DiscountType,
+// reused here), never a standalone reusable/code-based entity. Applied at
+// booking-approval/invoice-generation time.
+model Discount {
+  id               String        @id @default(cuid())
+  code             String?       @unique
+  label            String
+  type             DiscountType
+  scope            DiscountScope @default(ALL)
+  value            Decimal
+  influencerId     String?
+  categoryId       String?
+  startsAt         DateTime?
+  endsAt           DateTime?
+  maxUses          Int?
+  usedCount        Int           @default(0)
+  minBookingAmount Decimal?
+  isActive         Boolean       @default(true)
+  // Display color for the "X% OFF" badge shown on marketplace/pricing
+  // cards (packages/types BADGE_COLORS palette, same one InfluencerBadge
+  // uses) -- admin-assigned only, same pattern as InfluencerBadge.color.
+  // Null falls back to a default badge style at render time.
+  color            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  influencer Influencer?         @relation(fields: [influencerId], references: [id])
+  category   InfluencerCategory? @relation(fields: [categoryId], references: [id])
+  bookings   Booking[]
+  // Every discount -- whatever its scope -- only ever displays on or
+  // applies to a given influencer's bookings once THAT influencer
+  // individually approves it (brief: admin proposes, each affected
+  // influencer decides for themselves; a platform-wide ALL/CATEGORY
+  // discount still needs every eligible influencer's own buy-in, not just
+  // one admin decision). One row per (discount, eligible influencer),
+  // fanned out at create/update time -- see lib/discount.ts's
+  // syncDiscountResponses, the only writer of this table.
+  responses  DiscountInfluencerResponse[]
+
+  @@map("influencer_discounts")
+}
+
+model DiscountInfluencerResponse {
+  id           String                 @id @default(cuid())
+  discountId   String
+  influencerId String
+  status       DiscountApprovalStatus @default(PENDING)
+  respondedAt  DateTime?
+  createdAt    DateTime               @default(now())
+
+  discount   Discount   @relation(fields: [discountId], references: [id], onDelete: Cascade)
+  influencer Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+
+  @@unique([discountId, influencerId])
+  @@map("discount_influencer_responses")
+}
+
+// "Influencers cannot add payout details before approval" (brief §19) is an
+// application-status gate enforced at the API layer (403 unless
+// Influencer.status == APPROVED), not a schema concern.
+model InfluencerPayoutMethod {
+  id           String             @id @default(cuid())
+  influencerId String
+  type         PayoutMethodType
+  details      Json // shape depends on `type`
+  isDefault    Boolean            @default(false)
+  status       PayoutMethodStatus @default(PENDING)
+  submittedAt  DateTime           @default(now())
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  influencer Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  reviewedBy User?      @relation(fields: [reviewedById], references: [id])
+
+  @@map("influencer_payout_methods")
+}
+
+// One payout can bundle several completed bookings (InfluencerPayoutBooking
+// join) -- "mark paid" is a manual admin action, mirroring how client
+// Payments are recorded today (brief's "manual, admin-recorded" decision).
+model InfluencerPayout {
+  id                    String           @id @default(cuid())
+  payoutNumber          String           @unique
+  influencerId          String
+  status                PayoutStatus     @default(PENDING)
+  totalAmount           Decimal
+  currency              String
+  method                PayoutMethodType
+  payoutDetailsSnapshot Json // frozen copy of the method used -- bank details can change after a payout is issued
+  processedAt           DateTime?
+  processedById         String?
+  notes                 String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  influencer  Influencer                @relation(fields: [influencerId], references: [id])
+  processedBy User?                     @relation(fields: [processedById], references: [id])
+  bookings    InfluencerPayoutBooking[]
+
+  @@map("influencer_payouts")
+}
+
+model InfluencerPayoutBooking {
+  payoutId  String
+  bookingId String
+  amount    Decimal
+
+  payout  InfluencerPayout @relation(fields: [payoutId], references: [id], onDelete: Cascade)
+  booking Booking          @relation(fields: [bookingId], references: [id])
+
+  @@id([payoutId, bookingId])
+  @@map("influencer_payout_bookings")
+}
+
+// Singleton, mirrors FinanceSettings exactly (structured/numeric config
+// needs Decimal precision, unlike the simple SiteSetting-blob feature flags
+// -- see influencer_flags key in site_settings, brief §29).
+model InfluencerSettings {
+  id                          String   @id @default(cuid())
+  defaultCommissionPercent    Decimal  @default(20)
+  allowPerInfluencerOverride  Boolean  @default(true)
+  allowPerCampaignOverride    Boolean  @default(true)
+  minimumBookingAmount        Decimal?
+  autoApproveApplications     Boolean  @default(false)
+  requireIdentityVerification Boolean  @default(true)
+  payoutMinimumAmount         Decimal?
+  payoutProcessingDays        Int      @default(7)
+  badgeAutoApprovalEnabled    Boolean  @default(false)
+  maxPricingCards             Int      @default(10)
+  nextBookingSeq              Int      @default(1)
+  nextPayoutSeq               Int      @default(1)
+  bookingNumberFormat         String   @default("{PREFIX}-{YEAR}-{SEQ}")
+  payoutNumberFormat          String   @default("{PREFIX}-{YEAR}-{SEQ}")
+  bookingPrefix               String   @default("BKG")
+  payoutPrefix                String   @default("PAY")
+  updatedAt                   DateTime @updatedAt
+
+  @@map("influencer_settings")
+}
+
+// Polymorphic: exactly one of recipientUserId (staff) / recipientInfluencerId
+// is set per row, driven by recipientType. One table/API shape serves both
+// the admin topbar bell and the influencer dashboard bell.
+model Notification {
+  id                    String                    @id @default(cuid())
+  recipientType         NotificationRecipientType
+  recipientUserId       String?
+  recipientInfluencerId String?
+  type                  String
+  title                 String
+  body                  String
+  linkUrl               String?
+  isRead                Boolean                   @default(false)
+  readAt                DateTime?
+  createdAt             DateTime                  @default(now())
+
+  recipientUser       User?       @relation(fields: [recipientUserId], references: [id], onDelete: Cascade)
+  recipientInfluencer Influencer? @relation(fields: [recipientInfluencerId], references: [id], onDelete: Cascade)
+
+  @@index([recipientUserId])
+  @@index([recipientInfluencerId])
+  @@map("notifications")
 }

@@ -102,3 +102,53 @@ export const integrationsSchema = z.object({
   footerScript: z.string().max(20_000, "Footer script is too long (max 20,000 characters).").optional().default(""),
 });
 export type IntegrationsInput = z.infer<typeof integrationsSchema>;
+
+// Influencer Marketplace kill-switches (brief §29) -- reuses the exact same
+// SiteSetting-blob mechanism as `integrations` above: `GET /settings` is
+// public/unauthenticated, so apps/web reads this key directly to gate
+// listing/detail/booking routes with zero extra API surface and zero
+// redeploy required to flip a toggle.
+export const influencerFlagsSchema = z.object({
+  marketplaceEnabled: z.boolean().default(true),
+  registrationEnabled: z.boolean().default(true),
+  bookingsEnabled: z.boolean().default(true),
+  // Rich-text (HTML from the admin's rich-text editor), shown in place of
+  // the marketplace when marketplaceEnabled is false.
+  maintenanceNotice: z.string().max(5000).optional().default(""),
+  registrationClosedMessage: z
+    .string()
+    .max(2000)
+    .optional()
+    .default("Influencer registrations are currently closed. Please check back later."),
+  bookingsDisabledMessage: z
+    .string()
+    .max(2000)
+    .optional()
+    .default("Bookings are temporarily unavailable right now. Please check back later."),
+});
+export type InfluencerFlagsInput = z.infer<typeof influencerFlagsSchema>;
+
+// Admin-manageable copy for the "Video Guide" modal on the registration
+// form's Introduction Video field -- rich-text (HTML from the admin's
+// rich-text editor) so admin can rewrite the steps/wording without a code
+// change, same mechanism as `influencerFlagsSchema.maintenanceNotice`.
+export const influencerVideoGuideSchema = z.object({
+  content: z.string().max(10_000).optional().default(""),
+});
+export type InfluencerVideoGuideInput = z.infer<typeof influencerVideoGuideSchema>;
+
+// Admin-manageable copy for the dashboard's "Platform Insights Guide" page --
+// one rich-text field per platform (same mechanism/pattern as
+// influencerVideoGuideSchema above), so admin can rewrite where-to-find-your-
+// analytics instructions without a code change. Empty string per platform
+// means "not customized yet" -- the web app falls back to a sensible default
+// in that case, same convention as influencer_flags' maintenanceNotice.
+export const influencerInsightsGuideSchema = z.object({
+  instagram: z.string().max(10_000).optional().default(""),
+  tiktok: z.string().max(10_000).optional().default(""),
+  youtube: z.string().max(10_000).optional().default(""),
+  facebook: z.string().max(10_000).optional().default(""),
+  linkedin: z.string().max(10_000).optional().default(""),
+  x: z.string().max(10_000).optional().default(""),
+});
+export type InfluencerInsightsGuideInput = z.infer<typeof influencerInsightsGuideSchema>;

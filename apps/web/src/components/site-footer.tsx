@@ -19,7 +19,7 @@ export function SiteFooter({
 
   return (
     <footer className="bg-neutral-950 text-neutral-400">
-      <div className="mx-auto max-w-6xl px-6 py-16">
+      <div className="mx-auto max-w-[1400px] px-6 py-16">
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
             {branding.logoUrl ? (
@@ -82,7 +82,7 @@ export function SiteFooter({
 
         <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-6 text-body-sm sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} {branding.name}. All rights reserved.</p>
-          <p className="font-mono text-label text-neutral-600">Built with Next.js on Vercel</p>
+          {/* <p className="font-mono text-label text-neutral-600">Built with Next.js on Vercel</p> */}
         </div>
       </div>
     </footer>

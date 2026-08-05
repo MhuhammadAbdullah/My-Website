@@ -25,19 +25,6 @@ export const faqSchema = z.object({
 });
 export type FaqInput = z.infer<typeof faqSchema>;
 
-// Skills -- a flat, reorderable list (like CoreValue), shared globally rather
-// than per-team-member: proficiency lives on the Skill itself so the About
-// page's progress bars and a team member's skill tags both read the same
-// number instead of it being entered twice.
-export const skillSchema = z.object({
-  id: z.string().optional(),
-  name: z.string().min(1, "Skill name is required").max(60),
-  proficiency: z.coerce.number().int().min(0, "Progress must be between 0 and 100").max(100, "Progress must be between 0 and 100"),
-  order: z.coerce.number().int().default(0),
-  isEnabled: z.boolean().default(true),
-});
-export type SkillInput = z.infer<typeof skillSchema>;
-
 export const teamMemberSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1).max(100),
@@ -54,7 +41,6 @@ export const teamMemberSchema = z.object({
     .partial()
     .nullable()
     .optional(),
-  skillIds: z.array(z.string()).default([]),
   status: contentStatusSchema.default("PUBLISHED"),
   order: z.number().int().default(0),
 });
@@ -234,9 +220,9 @@ export const aboutPageContentSchema = z.object({
   valuesHeading: z.string().nullable().optional(),
   timelineHeading: z.string().nullable().optional(),
   teamHeading: z.string().nullable().optional(),
-  skillsHeading: z.string().nullable().optional(),
   certificationsHeading: z.string().nullable().optional(),
   technologiesHeading: z.string().nullable().optional(),
+  certificationsEnabled: z.boolean().default(true),
 
   // .nullable() matters here: GET returns `seo: null` (Prisma's shape for
   // an unset optional relation) whenever no SeoMeta row has been created

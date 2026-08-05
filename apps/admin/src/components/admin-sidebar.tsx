@@ -14,14 +14,48 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Skeleton,
   cn,
 } from "@agency/ui";
 import { adminNavGroups, findGroupKeyForPath, type AdminNavGroup } from "@/lib/nav-config";
+import { usePermissions } from "@/lib/use-permissions";
 
 const GROUP_STORAGE_KEY = "admin-sidebar-expanded-group";
 
 function isGroupActive(group: AdminNavGroup, pathname: string) {
   return group.items.some((item) => item.href === pathname || (item.href !== "/" && pathname.startsWith(`${item.href}/`)));
+}
+
+// A user only sees the nav items (and, transitively, groups) they actually
+// have "view" permission for -- an item with resource:null (just Dashboard)
+// is always visible. Groups that end up empty after filtering are dropped
+// entirely rather than shown as an empty header.
+function useVisibleNavGroups(): AdminNavGroup[] {
+  const { can } = usePermissions();
+  return React.useMemo(
+    () =>
+      adminNavGroups
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) => item.resource === null || can(item.resource, "view")),
+        }))
+        .filter((group) => group.items.length > 0),
+    [can],
+  );
+}
+
+function SidebarNavSkeleton() {
+  return (
+    <div className="flex-1 space-y-3 px-1">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="space-y-1.5">
+          <Skeleton className="h-3.5 w-20" />
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-9 w-full" />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function CollapsedGroupFlyout({ group, active, onNavigate }: { group: AdminNavGroup; active: boolean; onNavigate?: () => void }) {
@@ -103,6 +137,8 @@ function CollapsedGroupFlyout({ group, active, onNavigate }: { group: AdminNavGr
 
 export function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: () => void }) {
   const pathname = usePathname();
+  const { loading } = usePermissions();
+  const visibleGroups = useVisibleNavGroups();
   const [expandedGroup, setExpandedGroup] = React.useState<string>("");
   const firstRun = React.useRef(true);
 
@@ -126,10 +162,14 @@ export function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNa
     if (value) window.localStorage.setItem(GROUP_STORAGE_KEY, value);
   }
 
+  if (loading) {
+    return <SidebarNavSkeleton />;
+  }
+
   if (collapsed) {
     return (
       <nav className="flex-1 space-y-1">
-        {adminNavGroups.map((group) => (
+        {visibleGroups.map((group) => (
           <CollapsedGroupFlyout key={group.key} group={group} active={isGroupActive(group, pathname)} onNavigate={onNavigate} />
         ))}
       </nav>
@@ -138,7 +178,7 @@ export function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNa
 
   return (
     <Accordion type="single" collapsible value={expandedGroup} onValueChange={handleValueChange} className="flex-1 space-y-1">
-      {adminNavGroups.map((group) => (
+      {visibleGroups.map((group) => (
         <AccordionItem key={group.key} value={group.key} className="border-b-0">
           <AccordionHeader>
             <AccordionTriggerPrimitive className="group flex w-full items-center justify-between rounded-lg px-3 py-2 font-mono text-label uppercase tracking-wide text-neutral-400 transition-colors hover:text-heading">

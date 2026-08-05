@@ -16,7 +16,6 @@ import { legalRouter } from "./legal.routes.js";
 import { pageSeoRouter } from "./page-seo.routes.js";
 import { homeStatsRouter } from "./home-stats.routes.js";
 import { homeProcessStepsRouter, homeWhyReasonsRouter } from "./home-sections.routes.js";
-import { skillsRouter } from "./skills.routes.js";
 import { coreValuesRouter, timelineEventsRouter, certificationsRouter } from "./about-content.routes.js";
 import { clientsRouter } from "./clients.routes.js";
 import { quotationsRouter } from "./quotations.routes.js";
@@ -26,6 +25,21 @@ import { financeSettingsRouter } from "./finance-settings.routes.js";
 import { financeDashboardRouter } from "./finance-dashboard.routes.js";
 import { financeProjectsRouter } from "./finance-projects.routes.js";
 import { financeReportsRouter } from "./finance-reports.routes.js";
+import { influencerApplicationsRouter } from "./influencer-applications.routes.js";
+import { influencerOtpRouter } from "./influencer-otp.routes.js";
+import { influencerMeRouter } from "./influencer-me.routes.js";
+import { influencerDeliverableTypesRouter } from "./influencer-deliverable-types.routes.js";
+import { influencersRouter } from "./influencers.routes.js";
+import { bookingsRouter } from "./bookings.routes.js";
+import { influencerPayoutsRouter } from "./influencer-payouts.routes.js";
+import { influencerSettingsRouter } from "./influencer-settings.routes.js";
+import { discountsRouter } from "./discounts.routes.js";
+import { influencerBadgesRouter } from "./influencer-badges.routes.js";
+import { influencerDashboardRouter } from "./influencer-dashboard.routes.js";
+import { influencerReportsRouter } from "./influencer-reports.routes.js";
+import { influencerDiscountsRouter } from "./influencer-discounts.routes.js";
+import { influencerReviewsRouter } from "./influencer-reviews.routes.js";
+import { notificationsRouter } from "./notifications.routes.js";
 
 export const apiRouter = Router();
 
@@ -49,7 +63,6 @@ apiRouter.use("/page-seo", pageSeoRouter);
 apiRouter.use("/home-stats", homeStatsRouter);
 apiRouter.use("/home-process-steps", homeProcessStepsRouter);
 apiRouter.use("/home-why-reasons", homeWhyReasonsRouter);
-apiRouter.use("/skills", skillsRouter);
 apiRouter.use("/core-values", coreValuesRouter);
 apiRouter.use("/timeline-events", timelineEventsRouter);
 apiRouter.use("/certifications", certificationsRouter);
@@ -61,3 +74,22 @@ apiRouter.use("/finance/settings", financeSettingsRouter);
 apiRouter.use("/finance/dashboard", financeDashboardRouter);
 apiRouter.use("/finance/projects", financeProjectsRouter);
 apiRouter.use("/finance/reports", financeReportsRouter);
+apiRouter.use("/influencer-applications", influencerApplicationsRouter);
+apiRouter.use("/influencer-otp", influencerOtpRouter);
+apiRouter.use("/influencers/me", influencerMeRouter);
+apiRouter.use("/influencer-deliverable-types", influencerDeliverableTypesRouter);
+// Registered after /influencers/me: Express matches middleware in
+// registration order, so a request to /influencers/me/* is fully handled by
+// influencerMeRouter above before this broader /influencers mount (which
+// includes a public GET /:username) ever sees it.
+apiRouter.use("/influencers", influencersRouter);
+apiRouter.use("/bookings", bookingsRouter);
+apiRouter.use("/influencer-payouts", influencerPayoutsRouter);
+apiRouter.use("/influencer-settings", influencerSettingsRouter);
+apiRouter.use("/discounts", discountsRouter);
+apiRouter.use("/influencer-discounts", influencerDiscountsRouter);
+apiRouter.use("/influencer-badges", influencerBadgesRouter);
+apiRouter.use("/influencer-reviews", influencerReviewsRouter);
+apiRouter.use("/influencer-dashboard", influencerDashboardRouter);
+apiRouter.use("/influencer-reports", influencerReportsRouter);
+apiRouter.use("/notifications", notificationsRouter);

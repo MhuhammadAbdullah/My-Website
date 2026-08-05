@@ -15,7 +15,7 @@ teamRouter.get(
     const items = await prisma.teamMember.findMany({
       where: { status: "PUBLISHED" },
       orderBy: { order: "asc" },
-      include: { skills: true, avatar: true },
+      include: { avatar: true },
     });
     res.json({ items });
   }),
@@ -44,7 +44,7 @@ teamRouter.get(
         orderBy: { [sortBy]: sortOrder },
         skip,
         take: limit,
-        include: { skills: true, avatar: true },
+        include: { avatar: true },
       }),
       prisma.teamMember.count({ where }),
     ]);
@@ -58,7 +58,7 @@ teamRouter.get(
   asyncHandler(async (req, res) => {
     const item = await prisma.teamMember.findUnique({
       where: { id: req.params.id },
-      include: { skills: true, avatar: true },
+      include: { avatar: true },
     });
     if (!item) {
       res.status(404).json({ error: "Team member not found" });
@@ -73,7 +73,7 @@ teamRouter.post(
   requireAuth,
   requirePermission("team", "create"),
   asyncHandler(async (req, res) => {
-    const { skillIds, socials, ...data } = teamMemberSchema.parse(req.body);
+    const { socials, ...data } = teamMemberSchema.parse(req.body);
     const createData: Prisma.TeamMemberUncheckedCreateInput = {
       id: data.id,
       name: data.name,
@@ -83,7 +83,6 @@ teamRouter.post(
       status: data.status,
       order: data.order,
       socials: socials === null ? Prisma.JsonNull : socials,
-      skills: { connect: skillIds.map((id) => ({ id })) },
     };
     const item = await prisma.teamMember.create({ data: createData });
     res.status(201).json({ item });
@@ -95,14 +94,13 @@ teamRouter.patch(
   requireAuth,
   requirePermission("team", "update"),
   asyncHandler(async (req, res) => {
-    const { skillIds, socials, ...data } = teamMemberSchema.partial().parse(req.body);
+    const { socials, ...data } = teamMemberSchema.partial().parse(req.body);
     const updateData: Prisma.TeamMemberUncheckedUpdateInput = {
       ...data,
       // Only touch `socials` when the client actually sent the key — an
       // absent key (e.g. saving just a new profile image) must never wipe
       // out social links that already exist.
       ...(socials !== undefined ? { socials: socials === null ? Prisma.JsonNull : socials } : {}),
-      ...(skillIds ? { skills: { set: skillIds.map((id) => ({ id })) } } : {}),
     };
     const item = await prisma.teamMember.update({
       where: { id: req.params.id },

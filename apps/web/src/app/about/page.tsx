@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Github, Linkedin, Twitter } from "lucide-react";
-import { Container, Section, Heading, Reveal, Progress, Avatar, AvatarFallback, AvatarImage, DynamicIcon } from "@agency/ui";
-import { getAboutContent, getAboutTeamData, getSettings, getSkills, getTechnologies } from "@/lib/api";
+import { Container, Section, Heading, Reveal, Avatar, AvatarFallback, AvatarImage, DynamicIcon, cn } from "@agency/ui";
+import { getAboutContent, getAboutTeamData, getSettings, getTechnologies } from "@/lib/api";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { getFaqs } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
@@ -44,10 +44,9 @@ export async function generateMetadata(): Promise<Metadata> {
 const socialIcons = { twitter: Twitter, linkedin: Linkedin, github: Github } as const;
 
 export default async function AboutPage() {
-  const [about, teamData, skills, technologies, faqs, settings] = await Promise.all([
+  const [about, teamData, technologies, faqs, settings] = await Promise.all([
     withFallback(getAboutContent(), EMPTY_ABOUT_CONTENT, "about content"),
     withFallback(getAboutTeamData(), EMPTY_ABOUT_TEAM_DATA, "about team data"),
-    withFallback(getSkills(), [], "skills"),
     withFallback(getTechnologies(), [], "technologies"),
     withFallback(getFaqs("GENERAL"), [], "faqs"),
     withFallback(getSettings(), {}, "settings"),
@@ -157,35 +156,61 @@ export default async function AboutPage() {
         </Container>
       </Section>
 
-      <Section>
-        <Container className="grid gap-12 lg:grid-cols-2">
-          <div>
-            <Heading level={2}>{about.skillsHeading ?? "Skills"}</Heading>
-            <div className="mt-6 space-y-5">
-              {skills.map((skill) => (
-                <div key={skill.id}>
-                  <div className="mb-1.5 flex justify-between text-body-sm">
-                    <span className="text-heading">{skill.name}</span>
-                    <span className="text-neutral-400">{skill.proficiency}%</span>
-                  </div>
-                  <Progress value={skill.proficiency} label={skill.name} />
-                </div>
-              ))}
+      {about.certificationsEnabled && teamData.certifications.length > 0 && (
+        <Section>
+          <Container>
+            <Heading level={2} className="text-center">
+              {about.certificationsHeading ?? "Certifications"}
+            </Heading>
+            <div className="relative mt-16">
+              <div className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-neutral-200 lg:block" />
+              <div className="space-y-12 lg:space-y-20">
+                {teamData.certifications.map((cert, i) => {
+                  const imageFirst = i % 2 !== 0;
+                  return (
+                    <Reveal
+                      key={cert.id}
+                      delay={i * 0.06}
+                      className="relative grid items-center gap-6 lg:grid-cols-2 lg:gap-16"
+                    >
+                      <span className="absolute left-1/2 top-1/2 z-10 hidden size-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-500 ring-4 ring-background lg:block" />
+
+                      <div className={cn("order-2", imageFirst ? "lg:order-1" : "lg:order-2")}>
+                        {cert.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element -- arbitrary Cloudinary URL, not a static asset
+                          <img
+                            src={cloudinaryTransform(cert.image.url, "f_auto,q_auto,w_800,h_500,c_fill")}
+                            alt={cert.name}
+                            className="aspect-[8/5] w-full rounded-2xl border border-neutral-200 object-cover"
+                          />
+                        ) : (
+                          <div className="aspect-[8/5] w-full rounded-2xl border border-dashed border-neutral-200 bg-neutral-50" />
+                        )}
+                      </div>
+
+                      <div className={cn("order-1", imageFirst ? "lg:order-2" : "lg:order-1")}>
+                        <p className="font-mono text-label text-accent-600">{cert.issuer} · {cert.year}</p>
+                        <h3 className="mt-2 text-h4 font-semibold text-heading">{cert.name}</h3>
+                        {cert.description && <p className="mt-3 text-body-sm text-body">{cert.description}</p>}
+                        {cert.url && (
+                          <a
+                            href={cert.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-4 inline-block text-body-sm font-medium text-accent-600 hover:underline"
+                          >
+                            View credential →
+                          </a>
+                        )}
+                      </div>
+                    </Reveal>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-          <div>
-            <Heading level={2}>{about.certificationsHeading ?? "Certifications"}</Heading>
-            <ul className="mt-6 space-y-4">
-              {teamData.certifications.map((cert) => (
-                <li key={cert.id} className="rounded-2xl border border-neutral-200 p-4">
-                  <p className="font-medium text-heading">{cert.name}</p>
-                  <p className="text-body-sm text-neutral-500">{cert.issuer} · {cert.year}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Container>
-      </Section>
+          </Container>
+        </Section>
+      )}
 
       <Section>
         <Container>

@@ -36,7 +36,6 @@ const ABOUT_DEFAULTS = {
   valuesHeading: "Core **values**",
   timelineHeading: "Our **timeline**",
   teamHeading: "Meet the **team**",
-  skillsHeading: "Skills",
   certificationsHeading: "Certifications",
   technologiesHeading: "The **stack** behind the work",
 };

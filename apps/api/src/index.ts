@@ -6,9 +6,15 @@ import compression from "compression";
 import { rateLimit } from "express-rate-limit";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "@agency/auth/server";
+import { influencerAuth, setInfluencerResetPasswordSender } from "@agency/auth/influencer-server";
 import { env } from "./env.js";
 import { apiRouter } from "./routes/index.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
+import { sendPasswordResetEmail } from "./lib/influencer-mailer.js";
+
+setInfluencerResetPasswordSender(async ({ user, url }) => {
+  await sendPasswordResetEmail({ name: user.name, email: user.email }, url);
+});
 
 // helmet ships types only as a single index.d.cts with no .d.ts/.d.mts
 // sibling. Vercel's own separate serverless-function type-check pass
@@ -66,18 +72,27 @@ app.use(
 );
 
 // Baseline limiter for the whole API; the contact form has its own tighter
-// limiter layered on top (see routes/contact.routes.ts).
+// limiter layered on top (see routes/contact.routes.ts). `message` as an
+// object, not a string, so the 429 body is actually JSON -- Express's
+// res.send() only delegates to res.json() for object/array bodies, and a
+// plain string (the library's default) breaks every client-side res.json()
+// call site, surfacing as an opaque "Something went wrong".
 app.use(
   rateLimit({
     windowMs: 60 * 1000,
     limit: 120,
     standardHeaders: true,
     legacyHeaders: false,
+    message: { error: "Too many requests. Please try again shortly." },
   }),
 );
 
 // Better Auth needs the raw request before the JSON body parser touches it.
 app.all("/api/v1/auth/*", toNodeHandler(auth));
+// Separate principal/session space for Influencer Marketplace vendors --
+// see packages/auth/src/influencer-server.ts for why this isn't the same
+// Better Auth instance as staff `auth` above.
+app.all("/api/v1/influencer-auth/*", toNodeHandler(influencerAuth));
 
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));

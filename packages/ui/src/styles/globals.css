@@ -123,6 +123,16 @@
 
   html {
     scroll-behavior: smooth;
+    /* Permanently reserves the scrollbar track's width, whether or not a
+       scrollbar is actually drawn there. Without this, opening a Dialog
+       (Radix locks scroll via `overflow: hidden` on body) frees up that
+       width for the instant the real scrollbar disappears -- which shifts
+       anything sized against the viewport (`position: fixed` elements like
+       SiteHeader's `inset-x-0` pill nav, `100vw`-based layout) independently
+       of body's own box, since Radix's own compensation (an injected
+       `margin-right`/`padding-right` on body) only stabilizes body's content,
+       not the viewport width other elements measure themselves against. */
+    scrollbar-gutter: stable;
   }
 
   body {
@@ -234,6 +244,21 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .tech-marquee-track {
+      animation: none;
+    }
+  }
+
+  .reviews-marquee-track {
+    animation: marquee var(--reviews-marquee-duration, 50s) linear infinite;
+    will-change: transform;
+  }
+  @media (hover: hover) {
+    .reviews-marquee-track:hover {
+      animation-play-state: paused;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reviews-marquee-track {
       animation: none;
     }
   }

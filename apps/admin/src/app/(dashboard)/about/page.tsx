@@ -1,11 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Button, DynamicIcon, Heading, Input, Label, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, toast } from "@agency/ui";
+import { Button, Checkbox, DynamicIcon, Heading, Input, Label, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, toast } from "@agency/ui";
 import { request, createResourceClient } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { ResourceManager } from "@/components/resource-manager/resource-manager";
-import { AboutSkillsManager } from "@/components/about/about-skills-manager";
 import { AboutSeoForm } from "@/components/about/about-seo-form";
 
 interface AboutContent {
@@ -20,9 +19,9 @@ interface AboutContent {
   valuesHeading: string | null;
   timelineHeading: string | null;
   teamHeading: string | null;
-  skillsHeading: string | null;
   certificationsHeading: string | null;
   technologiesHeading: string | null;
+  certificationsEnabled: boolean;
 }
 
 // Shown next to every heading field's label -- the site renders `**word**`
@@ -43,9 +42,9 @@ const EMPTY_ABOUT_FORM: AboutContent = {
   valuesHeading: null,
   timelineHeading: null,
   teamHeading: null,
-  skillsHeading: null,
   certificationsHeading: null,
   technologiesHeading: null,
+  certificationsEnabled: true,
 };
 
 function AboutStoryForm() {
@@ -135,15 +134,17 @@ function AboutStoryForm() {
         <Field label="Team heading" hint={HEADING_HINT}>
           <Input value={form.teamHeading ?? ""} onChange={(e) => set("teamHeading", e.target.value || null)} placeholder="Meet the **team**" />
         </Field>
-        <Field label="Skills heading" hint={HEADING_HINT}>
-          <Input value={form.skillsHeading ?? ""} onChange={(e) => set("skillsHeading", e.target.value || null)} placeholder="Skills" />
-        </Field>
         <Field label="Certifications heading" hint={HEADING_HINT}>
           <Input value={form.certificationsHeading ?? ""} onChange={(e) => set("certificationsHeading", e.target.value || null)} placeholder="Certifications" />
         </Field>
         <Field label="Technologies heading" hint={HEADING_HINT}>
           <Input value={form.technologiesHeading ?? ""} onChange={(e) => set("technologiesHeading", e.target.value || null)} placeholder="The **stack** behind the work" />
         </Field>
+      </div>
+
+      <div className="flex items-center gap-2.5 border-t border-neutral-200 pt-5">
+        <Checkbox checked={form.certificationsEnabled} onCheckedChange={(c) => set("certificationsEnabled", c === true)} />
+        <Label className="mb-0">Show Certifications section on the About page</Label>
       </div>
 
       <Button onClick={handleSave} disabled={saving} className="w-fit">
@@ -171,9 +172,18 @@ const coreValuesClient = createResourceClient<{ id: string; title: string; descr
 const timelineClient = createResourceClient<{ id: string; year: string; title: string; description: string; order: number }>(
   "/timeline-events",
 );
-const certificationsClient = createResourceClient<{ id: string; name: string; issuer: string; year: string; url: string | null; order: number }>(
-  "/certifications",
-);
+interface CertificationItem {
+  id: string;
+  name: string;
+  issuer: string;
+  year: string;
+  description: string | null;
+  imageId: string | null;
+  image: { id: string; url: string } | null;
+  url: string | null;
+  order: number;
+}
+const certificationsClient = createResourceClient<CertificationItem>("/certifications");
 
 export default function AboutContentPage() {
   return (
@@ -184,7 +194,6 @@ export default function AboutContentPage() {
       <Tabs defaultValue="story" className="mt-6">
         <TabsList>
           <TabsTrigger value="story">Story</TabsTrigger>
-          <TabsTrigger value="skills">Skills</TabsTrigger>
           <TabsTrigger value="values">Core Values</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
           <TabsTrigger value="certifications">Certifications</TabsTrigger>
@@ -192,9 +201,6 @@ export default function AboutContentPage() {
         </TabsList>
         <TabsContent value="story">
           <AboutStoryForm />
-        </TabsContent>
-        <TabsContent value="skills">
-          <AboutSkillsManager />
         </TabsContent>
         <TabsContent value="values">
           <ResourceManager
@@ -233,6 +239,7 @@ export default function AboutContentPage() {
         <TabsContent value="certifications">
           <ResourceManager
             title="Certifications"
+            description="Shown as an alternating left/right timeline on the About page."
             resourceClient={certificationsClient}
             columns={[
               { key: "name", label: "Name" },
@@ -243,10 +250,13 @@ export default function AboutContentPage() {
               { key: "name", label: "Name", type: "text", required: true },
               { key: "issuer", label: "Issuer", type: "text", required: true },
               { key: "year", label: "Year", type: "text", required: true },
+              { key: "description", label: "Description", type: "textarea" },
+              { key: "imageId", label: "Certificate image", type: "image", previewUrlKey: "imageUrl" },
               { key: "url", label: "URL", type: "url" },
               { key: "order", label: "Sort order", type: "number" },
             ]}
-            defaultValues={{ name: "", issuer: "", year: "", url: "", order: 0 }}
+            defaultValues={{ name: "", issuer: "", year: "", description: "", imageId: null, imageUrl: null, url: "", order: 0 }}
+            toFormValues={(item) => ({ ...item, imageUrl: item.image?.url ?? null })}
           />
         </TabsContent>
         <TabsContent value="seo">

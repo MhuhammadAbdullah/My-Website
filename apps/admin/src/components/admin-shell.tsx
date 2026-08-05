@@ -4,6 +4,7 @@ import * as React from "react";
 import { Sheet, SheetContent, SheetTitle } from "@agency/ui";
 import { AdminSidebar, SidebarNav } from "@/components/admin-sidebar";
 import { AdminTopbar } from "@/components/admin-topbar";
+import { AdminRouteGuard } from "@/components/admin-route-guard";
 
 const COLLAPSE_STORAGE_KEY = "admin-sidebar-collapsed";
 
@@ -48,7 +49,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminTopbar onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-x-hidden p-4 sm:p-6">{children}</main>
+        <main className="flex-1 overflow-x-hidden p-4 sm:p-6">
+          <AdminRouteGuard>{children}</AdminRouteGuard>
+        </main>
       </div>
     </div>
   );

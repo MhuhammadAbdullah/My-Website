@@ -121,9 +121,9 @@ pagesRouter.put(
       valuesHeading: data.valuesHeading,
       timelineHeading: data.timelineHeading,
       teamHeading: data.teamHeading,
-      skillsHeading: data.skillsHeading,
       certificationsHeading: data.certificationsHeading,
       technologiesHeading: data.technologiesHeading,
+      certificationsEnabled: data.certificationsEnabled,
     };
     const existing = await prisma.aboutPageContent.findFirst();
 
@@ -154,10 +154,10 @@ pagesRouter.get(
   "/about/team",
   asyncHandler(async (_req, res) => {
     const [team, values, timeline, certifications] = await Promise.all([
-      prisma.teamMember.findMany({ where: { status: "PUBLISHED" }, orderBy: { order: "asc" }, include: { skills: true, avatar: true } }),
+      prisma.teamMember.findMany({ where: { status: "PUBLISHED" }, orderBy: { order: "asc" }, include: { avatar: true } }),
       prisma.coreValue.findMany({ orderBy: { order: "asc" } }),
       prisma.timelineEvent.findMany({ orderBy: { order: "asc" } }),
-      prisma.certification.findMany({ orderBy: { order: "asc" } }),
+      prisma.certification.findMany({ orderBy: { order: "asc" }, include: { image: true } }),
     ]);
     res.json({ team, values, timeline, certifications });
   }),

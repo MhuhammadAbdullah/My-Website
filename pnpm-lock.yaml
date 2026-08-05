@@ -175,6 +175,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@agency/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@agency/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -184,12 +187,24 @@ importers:
       '@agency/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@dnd-kit/core':
+        specifier: ^6.3.1
+        version: 6.3.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@dnd-kit/sortable':
+        specifier: ^10.0.0
+        version: 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)
+      '@dnd-kit/utilities':
+        specifier: ^3.2.2
+        version: 3.2.2(react@19.2.7)
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.10.0(react-hook-form@7.80.0(react@19.2.7))
       '@next/third-parties':
         specifier: ^15.1.0
         version: 15.5.22(next@15.5.20(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)
+      better-auth:
+        specifier: ^1.1.0
+        version: 1.6.23(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(next@15.5.20(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(prisma@6.19.3(typescript@5.9.3))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       lucide-react:
         specifier: ^0.468.0
         version: 0.468.0(react@19.2.7)
@@ -208,6 +223,9 @@ importers:
       react-hook-form:
         specifier: ^7.54.0
         version: 7.80.0(react@19.2.7)
+      recharts:
+        specifier: ^2.15.0
+        version: 2.15.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       zod:
         specifier: ^3.24.0
         version: 3.25.76

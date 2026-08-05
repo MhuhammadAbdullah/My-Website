@@ -12,6 +12,14 @@
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
+/* Influencer Dashboard only (see InfluencerDashboardRadiusScope): cards,
+   dialogs/forms, and tables use rounded-2xl from the shared design system --
+   dial that scale down to rounded-lg here, same as the admin panel, without
+   touching the token for the rest of the public marketing site. */
+body.influencer-dashboard-scope {
+  --radius-2xl: var(--radius-lg);
+}
+
 /* Manrope's `latin` subset has no ₨ glyph, so it falls back to a system font
    for that character only. Pin the fallback stack explicitly and use a
    weight that font actually has, instead of letting the browser synthesize

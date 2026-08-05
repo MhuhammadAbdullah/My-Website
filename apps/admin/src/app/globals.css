@@ -8,4 +8,9 @@
   --font-serif-emphasis: var(--font-playfair), ui-serif, Georgia, serif;
   --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* Admin-only: cards, dialogs/forms, and tables use rounded-2xl from the
+     shared design system -- dial that scale down to rounded-lg here so the
+     public site (which imports the same tokens) stays untouched. */
+  --radius-2xl: var(--radius-lg);
 }

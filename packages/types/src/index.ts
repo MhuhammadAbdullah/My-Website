@@ -6,3 +6,7 @@ export * from "./content.js";
 export * from "./auth.js";
 export * from "./settings.js";
 export * from "./finance.js";
+export * from "./influencer.js";
+export * from "./booking.js";
+export * from "./payout.js";
+export * from "./discount.js";

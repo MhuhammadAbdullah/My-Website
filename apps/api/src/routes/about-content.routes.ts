@@ -20,6 +20,8 @@ const certificationSchema = z.object({
   name: z.string().min(1),
   issuer: z.string().min(1),
   year: z.string().min(1),
+  description: z.string().nullable().optional(),
+  imageId: z.string().nullable().optional(),
   url: z.string().url().nullable().optional(),
   order: z.number().int().default(0),
 });
@@ -40,4 +42,5 @@ export const certificationsRouter = createCrudRouter({
   resource: "about",
   delegate: prisma.certification,
   schema: certificationSchema,
+  include: { image: true },
 });

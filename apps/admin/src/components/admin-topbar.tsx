@@ -6,6 +6,7 @@ import { LogOut, Menu } from "lucide-react";
 import { Avatar, AvatarFallback, Button } from "@agency/ui";
 import { authClient } from "@/lib/auth-client";
 import { getPageTitle } from "@/lib/nav-config";
+import { NotificationBell } from "@/components/notification-bell";
 
 export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
   const router = useRouter();
@@ -41,6 +42,7 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
         <p className="truncate font-heading text-body font-semibold text-heading">{getPageTitle(pathname)}</p>
       </div>
       <div className="flex shrink-0 items-center gap-3">
+        <NotificationBell />
         <Avatar className="size-9">
           <AvatarFallback>{user?.name?.charAt(0) ?? "A"}</AvatarFallback>
         </Avatar>
