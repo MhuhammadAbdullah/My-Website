@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import { Suspense } from "react";
+import { Trash2 } from "lucide-react";
 import {
   Badge,
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -31,6 +33,8 @@ import {
 import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-list-toolbar";
 import { request } from "@/lib/api";
 import { usePaginatedList } from "@/lib/use-paginated-list";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
+import { usePermissions } from "@/lib/use-permissions";
 
 interface InfluencerListItem {
   id: string;
@@ -70,14 +74,98 @@ function InfluencersPageInner() {
     filterKeys: ["status"],
   });
   const [openId, setOpenId] = React.useState<string | null>(null);
+  const { can } = usePermissions();
+  const canDelete = can("influencers", "delete");
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
   const rows = list.data ?? [];
+
+  // Row selection is scoped to the current page — drop it whenever the page
+  // itself, or anything that reshuffles which rows are on it, changes.
+  React.useEffect(() => {
+    setSelected(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list.page, list.search, list.sortBy, list.sortOrder, JSON.stringify(list.filters)]);
+
+  // After a delete, stay on the current page if it still has rows; if the
+  // deleted row(s) emptied it, step back a page (unless already on page 1).
+  function afterDelete(deletedCount: number) {
+    const remaining = rows.length - deletedCount;
+    if (remaining <= 0 && list.page > 1) {
+      list.setPage(list.page - 1);
+    } else {
+      list.reload();
+    }
+  }
+
+  function handleDelete(inf: InfluencerListItem) {
+    confirmDelete({
+      title: "Delete this influencer?",
+      description: `Delete ${inf.name}${inf.profile ? ` (@${inf.profile.username})` : ""} and all of their profile data (platforms, portfolio, pricing, badges)?\n\nInfluencers with existing bookings or payouts can't be deleted — suspend their account instead.\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        await request(`/influencers/admin/${inf.id}`, { method: "DELETE" });
+        toast.success("Influencer deleted");
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(inf.id);
+          return next;
+        });
+        afterDelete(1);
+      },
+    });
+  }
+
+  function handleBulkDelete() {
+    const ids = Array.from(selected);
+    confirmDelete({
+      title: `Delete ${ids.length} influencer${ids.length === 1 ? "" : "s"}?`,
+      description:
+        "Influencers with existing bookings or payouts won't be deleted — the whole selection is blocked if even one of them has business history. Suspend those instead.\n\nThis action cannot be undone.",
+      onConfirm: async () => {
+        const res = await request<{ count: number }>("/influencers/admin/bulk-delete", {
+          method: "POST",
+          body: JSON.stringify({ ids }),
+        });
+        toast.success(`${res.count} influencer${res.count === 1 ? "" : "s"} deleted`);
+        setSelected(new Set());
+        afterDelete(ids.length);
+      },
+    });
+  }
+
+  const allSelected = rows.length > 0 && selected.size === rows.length;
+  const someSelected = selected.size > 0 && !allSelected;
+
+  function toggleAll(checked: boolean) {
+    setSelected(checked ? new Set(rows.map((r) => r.id)) : new Set());
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  const columnCount = canDelete ? 8 : 7;
 
   return (
     <div>
-      <Heading level={2}>Influencers</Heading>
-      <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
-        Manage approved marketplace profiles — verification, featured placement, availability, and commission overrides.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <Heading level={2}>Influencers</Heading>
+          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+            Manage approved marketplace profiles — verification, featured placement, availability, and commission overrides.
+          </p>
+        </div>
+        {canDelete && selected.size > 0 && (
+          <Button variant="outline" className="text-error-500" onClick={handleBulkDelete}>
+            <Trash2 className="size-4" /> Delete {selected.size} selected
+          </Button>
+        )}
+      </div>
 
       <div className="mt-6">
         <AdminListToolbar
@@ -107,6 +195,15 @@ function InfluencersPageInner() {
           <Table>
             <TableHeader>
               <TableRow>
+                {canDelete && (
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                      onCheckedChange={(checked) => toggleAll(checked === true)}
+                      aria-label="Select all influencers"
+                    />
+                  </TableHead>
+                )}
                 <TableHead>Name</TableHead>
                 <TableHead>Username</TableHead>
                 <TableHead>Location</TableHead>
@@ -119,6 +216,15 @@ function InfluencersPageInner() {
             <TableBody>
               {rows.map((inf) => (
                 <TableRow key={inf.id}>
+                  {canDelete && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(inf.id)}
+                        onCheckedChange={(checked) => toggleOne(inf.id, checked === true)}
+                        aria-label={`Select ${inf.name}`}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <div className="flex items-center gap-1.5">
                       {inf.name}
@@ -140,15 +246,22 @@ function InfluencersPageInner() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" onClick={() => setOpenId(inf.id)}>
-                      Manage
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setOpenId(inf.id)}>
+                        Manage
+                      </Button>
+                      {canDelete && (
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(inf)} aria-label={`Delete ${inf.name}`}>
+                          <Trash2 className="size-4 text-error-500" />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-neutral-400">
+                  <TableCell colSpan={columnCount} className="text-center text-neutral-400">
                     {list.hasActiveFilters ? <EmptyState hasActiveFilters label="influencers" /> : <Badge variant="neutral">No influencers yet</Badge>}
                   </TableCell>
                 </TableRow>
@@ -175,6 +288,8 @@ function InfluencersPageInner() {
           }}
         />
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

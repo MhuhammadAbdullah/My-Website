@@ -36,7 +36,16 @@ export default async function InfluencerDetailPage({ params }: { params: Promise
   const flags = await getInfluencerFlags();
   if (!flags.marketplaceEnabled) notFound();
 
-  const influencer = await getInfluencer(username).catch(() => null);
+  const influencer = await getInfluencer(username).catch((error) => {
+    // Silent before this -- a real failure here (as opposed to a genuinely
+    // missing/unpublished profile, which the API 404s for cleanly) was
+    // invisible in Vercel's runtime error log, making the intermittent
+    // fetch-failed 404s reported against this route unfalsifiable from the
+    // dashboard alone. Logging it doesn't fix the flakiness (apiFetch's
+    // retries do that); it just means the next occurrence leaves a trace.
+    console.error(`[web] Failed to load influencer "${username}".`, error instanceof Error ? error.message : error);
+    return null;
+  });
   if (!influencer) notFound();
 
   const faqs = await withFallback(getFaqs("INFLUENCER"), [], "influencer FAQs");

@@ -44,12 +44,25 @@ async function apiFetch<T>(path: string, init?: RequestInit & { next?: NextFetch
   // A dropped keep-alive connection between the two Vercel deployments (a
   // frozen serverless function thawing mid-request) surfaces as a thrown
   // network error, not an HTTP status -- see "TypeError: fetch failed" /
-  // ECONNRESET in Vercel's runtime error log for this project. Bigger
-  // responses (e.g. an influencer profile with full platform analytics)
-  // are more likely to straddle that window, so this hit the influencer
-  // detail route hardest, surfacing as a false notFound() to callers that
-  // catch() this into null. One retry recovers cleanly.
-  const res = await doFetch().catch(() => doFetch());
+  // ECONNRESET / ETIMEDOUT in Vercel's runtime error log for this project.
+  // Bigger responses (e.g. an influencer profile with full platform
+  // analytics) are more likely to straddle that window, so this hit the
+  // influencer detail route hardest, surfacing as a false notFound() to
+  // callers that catch() this into null. A single retry still left a real
+  // (if smaller) chance of hitting it twice in a row -- three attempts
+  // total before giving up.
+  const ATTEMPTS = 3;
+  let res: Response | undefined;
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
+    try {
+      res = await doFetch();
+      break;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  if (!res) throw lastError;
 
   if (!res.ok) {
     throw new Error(`API request to ${path} failed with ${res.status}`);

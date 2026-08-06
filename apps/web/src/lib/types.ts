@@ -305,6 +305,8 @@ export interface SiteSettings {
     logoMediaId: string | null;
     logoUrl: string | null;
     displayMode: "LOGO" | "TEXT";
+    footerLogoMediaId?: string | null;
+    footerLogoUrl?: string | null;
   };
   tech_stack_display?: "TAGS" | "MARQUEE";
   default_cta?: DefaultCtaRead;

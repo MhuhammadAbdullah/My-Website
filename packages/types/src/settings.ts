@@ -66,6 +66,11 @@ export const brandingSchema = z.object({
   logoMediaId: z.string().nullable(),
   logoUrl: z.string().nullable(),
   displayMode: z.enum(BRANDING_DISPLAY_MODES),
+  // Independent from the header logo above -- null means "reuse the header
+  // logo in the footer too" (see resolveBranding() in apps/web), not "show
+  // no logo in the footer".
+  footerLogoMediaId: z.string().nullable(),
+  footerLogoUrl: z.string().nullable(),
 });
 export type BrandingInput = z.infer<typeof brandingSchema>;
 

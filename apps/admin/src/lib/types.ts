@@ -15,6 +15,8 @@ export interface SiteSettings {
     logoMediaId: string | null;
     logoUrl: string | null;
     displayMode: "LOGO" | "TEXT";
+    footerLogoMediaId?: string | null;
+    footerLogoUrl?: string | null;
   };
   default_cta?: {
     headline: string;

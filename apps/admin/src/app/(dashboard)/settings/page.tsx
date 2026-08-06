@@ -65,6 +65,7 @@ export default function SettingsPage() {
   const [socialErrors, setSocialErrors] = React.useState<Record<string, string>>({});
   const [mapErrors, setMapErrors] = React.useState<Record<string, string>>({});
   const [logo, setLogo] = React.useState<LogoValue>({ mediaId: null, url: null });
+  const [footerLogo, setFooterLogo] = React.useState<LogoValue>({ mediaId: null, url: null });
   const [displayMode, setDisplayMode] = React.useState<BrandingDisplayMode>("TEXT");
   const [saving, setSaving] = React.useState(false);
 
@@ -91,6 +92,7 @@ export default function SettingsPage() {
       ...Object.fromEntries(SOCIAL_PLATFORM_IDS.map((id) => [`social_${id}`, settings.socials?.[id] ?? ""])),
     });
     setLogo({ mediaId: settings.branding?.logoMediaId ?? null, url: settings.branding?.logoUrl ?? null });
+    setFooterLogo({ mediaId: settings.branding?.footerLogoMediaId ?? null, url: settings.branding?.footerLogoUrl ?? null });
     setDisplayMode(settings.branding?.displayMode ?? "TEXT");
   }, [settings]);
 
@@ -129,6 +131,8 @@ export default function SettingsPage() {
       logoMediaId: logo.mediaId,
       logoUrl: logo.url,
       displayMode,
+      footerLogoMediaId: footerLogo.mediaId,
+      footerLogoUrl: footerLogo.url,
     };
     const brandingParsed = brandingSchema.safeParse(brandingValue);
     if (!brandingParsed.success) {
@@ -266,7 +270,9 @@ export default function SettingsPage() {
           </p>
 
           <div className="mt-5 grid gap-5">
-            <LogoField label="Website logo" value={logo} folder="branding" onChange={setLogo} />
+            <LogoField label="Website logo (header)" value={logo} folder="branding" onChange={setLogo} />
+            <LogoField label="Footer logo" value={footerLogo} folder="branding" onChange={setFooterLogo} />
+            <p className="-mt-3 text-body-sm text-neutral-500">Leave the footer logo empty to reuse the header logo above.</p>
             {field("brand_name", "Brand name")}
             <div>
               <Label>Branding display mode</Label>

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { z } from "zod";
 import { prisma } from "@agency/database";
 import { INFLUENCER_SOCIAL_PLATFORMS } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
@@ -357,6 +358,41 @@ influencersRouter.patch(
     ]);
 
     res.json({ item: { ...influencer, ...influencerData, profile } });
+  }),
+);
+
+const bulkDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1) });
+
+// Deletion is only ever possible for influencers with no bookings/payouts --
+// both relations lack `onDelete: Cascade` (see schema.prisma), so Postgres
+// itself rejects the delete with a P2003 the moment either exists, which
+// error-handler.ts already turns into a clean 409. That's the intended
+// guardrail: staff can remove a spam/unwanted signup that never did
+// business with us, but real booking/payout history can never be wiped by
+// deleting the influencer that owns it -- suspend (PATCH status) instead.
+influencersRouter.post(
+  "/admin/bulk-delete",
+  requireAuth,
+  requirePermission("influencers", "delete"),
+  asyncHandler(async (req, res) => {
+    const { ids } = bulkDeleteSchema.parse(req.body);
+    // A single deleteMany is all-or-nothing under Postgres: if any of the
+    // selected influencers has a booking/payout, the whole statement is
+    // rejected (0 deleted) rather than silently skipping just that one --
+    // callers need to know a whole selection was blocked, not guess which
+    // row surrendered no fewer real business records.
+    const { count } = await prisma.influencer.deleteMany({ where: { id: { in: ids } } });
+    res.json({ count });
+  }),
+);
+
+influencersRouter.delete(
+  "/admin/:id",
+  requireAuth,
+  requirePermission("influencers", "delete"),
+  asyncHandler(async (req, res) => {
+    await prisma.influencer.delete({ where: { id: req.params.id } });
+    res.status(204).send();
   }),
 );
 
