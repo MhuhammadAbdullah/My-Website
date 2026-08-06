@@ -23,9 +23,9 @@ export function SiteFooter({
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">
             {branding.logoUrl ? (
-              <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white">
+              <span className="flex h-14 w-auto shrink-0 items-center justify-center">
                 {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary Cloudinary URL, not a static asset */}
-                <img src={branding.logoUrl} alt={branding.name} className="size-full rounded-full object-cover" />
+                <img src={branding.logoUrl} alt={branding.name} className="h-full w-auto object-contain" />
               </span>
             ) : (
               <p className="font-heading text-h4 font-semibold text-white">{branding.name}</p>

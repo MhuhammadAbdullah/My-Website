@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "@agency/database";
-import { influencerSelfProfileSchema, influencerPayoutMethodSubmissionSchema } from "@agency/types";
+import { influencerSelfProfileSchema, influencerPayoutMethodSubmissionSchema, type NewMediaUploadInput } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireInfluencerAuth, requireApprovedInfluencer } from "../middleware/require-influencer-auth.js";
 import { ApiError } from "../middleware/error-handler.js";
@@ -100,18 +100,30 @@ influencerMeRouter.patch(
       : [];
     const deliverableTypeIdByKey = new Map(deliverableTypes.map((d) => [d.key, d.id]));
 
-    // Media rows are created up front, outside the transaction -- these are
-    // just I/O-bound inserts, and doing them here instead of one-at-a-time
-    // inside the transaction keeps the transaction itself to a handful of
-    // fast local writes instead of N serial round trips. That serial-writes
-    // shape was blowing past Prisma's default 5s interactive-transaction
-    // timeout against the remote Supabase pooler for any profile with more
-    // than a couple of portfolio items (confirmed via P2028 "Transaction not
-    // found" errors under real network latency).
+    // Media rows are upserted (by publicId, Media's unique key) up front,
+    // outside the transaction -- these are just I/O-bound writes, and doing
+    // them here instead of one-at-a-time inside the transaction keeps the
+    // transaction itself to a handful of fast local writes instead of N
+    // serial round trips. That serial-writes shape was blowing past
+    // Prisma's default 5s interactive-transaction timeout against the
+    // remote Supabase pooler for any profile with more than a couple of
+    // portfolio items (confirmed via P2028 "Transaction not found" errors
+    // under real network latency).
+    //
+    // upsert (not create): the client always resubmits the *full* list of
+    // portfolio items -- including ones saved in a previous request, whose
+    // Media row already exists -- since portfolioItemSchema.media carries
+    // raw upload fields rather than an existing-media reference. A blind
+    // create() therefore collided with itself (P2002 on publicId) the
+    // moment a second video was added to an already-saved portfolio, and
+    // failed the whole request before the transaction ever ran.
+    const upsertMedia = (media: NewMediaUploadInput) =>
+      prisma.media.upsert({ where: { publicId: media.publicId }, create: media, update: media });
+
     const [profilePhoto, coverImage, portfolioMedia] = await Promise.all([
-      data.profilePhoto ? prisma.media.create({ data: data.profilePhoto }) : Promise.resolve(undefined),
-      data.coverImage ? prisma.media.create({ data: data.coverImage }) : Promise.resolve(undefined),
-      data.portfolioItems ? Promise.all(data.portfolioItems.map((item) => prisma.media.create({ data: item.media }))) : [],
+      data.profilePhoto ? upsertMedia(data.profilePhoto) : Promise.resolve(undefined),
+      data.coverImage ? upsertMedia(data.coverImage) : Promise.resolve(undefined),
+      data.portfolioItems ? Promise.all(data.portfolioItems.map((item) => upsertMedia(item.media))) : [],
     ]);
 
     const profileId = await prisma.$transaction(async (tx) => {

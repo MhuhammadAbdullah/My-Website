@@ -21,9 +21,9 @@ export function SiteHeader({ navItems, branding }: { navItems: NavItemRead[]; br
       <div className="glass flex w-full max-w-[1400px] items-center justify-between gap-8 rounded-2xl px-6 py-3">
         <Link href="/" className="flex h-14 shrink-0 items-center gap-2.5 pl-1">
           {branding.logoUrl ? (
-            <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-neutral-200/60">
+            <span className="flex h-14 w-auto shrink-0 items-center justify-center">
               {/* eslint-disable-next-line @next/next/no-img-element -- arbitrary Cloudinary URL, not a static asset */}
-              <img src={branding.logoUrl} alt={branding.name} className="size-full rounded-full object-cover" />
+              <img src={branding.logoUrl} alt={branding.name} className="h-full w-auto object-contain" />
             </span>
           ) : (
             <span className="max-w-[12rem] truncate font-heading text-body font-semibold text-heading">

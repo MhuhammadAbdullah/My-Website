@@ -192,7 +192,7 @@ export default function InfluencerPortfolioPage() {
         <div>
           <Heading level={2}>Portfolio</Heading>
           <p className="mt-1 text-body-sm text-neutral-500">
-            Upload showcase videos — up to 3 public videos appear on your profile at /influencers/{me?.profile?.username}.
+            Upload showcase videos — up to 4 public videos appear on your profile at /influencers/{me?.profile?.username}.
           </p>
         </div>
         <Button

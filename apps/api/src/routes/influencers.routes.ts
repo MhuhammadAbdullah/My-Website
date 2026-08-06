@@ -61,9 +61,9 @@ const detailInclude = {
   },
   pricingItems: { where: { isEnabled: true }, include: { deliverableType: true }, orderBy: { price: "asc" as const } },
   pricingCards: { where: { isEnabled: true }, orderBy: { order: "asc" as const } },
-  // Capped at 3 -- keeps the public payload/render small (brief request:
+  // Capped at 4 -- keeps the public payload/render small (brief request:
   // "so the system doesn't get overloaded"), not the full library.
-  portfolioItems: { where: { isPublic: true }, include: { media: true }, orderBy: { order: "asc" as const }, take: 3 },
+  portfolioItems: { where: { isPublic: true }, include: { media: true }, orderBy: { order: "asc" as const }, take: 4 },
   collaborations: { include: { brandLogo: true }, orderBy: { order: "asc" as const } },
 };
 
