@@ -18,7 +18,7 @@ export function SiteHeader({ navItems, branding }: { navItems: NavItemRead[]; br
 
   return (
     <header className="fixed inset-x-0 top-4 z-50 flex justify-center px-4">
-      <div className="glass flex w-full max-w-[1400px] items-center justify-between gap-8 rounded-full px-6 py-3">
+      <div className="glass flex w-full max-w-[1400px] items-center justify-between gap-8 rounded-2xl px-6 py-3">
         <Link href="/" className="flex h-14 shrink-0 items-center gap-2.5 pl-1">
           {branding.logoUrl ? (
             <span className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-neutral-200/60">
@@ -70,7 +70,7 @@ export function SiteHeader({ navItems, branding }: { navItems: NavItemRead[]; br
       </div>
 
       {mobileOpen && (
-        <div className="glass absolute left-4 right-4 top-[calc(100%+0.5rem)] flex flex-col gap-1 rounded-3xl p-3 lg:hidden">
+        <div className="glass absolute left-4 right-4 top-[calc(100%+0.5rem)] flex flex-col gap-1 rounded-2xl p-3 lg:hidden">
           {navItems.map((item) => (
             <Link
               key={item.id}

@@ -155,6 +155,12 @@ export const adminNavGroups: AdminNavGroup[] = [
     ],
   },
   {
+    key: "communications",
+    label: "Communications",
+    icon: Mail,
+    items: [{ label: "Email Templates", href: "/email-templates", icon: Mail, resource: "emailTemplates" }],
+  },
+  {
     key: "influencers",
     label: "Influencer Marketplace",
     icon: Sparkles,

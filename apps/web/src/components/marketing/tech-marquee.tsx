@@ -17,7 +17,11 @@ function TechMarqueeItem({ tech, hidden }: { tech: TechnologyRead; hidden: boole
         // same visual size regardless of its natural aspect ratio -- a
         // square icon and a wide logotype both scale to fill this same
         // height, object-contain, so neither dominates or shrinks away.
-        <div className="relative h-14 w-full grayscale opacity-70 transition-all duration-base ease-[var(--ease-premium)] hover:opacity-100 hover:grayscale-0">
+        // Grayscale-until-hover only kicks in from `sm:` up -- hover doesn't
+        // exist on touch, so gating it below `sm:` would leave mobile logos
+        // permanently dimmed/gray with no way to "reveal" color. Below `sm:`
+        // they're just shown in full color instead.
+        <div className="relative h-14 w-full transition-all duration-base ease-[var(--ease-premium)] sm:grayscale sm:opacity-70 sm:hover:opacity-100 sm:hover:grayscale-0">
           <Image src={tech.logo.url} alt={tech.name} fill sizes="160px" className="object-contain" />
         </div>
       ) : (

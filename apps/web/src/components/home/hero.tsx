@@ -11,16 +11,14 @@ export function Hero({ content }: { content: HomeContentRead }) {
     : null;
 
   return (
-    // -mt-32/pt-44 below cancel out: pulls this wrapper's box up by exactly
-    // <main>'s pt-32 (the fixed header's clearance) so the background can
-    // extend behind the header on mobile/tablet, while adding the same
+    // -mt-32/pt-44 cancel out at every breakpoint: pulls this wrapper's box
+    // up by exactly <main>'s pt-32 (the fixed header's clearance) so the
+    // background glow extends all the way behind the header instead of
+    // leaving a gap of plain background between them, while adding the same
     // amount back as top padding keeps the actual content (badge/heading/
     // etc.) at its original position -- net zero effect on content layout or
     // the height of this section as far as later sections are concerned.
-    // Reset at `lg:` (the same breakpoint the header itself switches mobile
-    // nav at) so desktop keeps its original, unextended background exactly
-    // as it was.
-    <div className="relative -mt-32 overflow-hidden px-6 pb-section pt-44 text-center lg:mt-0 lg:pt-12">
+    <div className="relative -mt-32 overflow-hidden px-6 pb-section pt-44 text-center">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[44rem] lg:h-[36rem]"

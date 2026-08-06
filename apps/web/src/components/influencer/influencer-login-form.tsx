@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, type SignInInput } from "@agency/types";
@@ -17,7 +17,13 @@ const RESEND_COOLDOWN_SECONDS = 30;
 // self-contained (owns its own DialogHeader, since the title depends on
 // which phase it's in) so the modal shell itself doesn't need to know
 // anything about login's internal password/otp/forgot state machine.
-export function InfluencerLoginForm({ onSwitchToRegister }: { onSwitchToRegister: () => void }) {
+export function InfluencerLoginForm({
+  onSwitchToRegister,
+  onRequestClose,
+}: {
+  onSwitchToRegister: () => void;
+  onRequestClose: () => void;
+}) {
   const [phase, setPhase] = React.useState<Phase>("password");
 
   return (
@@ -29,7 +35,7 @@ export function InfluencerLoginForm({ onSwitchToRegister }: { onSwitchToRegister
       {phase === "password" && (
         <PasswordStep onVerified={() => setPhase("otp")} onForgot={() => setPhase("forgot")} onSwitchToRegister={onSwitchToRegister} />
       )}
-      {phase === "otp" && <OtpStep />}
+      {phase === "otp" && <OtpStep onRequestClose={onRequestClose} />}
       {phase === "forgot" && <ForgotStep onSent={() => setPhase("forgot-sent")} onBack={() => setPhase("password")} />}
       {phase === "forgot-sent" && <ForgotSentStep onBack={() => setPhase("password")} />}
     </>
@@ -100,10 +106,14 @@ function PasswordStep({
   );
 }
 
-function OtpStep() {
+const DASHBOARD_PATH = "/influencer/dashboard";
+
+function OtpStep({ onRequestClose }: { onRequestClose: () => void }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [code, setCode] = React.useState("");
   const [verifying, setVerifying] = React.useState(false);
+  const [redirecting, setRedirecting] = React.useState(false);
   const [resending, setResending] = React.useState(false);
   const [cooldown, setCooldown] = React.useState(RESEND_COOLDOWN_SECONDS);
 
@@ -112,6 +122,23 @@ function OtpStep() {
     const timer = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
     return () => clearInterval(timer);
   }, [cooldown]);
+
+  // Once OTP verification succeeds we navigate to the dashboard first and
+  // only close the popup after that navigation has actually landed (pathname
+  // flips to DASHBOARD_PATH) -- closing eagerly races Next's router (see
+  // below) and also visually closes the popup before there's anything to
+  // reveal underneath it. The timeout is a safety net in case the pathname
+  // never updates (e.g. middleware bounces back to /influencer/login because
+  // the session cookie hadn't landed yet) so the popup can't get stuck open.
+  React.useEffect(() => {
+    if (!redirecting) return;
+    if (pathname === DASHBOARD_PATH) {
+      onRequestClose();
+      return;
+    }
+    const timer = setTimeout(onRequestClose, 4000);
+    return () => clearTimeout(timer);
+  }, [redirecting, pathname, onRequestClose]);
 
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault();
@@ -122,11 +149,16 @@ function OtpStep() {
     setVerifying(true);
     try {
       await verifyLoginOtp(code);
-      router.push("/influencer/dashboard");
+      // Navigate first -- calling onRequestClose() before router.push() was
+      // breaking the redirect entirely: closing the popup restores the
+      // pre-modal URL via a raw window.history.pushState(), which stomps on
+      // Next's App Router history state right before router.push() runs and
+      // makes the dashboard navigation silently no-op.
+      setRedirecting(true);
       router.refresh();
+      router.push(DASHBOARD_PATH);
     } catch (error) {
       toast.error(error instanceof InfluencerApiError ? error.message : "That code is incorrect or has expired.");
-    } finally {
       setVerifying(false);
     }
   }
@@ -163,7 +195,7 @@ function OtpStep() {
           />
         </div>
         <Button type="submit" size="lg" disabled={verifying} className="w-full">
-          {verifying ? "Verifying…" : "Verify & log in"}
+          {redirecting ? "Loading your dashboard…" : verifying ? "Verifying…" : "Verify & log in"}
         </Button>
       </form>
 

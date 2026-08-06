@@ -10,13 +10,10 @@
   --font-serif-emphasis: var(--font-playfair), ui-serif, Georgia, serif;
   --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
-}
 
-/* Influencer Dashboard only (see InfluencerDashboardRadiusScope): cards,
-   dialogs/forms, and tables use rounded-2xl from the shared design system --
-   dial that scale down to rounded-lg here, same as the admin panel, without
-   touching the token for the rest of the public marketing site. */
-body.influencer-dashboard-scope {
+  /* Site-wide: cards, dialogs/forms, and tables use rounded-2xl from the
+     shared design system -- dial that scale down to rounded-lg here, same
+     as the admin panel. */
   --radius-2xl: var(--radius-lg);
 }
 

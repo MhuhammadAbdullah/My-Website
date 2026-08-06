@@ -1837,3 +1837,30 @@ model Notification {
   @@index([recipientInfluencerId])
   @@map("notifications")
 }
+
+enum EmailRecipientRole {
+  ADMIN
+  CLIENT
+  INFLUENCER
+}
+
+// One row per transactional email the platform sends (see email-templates.ts
+// on the API side for the fixed set of keys and their fallback content).
+// Admin edits subject/bodyHtml here; recipientRole and variables are fixed
+// metadata describing the send, not admin-editable, so the Email Templates
+// screen can group templates by who receives them and show which
+// {{placeholders}} are available for that template.
+model EmailTemplate {
+  id            String             @id @default(cuid())
+  key           String             @unique
+  name          String
+  description   String?
+  recipientRole EmailRecipientRole
+  subject       String
+  bodyHtml      String             @db.Text
+  variables     String[]           @default([])
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@map("email_templates")
+}

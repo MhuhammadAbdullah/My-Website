@@ -55,7 +55,7 @@ export function InfluencerAuthFlow({
           </div>
         </>
       ) : (
-        <InfluencerLoginForm onSwitchToRegister={() => switchTo("register")} />
+        <InfluencerLoginForm onSwitchToRegister={() => switchTo("register")} onRequestClose={onRequestClose} />
       )}
     </InfluencerAuthModal>
   );

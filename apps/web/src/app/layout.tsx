@@ -4,8 +4,7 @@ import { manrope, playfairDisplay, ibmPlexMono } from "@/lib/fonts";
 import { getNav, getSettings } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
 import { resolveBranding } from "@/lib/branding";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { SiteChrome } from "@/components/site-chrome";
 import { env } from "@/lib/env";
 import { TrackingScripts } from "@/lib/tracking";
 import { renderRawHtml } from "@/lib/raw-html-to-elements";
@@ -69,9 +68,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {renderRawHtml(integrations?.bodyScript, "body-script")}
         <TrackingScripts integrations={integrations} />
         <AuthModalProvider registrationFlags={influencerFlags}>
-          <SiteHeader navItems={headerNav} branding={branding} />
-          <main className="pt-32">{children}</main>
-          <SiteFooter navItems={footerNav} settings={settings} branding={branding} />
+          <SiteChrome headerNav={headerNav} footerNav={footerNav} settings={settings} branding={branding}>
+            {children}
+          </SiteChrome>
         </AuthModalProvider>
         <Toaster />
         {renderRawHtml(integrations?.footerScript, "footer-script")}

@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import { Container } from "@agency/ui";
 import { getInfluencerServerSession } from "@/lib/influencer-server-session";
-import { InfluencerDashboardNav } from "@/components/influencer/dashboard-nav";
+import { InfluencerDashboardShell } from "@/components/influencer/dashboard-shell";
 import { InfluencerStatusScreen } from "@/components/influencer/status-screen";
-import { InfluencerDashboardRadiusScope } from "@/components/influencer/dashboard-radius-scope";
 
 export default async function InfluencerDashboardLayout({ children }: { children: React.ReactNode }) {
   const me = await getInfluencerServerSession();
@@ -16,7 +15,6 @@ export default async function InfluencerDashboardLayout({ children }: { children
   if (me.status !== "APPROVED") {
     return (
       <div className="min-h-[60vh] py-16">
-        <InfluencerDashboardRadiusScope />
         <Container className="max-w-lg">
           <InfluencerStatusScreen me={me} />
         </Container>
@@ -24,11 +22,5 @@ export default async function InfluencerDashboardLayout({ children }: { children
     );
   }
 
-  return (
-    <div className="min-h-[60vh]">
-      <InfluencerDashboardRadiusScope />
-      <InfluencerDashboardNav name={me.name} />
-      <Container className="py-10">{children}</Container>
-    </div>
-  );
+  return <InfluencerDashboardShell name={me.name}>{children}</InfluencerDashboardShell>;
 }

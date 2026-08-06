@@ -7,6 +7,7 @@ import {
   type Technology,
   type Faq,
 } from "../generated/client/index.js";
+import { EMAIL_TEMPLATE_DEFAULTS } from "../src/email-template-defaults.js";
 
 const prisma = new PrismaClient();
 
@@ -32,7 +33,7 @@ async function main() {
   const resources = [
     "home", "about", "services", "pricing", "portfolio", "projects", "categories",
     "testimonials", "faqs", "team", "affiliate", "contact", "media", "navigation",
-    "footer", "seo", "analytics", "settings", "users", "roles", "permissions",
+    "footer", "seo", "analytics", "settings", "emailTemplates", "users", "roles", "permissions",
     "clients", "quotations", "invoices", "payments", "financeSettings", "legal",
     // Influencer Marketplace
     "influencers", "influencerApplications", "influencerCategories", "bookings",
@@ -89,7 +90,7 @@ async function main() {
       isSystem: true,
       permissions: {
         create: permissions
-          .filter((p) => !["users", "roles", "permissions", "settings"].includes(p.resource))
+          .filter((p) => !["users", "roles", "permissions", "settings", "emailTemplates"].includes(p.resource))
           .map((p) => ({ permissionId: p.id })),
       },
     },
@@ -99,7 +100,7 @@ async function main() {
   // `isSystem` (unlike Super Admin/Editor above) since they're example
   // presets an admin should be free to edit or delete via the Roles page,
   // not roles the platform's own bootstrapping depends on.
-  const managerExcludedResources = ["users", "roles", "permissions", "settings", "financeSettings"];
+  const managerExcludedResources = ["users", "roles", "permissions", "settings", "emailTemplates", "financeSettings"];
   await prisma.role.upsert({
     where: { slug: "manager" },
     update: {},
@@ -717,6 +718,28 @@ async function main() {
   ];
   for (const s of settings) {
     await prisma.siteSetting.upsert({ where: { key: s.key }, update: { value: s.value }, create: s });
+  }
+
+  // ---------------------------------------------------------------------
+  // Email templates -- one row per transactional email the platform sends
+  // (see packages/database/src/email-template-defaults.ts for the fixed set
+  // of keys). `update: {}` so a reseed never clobbers subject/body an admin
+  // has already customized via the Email Templates admin screen.
+  // ---------------------------------------------------------------------
+  for (const t of Object.values(EMAIL_TEMPLATE_DEFAULTS)) {
+    await prisma.emailTemplate.upsert({
+      where: { key: t.key },
+      update: {},
+      create: {
+        key: t.key,
+        name: t.name,
+        description: t.description,
+        recipientRole: t.recipientRole,
+        subject: t.subject,
+        bodyHtml: t.bodyHtml,
+        variables: t.variables,
+      },
+    });
   }
 
   // ---------------------------------------------------------------------
