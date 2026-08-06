@@ -34,11 +34,22 @@ import type { InfluencerCardRead, InfluencerDetailRead } from "./influencer-type
 const API_TIMEOUT_MS = 10_000;
 
 async function apiFetch<T>(path: string, init?: RequestInit & { next?: NextFetchRequestConfig }): Promise<T> {
-  const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/v1${path}`, {
-    next: { revalidate: 300 },
-    signal: AbortSignal.timeout(API_TIMEOUT_MS),
-    ...init,
-  });
+  const doFetch = () =>
+    fetch(`${env.NEXT_PUBLIC_API_URL}/api/v1${path}`, {
+      next: { revalidate: 300 },
+      signal: AbortSignal.timeout(API_TIMEOUT_MS),
+      ...init,
+    });
+
+  // A dropped keep-alive connection between the two Vercel deployments (a
+  // frozen serverless function thawing mid-request) surfaces as a thrown
+  // network error, not an HTTP status -- see "TypeError: fetch failed" /
+  // ECONNRESET in Vercel's runtime error log for this project. Bigger
+  // responses (e.g. an influencer profile with full platform analytics)
+  // are more likely to straddle that window, so this hit the influencer
+  // detail route hardest, surfacing as a false notFound() to callers that
+  // catch() this into null. One retry recovers cleanly.
+  const res = await doFetch().catch(() => doFetch());
 
   if (!res.ok) {
     throw new Error(`API request to ${path} failed with ${res.status}`);
