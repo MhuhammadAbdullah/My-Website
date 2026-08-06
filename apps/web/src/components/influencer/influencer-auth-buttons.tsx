@@ -10,12 +10,21 @@ export function InfluencerAuthButtons({ registrationEnabled }: { registrationEna
   const { openAuthModal } = useAuthModal();
 
   return (
-    <div className="flex shrink-0 flex-wrap gap-3">
-      <Button variant="outline" size="lg" onClick={() => openAuthModal("login")}>
+    <div className="flex flex-wrap items-center justify-start gap-2 sm:shrink-0 sm:gap-3">
+      <Button
+        variant="outline"
+        size="lg"
+        className="h-9 px-4 text-label sm:h-13 sm:px-8 sm:text-[length:var(--text-body)]"
+        onClick={() => openAuthModal("login")}
+      >
         Login
       </Button>
       {registrationEnabled && (
-        <Button size="lg" onClick={() => openAuthModal("register")}>
+        <Button
+          size="lg"
+          className="h-9 px-4 text-label sm:h-13 sm:px-8 sm:text-[length:var(--text-body)]"
+          onClick={() => openAuthModal("register")}
+        >
           Become an Influencer
         </Button>
       )}
