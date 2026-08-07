@@ -35,7 +35,7 @@ export function InfluencerStatusScreen({ me }: { me: InfluencerMeRead }) {
 
   async function handleSignOut() {
     await influencerAuthClient.signOut();
-    router.push("/influencer/login");
+    router.push("/influencers");
     router.refresh();
   }
 

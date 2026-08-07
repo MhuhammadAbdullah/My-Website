@@ -13,7 +13,7 @@ export function InfluencerDashboardTopbar({ name, onMenuClick }: { name: string;
 
   async function handleSignOut() {
     await influencerAuthClient.signOut();
-    router.push("/influencer/login");
+    router.push("/influencers");
     router.refresh();
   }
 
