@@ -1,4 +1,5 @@
 import { Card, Container, Heading, Section } from "@agency/ui";
+import { cloudinaryTransform, cloudinaryVideoPoster } from "@/lib/cloudinary";
 import type { InfluencerPortfolioItemRead } from "@/lib/influencer-types";
 
 // Portfolio is video-only (no image upload, no metadata fields -- see
@@ -22,7 +23,14 @@ export function PortfolioGallery({ items }: { items: InfluencerPortfolioItemRead
             <Card key={item.id} className="w-full overflow-hidden p-0">
               <div className="relative aspect-[9/16] w-full overflow-hidden bg-neutral-100">
                 {/* eslint-disable-next-line jsx-a11y/media-has-caption -- arbitrary influencer-uploaded video, no caption track exists to reference */}
-                <video src={item.media.url} controls playsInline preload="metadata" className="size-full object-cover" />
+                <video
+                  src={cloudinaryTransform(item.media.url, "vc_h264")}
+                  poster={cloudinaryVideoPoster(item.media.url)}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="size-full object-cover"
+                />
               </div>
             </Card>
           ))}
