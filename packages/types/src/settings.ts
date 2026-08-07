@@ -148,6 +148,23 @@ export type InfluencerVideoGuideInput = z.infer<typeof influencerVideoGuideSchem
 // analytics instructions without a code change. Empty string per platform
 // means "not customized yet" -- the web app falls back to a sensible default
 // in that case, same convention as influencer_flags' maintenanceNotice.
+// Admin-manageable copy for the commission notice banner shown at the top of
+// the influencer dashboard's Earnings page -- same content-blob mechanism as
+// influencerVideoGuideSchema, but plain text (not rich text) since it's a
+// one-line disclosure rather than a multi-step guide, and an `enabled` flag
+// so admin can hide the banner entirely without clearing the saved copy.
+export const influencerCommissionNoticeSchema = z.object({
+  enabled: z.boolean().default(true),
+  content: z
+    .string()
+    .max(2000)
+    .optional()
+    .default(
+      "Admin charges a commission on every completed booking before it's paid out to you. The amounts shown below are your net earnings after commission.",
+    ),
+});
+export type InfluencerCommissionNoticeInput = z.infer<typeof influencerCommissionNoticeSchema>;
+
 export const influencerInsightsGuideSchema = z.object({
   instagram: z.string().max(10_000).optional().default(""),
   tiktok: z.string().max(10_000).optional().default(""),

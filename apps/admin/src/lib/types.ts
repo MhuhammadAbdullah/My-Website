@@ -29,6 +29,7 @@ export interface SiteSettings {
   influencer_flags?: InfluencerFlagsSettings;
   influencer_video_guide?: InfluencerVideoGuideSettings;
   influencer_insights_guide?: InfluencerInsightsGuideSettings;
+  influencer_commission_notice?: InfluencerCommissionNoticeSettings;
 }
 
 export interface InfluencerFlagsSettings {
@@ -41,6 +42,11 @@ export interface InfluencerFlagsSettings {
 }
 
 export interface InfluencerVideoGuideSettings {
+  content: string;
+}
+
+export interface InfluencerCommissionNoticeSettings {
+  enabled: boolean;
   content: string;
 }
 

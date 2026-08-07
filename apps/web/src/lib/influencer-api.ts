@@ -210,6 +210,22 @@ export function getInfluencerVideoGuideContent() {
   );
 }
 
+// Defaults match packages/types/src/settings.ts `influencerCommissionNoticeSchema`
+// -- kept in sync manually since /settings returns the raw saved row as-is
+// (no schema defaults applied server-side) until an admin has saved this key
+// at least once from the Influencer Marketplace settings page.
+const DEFAULT_COMMISSION_NOTICE = {
+  enabled: true,
+  content:
+    "Admin charges a commission on every completed booking before it's paid out to you. The amounts shown below are your net earnings after commission.",
+};
+
+export function getInfluencerCommissionNotice() {
+  return publicFetch<{ settings: { influencer_commission_notice?: { enabled: boolean; content: string } } }>("/settings").then(
+    (r) => ({ ...DEFAULT_COMMISSION_NOTICE, ...(r.settings.influencer_commission_notice ?? {}) }),
+  );
+}
+
 export function getInfluencerMe() {
   return influencerRequest<{ item: InfluencerMeRead }>("/influencers/me").then((r) => r.item);
 }
@@ -295,6 +311,13 @@ export function getInfluencerPayoutMethods() {
 export function submitInfluencerPayoutMethod(data: InfluencerPayoutMethodSubmissionInput) {
   return influencerRequest<{ item: InfluencerPayoutMethodRead }>("/influencers/me/payout-methods", {
     method: "POST",
+    body: JSON.stringify(data),
+  }).then((r) => r.item);
+}
+
+export function updateInfluencerPayoutMethod(id: string, data: InfluencerPayoutMethodSubmissionInput) {
+  return influencerRequest<{ item: InfluencerPayoutMethodRead }>(`/influencers/me/payout-methods/${id}`, {
+    method: "PATCH",
     body: JSON.stringify(data),
   }).then((r) => r.item);
 }

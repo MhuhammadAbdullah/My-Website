@@ -21,7 +21,13 @@ import {
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { PageHeroContentForm } from "@/components/page-hero-content-form";
-import type { InfluencerFlagsSettings, InfluencerInsightsGuideSettings, InfluencerVideoGuideSettings, SiteSettings } from "@/lib/types";
+import type {
+  InfluencerCommissionNoticeSettings,
+  InfluencerFlagsSettings,
+  InfluencerInsightsGuideSettings,
+  InfluencerVideoGuideSettings,
+  SiteSettings,
+} from "@/lib/types";
 
 const DEFAULT_FLAGS: InfluencerFlagsSettings = {
   marketplaceEnabled: true,
@@ -35,6 +41,14 @@ const DEFAULT_FLAGS: InfluencerFlagsSettings = {
 // Falls back to the original spec'd script until an admin customizes it --
 // matches DEFAULT_FLAGS' pattern of a sensible client-side default rather
 // than requiring a seed-data change for a brand-new setting key.
+// Falls back to the original hardcoded banner copy until an admin
+// customizes it -- same "not customized yet" convention as DEFAULT_FLAGS.
+const DEFAULT_COMMISSION_NOTICE: InfluencerCommissionNoticeSettings = {
+  enabled: true,
+  content:
+    "Admin charges a commission on every completed booking before it's paid out to you. The amounts shown below are your net earnings after commission.",
+};
+
 const DEFAULT_VIDEO_GUIDE: InfluencerVideoGuideSettings = {
   content: `<ol>
 <li>Mention your Name</li>
@@ -125,6 +139,7 @@ export default function InfluencerSettingsPage() {
   );
 
   const [flags, setFlags] = React.useState<InfluencerFlagsSettings>(DEFAULT_FLAGS);
+  const [commissionNotice, setCommissionNotice] = React.useState<InfluencerCommissionNoticeSettings>(DEFAULT_COMMISSION_NOTICE);
   const [videoGuide, setVideoGuide] = React.useState<InfluencerVideoGuideSettings>(DEFAULT_VIDEO_GUIDE);
   const [insightsGuide, setInsightsGuide] = React.useState<InfluencerInsightsGuideSettings>(DEFAULT_INSIGHTS_GUIDE);
   const [auto, setAuto] = React.useState<InfluencerAutomationSettings>({
@@ -136,6 +151,7 @@ export default function InfluencerSettingsPage() {
 
   React.useEffect(() => {
     if (settings?.influencer_flags) setFlags({ ...DEFAULT_FLAGS, ...settings.influencer_flags });
+    if (settings?.influencer_commission_notice) setCommissionNotice({ ...DEFAULT_COMMISSION_NOTICE, ...settings.influencer_commission_notice });
     if (settings?.influencer_video_guide?.content) setVideoGuide(settings.influencer_video_guide);
     // Merge, not replace -- a saved row missing a not-yet-customized
     // platform key should still fall back to that one platform's default
@@ -156,6 +172,7 @@ export default function InfluencerSettingsPage() {
     try {
       await Promise.all([
         request("/settings/influencer_flags", { method: "PUT", body: JSON.stringify({ value: flags }) }),
+        request("/settings/influencer_commission_notice", { method: "PUT", body: JSON.stringify({ value: commissionNotice }) }),
         request("/settings/influencer_video_guide", { method: "PUT", body: JSON.stringify({ value: videoGuide }) }),
         request("/settings/influencer_insights_guide", { method: "PUT", body: JSON.stringify({ value: insightsGuide }) }),
         request("/influencer-settings", { method: "PATCH", body: JSON.stringify(auto) }),
@@ -249,6 +266,29 @@ export default function InfluencerSettingsPage() {
               <p className="mb-2 text-body-sm text-neutral-500">Shown in place of the marketplace whenever it's disabled.</p>
               <RichTextEditor value={flags.maintenanceNotice} onChange={(v) => setFlag("maintenanceNotice", v)} placeholder="Write a maintenance notice…" />
             </div>
+          </section>
+
+          <section className="space-y-4 rounded-2xl border border-neutral-200 p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-heading">Earnings page commission notice</p>
+                <p className="text-body-sm text-neutral-500">
+                  Shown at the top of the influencer dashboard's Earnings page, disclosing that admin deducts a commission before payout.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <StatusBadge enabled={commissionNotice.enabled} />
+                <Switch
+                  checked={commissionNotice.enabled}
+                  onCheckedChange={(v) => setCommissionNotice((c) => ({ ...c, enabled: v }))}
+                />
+              </div>
+            </div>
+            <Textarea
+              value={commissionNotice.content}
+              onChange={(e) => setCommissionNotice((c) => ({ ...c, content: e.target.value }))}
+              rows={2}
+            />
           </section>
 
           <section className="space-y-4">

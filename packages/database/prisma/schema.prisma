@@ -189,12 +189,12 @@ enum PayoutStatus {
 
 enum PayoutMethodType {
   BANK_ACCOUNT
-  IBAN
+  RAAST
   EASYPAISA
   JAZZCASH
-  PAYPAL
-  WISE
-  PAYONEER
+  NAYAPAY
+  SADAPAY
+  OTHER_WALLET
 }
 
 enum PayoutMethodStatus {

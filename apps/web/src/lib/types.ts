@@ -320,6 +320,7 @@ export interface SiteSettings {
   influencer_flags?: InfluencerFlags;
   influencer_video_guide?: InfluencerVideoGuide;
   influencer_insights_guide?: InfluencerInsightsGuide;
+  influencer_commission_notice?: InfluencerCommissionNotice;
 }
 
 export interface InfluencerFlags {
@@ -332,6 +333,11 @@ export interface InfluencerFlags {
 }
 
 export interface InfluencerVideoGuide {
+  content: string;
+}
+
+export interface InfluencerCommissionNotice {
+  enabled: boolean;
   content: string;
 }
 

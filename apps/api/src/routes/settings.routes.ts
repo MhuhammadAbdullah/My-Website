@@ -10,6 +10,7 @@ import {
   influencerFlagsSchema,
   influencerVideoGuideSchema,
   influencerInsightsGuideSchema,
+  influencerCommissionNoticeSchema,
 } from "@agency/types";
 import { z } from "zod";
 import { isGoogleMapsUrl, extractGoogleMapsEmbedSrc } from "@agency/utils";
@@ -51,6 +52,7 @@ const settingValidators: Record<string, (value: unknown) => Prisma.InputJsonValu
   influencer_flags: (value) => influencerFlagsSchema.parse(value),
   influencer_video_guide: (value) => influencerVideoGuideSchema.parse(value),
   influencer_insights_guide: (value) => influencerInsightsGuideSchema.parse(value),
+  influencer_commission_notice: (value) => influencerCommissionNoticeSchema.parse(value),
 };
 
 settingsRouter.get(

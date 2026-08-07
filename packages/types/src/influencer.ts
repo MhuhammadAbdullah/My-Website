@@ -64,14 +64,26 @@ export const DELIVERABLE_TYPES = [
 ] as const;
 export type DeliverableTypeId = (typeof DELIVERABLE_TYPES)[number];
 
-export const PAYOUT_METHOD_TYPES = ["BANK_ACCOUNT", "IBAN", "EASYPAISA", "JAZZCASH", "PAYPAL", "WISE", "PAYONEER"] as const;
+export const PAYOUT_METHOD_TYPES = ["BANK_ACCOUNT", "RAAST", "EASYPAISA", "JAZZCASH", "NAYAPAY", "SADAPAY", "OTHER_WALLET"] as const;
 export type PayoutMethodTypeId = (typeof PAYOUT_METHOD_TYPES)[number];
+
+// Display labels + brand color per method, shared by every payout-method
+// picker (registration step and dashboard) so an icon/color added in one
+// place doesn't drift from the other.
+export const PAYOUT_METHOD_LABELS: Record<PayoutMethodTypeId, string> = {
+  BANK_ACCOUNT: "Bank Transfer",
+  RAAST: "Raast",
+  EASYPAISA: "Easypaisa",
+  JAZZCASH: "JazzCash",
+  NAYAPAY: "Nayapay",
+  SADAPAY: "SadaPay",
+  OTHER_WALLET: "Other Wallet",
+};
 
 // Registration collects real payout details up front now (brief update:
 // "Creator Payout" step), but only offers the 3 methods most of this
 // platform's creators actually use -- the full PAYOUT_METHOD_TYPES set
-// (IBAN as its own method, PayPal/Wise/Payoneer) stays reachable from the
-// influencer dashboard post-approval, unchanged.
+// stays reachable from the influencer dashboard post-approval, unchanged.
 export const REGISTRATION_PAYOUT_METHOD_TYPES = ["BANK_ACCOUNT", "JAZZCASH", "EASYPAISA"] as const;
 export type RegistrationPayoutMethodTypeId = (typeof REGISTRATION_PAYOUT_METHOD_TYPES)[number];
 
@@ -81,9 +93,8 @@ export type IdentityDocumentType = (typeof IDENTITY_DOCUMENT_TYPES)[number];
 // Per-type payout detail schemas -- colocated with PAYOUT_METHOD_TYPES
 // (rather than in payout.ts, which already imports that constant from here)
 // so payout.ts can import these too without a circular dependency between
-// the two files. "Bank Transfer" collects both account number and IBAN in
-// one method (brief update) rather than the two-method BANK_ACCOUNT/IBAN
-// split the dashboard's fuller payout-method form still uses.
+// the two files. "Bank Transfer" collects account number, IBAN, and bank
+// name; every other method collects account title/number/IBAN only.
 const bankAccountDetailsSchema = z.object({
   accountTitle: z.string().min(2, "Account title is required").max(150),
   bankName: z.string().min(2, "Bank name is required").max(150),
@@ -91,31 +102,31 @@ const bankAccountDetailsSchema = z.object({
   iban: z.string().min(10, "Enter a valid IBAN").max(40),
   branchCode: z.string().max(30).optional().or(z.literal("")),
 });
-const ibanDetailsSchema = z.object({
+// Every non-bank-transfer method (Raast, Easypaisa, JazzCash, Nayapay,
+// SadaPay, Other Wallet) collects the same 3 fields.
+const walletDetailsSchema = z.object({
   accountTitle: z.string().min(2, "Account title is required").max(150),
+  accountNumber: z.string().min(4, "Account number is required").max(60),
   iban: z.string().min(10, "Enter a valid IBAN").max(40),
-  bankName: z.string().min(2, "Bank name is required").max(150),
-});
-const mobileWalletDetailsSchema = z.object({
-  accountTitle: z.string().min(2, "Account title is required").max(150),
-  phoneNumber: z.string().min(6, "Enter a valid phone number").max(20),
-});
-const emailBasedDetailsSchema = z.object({
-  email: z.string().email("Enter a valid email address"),
 });
 
 export const PAYOUT_METHOD_DETAILS_SCHEMA_BY_TYPE = {
   BANK_ACCOUNT: bankAccountDetailsSchema,
-  IBAN: ibanDetailsSchema,
-  EASYPAISA: mobileWalletDetailsSchema,
-  JAZZCASH: mobileWalletDetailsSchema,
-  PAYPAL: emailBasedDetailsSchema,
-  WISE: emailBasedDetailsSchema,
-  PAYONEER: emailBasedDetailsSchema,
+  RAAST: walletDetailsSchema,
+  EASYPAISA: walletDetailsSchema,
+  JAZZCASH: walletDetailsSchema,
+  NAYAPAY: walletDetailsSchema,
+  SADAPAY: walletDetailsSchema,
+  OTHER_WALLET: walletDetailsSchema,
 } as const;
 
 // Per-type field definitions the client form renders from, kept next to the
 // schema above so the two can never drift.
+const WALLET_FIELDS = [
+  { key: "accountTitle", label: "Account title" },
+  { key: "accountNumber", label: "Account number" },
+  { key: "iban", label: "IBAN" },
+];
 export const PAYOUT_METHOD_FIELDS_BY_TYPE: Record<(typeof PAYOUT_METHOD_TYPES)[number], { key: string; label: string }[]> = {
   BANK_ACCOUNT: [
     { key: "accountTitle", label: "Account title" },
@@ -124,22 +135,12 @@ export const PAYOUT_METHOD_FIELDS_BY_TYPE: Record<(typeof PAYOUT_METHOD_TYPES)[n
     { key: "iban", label: "IBAN" },
     { key: "branchCode", label: "Branch name (optional)" },
   ],
-  IBAN: [
-    { key: "accountTitle", label: "Account title" },
-    { key: "iban", label: "IBAN" },
-    { key: "bankName", label: "Bank name" },
-  ],
-  EASYPAISA: [
-    { key: "accountTitle", label: "Account title" },
-    { key: "phoneNumber", label: "Mobile number" },
-  ],
-  JAZZCASH: [
-    { key: "accountTitle", label: "Account title" },
-    { key: "phoneNumber", label: "Mobile number" },
-  ],
-  PAYPAL: [{ key: "email", label: "PayPal email" }],
-  WISE: [{ key: "email", label: "Wise email" }],
-  PAYONEER: [{ key: "email", label: "Payoneer email" }],
+  RAAST: WALLET_FIELDS,
+  EASYPAISA: WALLET_FIELDS,
+  JAZZCASH: WALLET_FIELDS,
+  NAYAPAY: WALLET_FIELDS,
+  SADAPAY: WALLET_FIELDS,
+  OTHER_WALLET: WALLET_FIELDS,
 };
 
 export const REGISTRATION_PAYOUT_METHOD_LABELS: Record<RegistrationPayoutMethodTypeId, string> = {

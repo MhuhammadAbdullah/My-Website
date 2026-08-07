@@ -562,6 +562,40 @@ influencerMeRouter.post(
   }),
 );
 
+influencerMeRouter.patch(
+  "/payout-methods/:id",
+  requireInfluencerAuth,
+  requireApprovedInfluencer,
+  asyncHandler(async (req, res) => {
+    const method = await prisma.influencerPayoutMethod.findFirst({ where: { id: req.params.id, influencerId: req.influencer!.id } });
+    if (!method) throw new ApiError(404, "Payout method not found.");
+    if (method.status === "APPROVED") {
+      throw new ApiError(409, "Approved payout methods can't be edited. Submit a new one and contact us if your details changed.");
+    }
+    const data = influencerPayoutMethodSubmissionSchema.parse(req.body);
+    const updated = await prisma.$transaction(async (tx) => {
+      if (data.isDefault) {
+        await tx.influencerPayoutMethod.updateMany({ where: { influencerId: req.influencer!.id }, data: { isDefault: false } });
+      }
+      // Edited details haven't been reviewed yet -- a REJECTED method that's
+      // been corrected goes back to PENDING for re-review rather than
+      // staying REJECTED with new details the admin never saw.
+      return tx.influencerPayoutMethod.update({
+        where: { id: method.id },
+        data: {
+          type: data.type,
+          details: data.details,
+          isDefault: data.isDefault,
+          status: "PENDING",
+          reviewedById: null,
+          reviewedAt: null,
+        },
+      });
+    });
+    res.json({ item: updated });
+  }),
+);
+
 influencerMeRouter.delete(
   "/payout-methods/:id",
   requireInfluencerAuth,
