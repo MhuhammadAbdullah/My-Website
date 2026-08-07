@@ -72,7 +72,7 @@ function PayoutMethodIcon({ type, size = 8 }: { type: string; size?: 8 | 9 }) {
     );
   }
   return (
-    <span className={`flex ${dimension} shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-600`}>
+    <span className={`flex ${dimension} shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white text-black`}>
       <Wallet className="h-4 w-4" />
     </span>
   );
