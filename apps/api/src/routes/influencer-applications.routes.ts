@@ -3,7 +3,7 @@ import { z } from "zod";
 import { rateLimit } from "express-rate-limit";
 import { APIError } from "better-auth/api";
 import { prisma } from "@agency/database";
-import { influencerApplicationSchema, influencerApplicationStatusSchema } from "@agency/types";
+import { influencerApplicationSchema, influencerApplicationStatusSchema, normalizePayoutMethodDetails } from "@agency/types";
 import { influencerAuth } from "@agency/auth/influencer-server";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
@@ -168,7 +168,7 @@ influencerApplicationsRouter.post(
             data: {
               influencerId,
               type: data.payoutMethod.type,
-              details: data.payoutMethod.details,
+              details: normalizePayoutMethodDetails(data.payoutMethod.type, data.payoutMethod.details),
               isDefault: true,
               status: payoutStatus,
               ...(autoApproveApplications ? { reviewedAt: new Date() } : {}),

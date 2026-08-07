@@ -96,8 +96,8 @@ export type IdentityDocumentType = (typeof IDENTITY_DOCUMENT_TYPES)[number];
 // the two files. "Bank Transfer" collects account number, IBAN, and bank
 // name; every other method collects account title/number/IBAN only.
 const bankAccountDetailsSchema = z.object({
-  accountTitle: z.string().min(2, "Account title is required").max(150),
   bankName: z.string().min(2, "Bank name is required").max(150),
+  accountTitle: z.string().min(2, "Account title is required").max(150),
   accountNumber: z.string().min(4, "Account number is required").max(60),
   iban: z.string().min(10, "Enter a valid IBAN").max(40),
   branchCode: z.string().max(30).optional().or(z.literal("")),
@@ -129,8 +129,8 @@ const WALLET_FIELDS = [
 ];
 export const PAYOUT_METHOD_FIELDS_BY_TYPE: Record<(typeof PAYOUT_METHOD_TYPES)[number], { key: string; label: string }[]> = {
   BANK_ACCOUNT: [
-    { key: "accountTitle", label: "Account title" },
     { key: "bankName", label: "Bank name" },
+    { key: "accountTitle", label: "Account title" },
     { key: "accountNumber", label: "Account number" },
     { key: "iban", label: "IBAN" },
     { key: "branchCode", label: "Branch name (optional)" },
@@ -142,6 +142,47 @@ export const PAYOUT_METHOD_FIELDS_BY_TYPE: Record<(typeof PAYOUT_METHOD_TYPES)[n
   SADAPAY: WALLET_FIELDS,
   OTHER_WALLET: WALLET_FIELDS,
 };
+
+// The submission schemas below only *validate* `details` -- Zod's
+// superRefine doesn't replace the field with the parsed/stripped output, so
+// a raw `z.record(string, string())` request body sails through with
+// whatever extra keys the client sent (e.g. a stale `phoneNumber` left over
+// from editing a payout method that used to be phone-based, before this
+// field set changed to accountTitle/accountNumber/iban) and in whatever key
+// order the client happened to build the object in. Routes that persist
+// payout method details MUST run them through this first so storage always
+// holds exactly the current per-type fields, in the schema's declared order.
+export function normalizePayoutMethodDetails(type: PayoutMethodTypeId, details: Record<string, string>): Record<string, string> {
+  const parsed = PAYOUT_METHOD_DETAILS_SCHEMA_BY_TYPE[type].parse(details) as Record<string, string | undefined>;
+  return Object.fromEntries(Object.entries(parsed).filter((entry): entry is [string, string] => entry[1] !== undefined));
+}
+
+// Every read UI (influencer dashboard, admin review queue) that lists out a
+// payout method's details MUST build its rows from this, not
+// `Object.entries(details)` directly -- Postgres' jsonb storage does not
+// preserve object key insertion order (it reorders keys internally, roughly
+// by key length), so the field order the app wrote is not the order it gets
+// back. This walks PAYOUT_METHOD_FIELDS_BY_TYPE's declared order instead and
+// looks each value up by key, which is order-stable regardless of storage.
+export function orderedPayoutMethodDetails(
+  type: string,
+  details: Record<string, string>,
+): { key: string; label: string; value: string }[] {
+  const fields = PAYOUT_METHOD_FIELDS_BY_TYPE[type as PayoutMethodTypeId] as { key: string; label: string }[] | undefined;
+  if (!fields) return Object.entries(details).map(([key, value]) => ({ key, label: key, value }));
+
+  const knownKeys = new Set(fields.map((f) => f.key));
+  const ordered = fields
+    .filter((f) => details[f.key] !== undefined && details[f.key] !== "")
+    .map((f) => ({ key: f.key, label: f.label.replace(/\s*\(optional\)$/i, ""), value: details[f.key]! }));
+  // Any leftover key the current field set doesn't know about (legacy data
+  // that predates a field-set change) still surfaces, appended at the end,
+  // rather than silently disappearing.
+  const extras = Object.entries(details)
+    .filter(([k]) => !knownKeys.has(k))
+    .map(([key, value]) => ({ key, label: key, value }));
+  return [...ordered, ...extras];
+}
 
 export const REGISTRATION_PAYOUT_METHOD_LABELS: Record<RegistrationPayoutMethodTypeId, string> = {
   BANK_ACCOUNT: "Bank Transfer",

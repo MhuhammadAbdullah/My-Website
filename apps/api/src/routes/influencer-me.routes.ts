@@ -1,7 +1,12 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "@agency/database";
-import { influencerSelfProfileSchema, influencerPayoutMethodSubmissionSchema, type NewMediaUploadInput } from "@agency/types";
+import {
+  influencerSelfProfileSchema,
+  influencerPayoutMethodSubmissionSchema,
+  normalizePayoutMethodDetails,
+  type NewMediaUploadInput,
+} from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireInfluencerAuth, requireApprovedInfluencer } from "../middleware/require-influencer-auth.js";
 import { ApiError } from "../middleware/error-handler.js";
@@ -555,7 +560,12 @@ influencerMeRouter.post(
         await tx.influencerPayoutMethod.updateMany({ where: { influencerId: req.influencer!.id }, data: { isDefault: false } });
       }
       return tx.influencerPayoutMethod.create({
-        data: { influencerId: req.influencer!.id, type: data.type, details: data.details, isDefault: data.isDefault },
+        data: {
+          influencerId: req.influencer!.id,
+          type: data.type,
+          details: normalizePayoutMethodDetails(data.type, data.details),
+          isDefault: data.isDefault,
+        },
       });
     });
     res.status(201).json({ item: created });
@@ -567,24 +577,27 @@ influencerMeRouter.patch(
   requireInfluencerAuth,
   requireApprovedInfluencer,
   asyncHandler(async (req, res) => {
+    // Influencers fully own their payout methods -- editing/deleting never
+    // depends on review status (APPROVED included), unlike the old rule that
+    // blocked changes once admin had signed off. Past InfluencerPayout rows
+    // are unaffected either way: they snapshot the method's details at
+    // payout time (payoutDetailsSnapshot) rather than referencing this row.
     const method = await prisma.influencerPayoutMethod.findFirst({ where: { id: req.params.id, influencerId: req.influencer!.id } });
     if (!method) throw new ApiError(404, "Payout method not found.");
-    if (method.status === "APPROVED") {
-      throw new ApiError(409, "Approved payout methods can't be edited. Submit a new one and contact us if your details changed.");
-    }
     const data = influencerPayoutMethodSubmissionSchema.parse(req.body);
     const updated = await prisma.$transaction(async (tx) => {
       if (data.isDefault) {
         await tx.influencerPayoutMethod.updateMany({ where: { influencerId: req.influencer!.id }, data: { isDefault: false } });
       }
-      // Edited details haven't been reviewed yet -- a REJECTED method that's
-      // been corrected goes back to PENDING for re-review rather than
-      // staying REJECTED with new details the admin never saw.
+      // Edited details haven't been reviewed yet -- any method (APPROVED or
+      // REJECTED) that's just been changed goes back to PENDING for
+      // re-review rather than keeping its old status against new details the
+      // admin never saw.
       return tx.influencerPayoutMethod.update({
         where: { id: method.id },
         data: {
           type: data.type,
-          details: data.details,
+          details: normalizePayoutMethodDetails(data.type, data.details),
           isDefault: data.isDefault,
           status: "PENDING",
           reviewedById: null,
@@ -603,9 +616,6 @@ influencerMeRouter.delete(
   asyncHandler(async (req, res) => {
     const method = await prisma.influencerPayoutMethod.findFirst({ where: { id: req.params.id, influencerId: req.influencer!.id } });
     if (!method) throw new ApiError(404, "Payout method not found.");
-    if (method.status === "APPROVED") {
-      throw new ApiError(409, "Approved payout methods can't be deleted. Submit a new one and contact us if your details changed.");
-    }
     await prisma.influencerPayoutMethod.delete({ where: { id: method.id } });
     res.status(204).end();
   }),

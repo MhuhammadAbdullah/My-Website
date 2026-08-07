@@ -40,7 +40,7 @@ import { usePaginatedList } from "@/lib/use-paginated-list";
 import { useAsyncData } from "@/lib/use-resource";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { usePermissions } from "@/lib/use-permissions";
-import { PAYOUT_STATUSES } from "@agency/types";
+import { PAYOUT_STATUSES, orderedPayoutMethodDetails } from "@agency/types";
 
 type PayoutStatus = "PENDING" | "PROCESSING" | "PAID" | "FAILED" | "CANCELLED";
 
@@ -759,10 +759,10 @@ function PayoutMethodQueue() {
                 )}
               </div>
               <div className="mt-2 space-y-1 text-body-sm">
-                {Object.entries(m.details).map(([k, v]) => (
-                  <div key={k} className="flex justify-between">
-                    <span className="text-neutral-400">{k}</span>
-                    <span className="text-heading">{v}</span>
+                {orderedPayoutMethodDetails(m.type, m.details).map(({ key, label, value }) => (
+                  <div key={key} className="flex justify-between">
+                    <span className="text-neutral-400">{label}</span>
+                    <span className="text-heading">{value}</span>
                   </div>
                 ))}
               </div>

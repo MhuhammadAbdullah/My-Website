@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Info, Landmark, Smartphone, Wallet, Zap, type LucideIcon } from "lucide-react";
+import { Info, Wallet } from "lucide-react";
 import {
   Badge,
   Button,
@@ -24,7 +24,14 @@ import {
   TableRow,
   toast,
 } from "@agency/ui";
-import { PAYOUT_METHOD_TYPES, PAYOUT_METHOD_FIELDS_BY_TYPE, PAYOUT_METHOD_LABELS, PAYOUT_STATUSES, type PayoutMethodTypeId } from "@agency/types";
+import {
+  PAYOUT_METHOD_TYPES,
+  PAYOUT_METHOD_FIELDS_BY_TYPE,
+  PAYOUT_METHOD_LABELS,
+  PAYOUT_STATUSES,
+  orderedPayoutMethodDetails,
+  type PayoutMethodTypeId,
+} from "@agency/types";
 import {
   deleteInfluencerPayoutMethod,
   getInfluencerCommissionNotice,
@@ -38,24 +45,35 @@ import type { InfluencerEarningsSummary, InfluencerPayoutListItemRead, Influence
 
 const ALL = "__all__";
 
-// Icon + brand-ish color per payout method, purely a display aid -- keeps
-// the method picker/list scannable at a glance instead of a wall of text.
-const PAYOUT_METHOD_STYLE: Record<PayoutMethodTypeId, { icon: LucideIcon; className: string }> = {
-  BANK_ACCOUNT: { icon: Landmark, className: "bg-blue-50 text-blue-600" },
-  RAAST: { icon: Zap, className: "bg-teal-50 text-teal-600" },
-  EASYPAISA: { icon: Smartphone, className: "bg-green-50 text-green-600" },
-  JAZZCASH: { icon: Smartphone, className: "bg-red-50 text-red-600" },
-  NAYAPAY: { icon: Smartphone, className: "bg-indigo-50 text-indigo-600" },
-  SADAPAY: { icon: Smartphone, className: "bg-pink-50 text-pink-600" },
-  OTHER_WALLET: { icon: Wallet, className: "bg-neutral-100 text-neutral-600" },
+// Real brand logos, purely a display aid -- keeps the method picker/list
+// scannable at a glance instead of a wall of text. OTHER_WALLET has no
+// single brand to show, so it keeps a generic wallet icon.
+const PAYOUT_METHOD_LOGOS: Partial<Record<PayoutMethodTypeId, string>> = {
+  BANK_ACCOUNT: "https://res.cloudinary.com/dgkd8jw6a/image/upload/v1786106349/images-removebg-preview_w6d2kj.png",
+  EASYPAISA: "https://res.cloudinary.com/dgkd8jw6a/image/upload/v1786106155/unnamed-removebg-preview_xoxto3.png",
+  JAZZCASH: "https://res.cloudinary.com/dgkd8jw6a/image/upload/v1786106217/unnamed-removebg-preview_1_yepkei.png",
+  SADAPAY: "https://res.cloudinary.com/dgkd8jw6a/image/upload/v1786106022/unnamed_salzri.png",
+  NAYAPAY: "https://res.cloudinary.com/dgkd8jw6a/image/upload/v1786106096/Nayapay-icon-New-Logo-PNG-SVG-Logo-01-removebg-preview_xnl5au.png",
+  RAAST: "https://res.cloudinary.com/dgkd8jw6a/image/upload/v1786105477/Raast_Logo_cxvgpi.svg",
 };
 
-function PayoutMethodIcon({ type }: { type: string }) {
-  const style = PAYOUT_METHOD_STYLE[type as PayoutMethodTypeId] ?? { icon: Wallet, className: "bg-neutral-100 text-neutral-600" };
-  const Icon = style.icon;
+// eslint-disable-next-line @next/next/no-img-element -- fixed, hardcoded brand
+// logo URLs (not user content), several of which are SVG; next/image's
+// optimizer refuses SVG sources unless dangerouslyAllowSVG is set, so a
+// plain <img> is the simpler fit here.
+function PayoutMethodIcon({ type, size = 8 }: { type: string; size?: 8 | 9 }) {
+  const logo = PAYOUT_METHOD_LOGOS[type as PayoutMethodTypeId];
+  const dimension = size === 9 ? "h-9 w-9" : "h-8 w-8";
+  if (logo) {
+    return (
+      <span className={`flex ${dimension} shrink-0 items-center justify-center rounded-full border border-neutral-200 bg-white p-1.5`}>
+        <img src={logo} alt="" className="h-full w-full object-contain" />
+      </span>
+    );
+  }
   return (
-    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${style.className}`}>
-      <Icon className="h-4 w-4" />
+    <span className={`flex ${dimension} shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-600`}>
+      <Wallet className="h-4 w-4" />
     </span>
   );
 }
@@ -392,22 +410,18 @@ function PayoutMethods() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge variant={payoutStatusVariant(m.status)}>{m.status}</Badge>
-                  {m.status !== "APPROVED" && (
-                    <>
-                      <button onClick={() => openEditForm(m)} className="text-body-sm text-accent-600 hover:underline">
-                        Edit
-                      </button>
-                      <button onClick={() => handleDelete(m.id)} className="text-body-sm text-error-500 hover:underline">
-                        Remove
-                      </button>
-                    </>
-                  )}
+                  <button onClick={() => openEditForm(m)} className="text-body-sm text-accent-600 hover:underline">
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(m.id)} className="text-body-sm text-error-500 hover:underline">
+                    Remove
+                  </button>
                 </div>
               </div>
               <div className="mt-2 space-y-0.5 pl-11 text-body-sm text-neutral-500">
-                {Object.entries(m.details).map(([k, v]) => (
-                  <p key={k}>
-                    {k}: {v}
+                {orderedPayoutMethodDetails(m.type, m.details).map(({ key, label, value }) => (
+                  <p key={key}>
+                    {label}: {value}
                   </p>
                 ))}
               </div>
@@ -423,7 +437,6 @@ function PayoutMethods() {
             <Label>Payout method</Label>
             <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
               {PAYOUT_METHOD_TYPES.map((t) => {
-                const { icon: Icon, className } = PAYOUT_METHOD_STYLE[t];
                 const selected = type === t;
                 return (
                   <button
@@ -437,9 +450,7 @@ function PayoutMethods() {
                       selected ? "border-accent-500 ring-1 ring-accent-500" : "border-neutral-200 hover:border-neutral-300"
                     }`}
                   >
-                    <span className={`flex h-9 w-9 items-center justify-center rounded-full ${className}`}>
-                      <Icon className="h-4 w-4" />
-                    </span>
+                    <PayoutMethodIcon type={t} size={9} />
                     <span className="text-label font-medium text-heading">{PAYOUT_METHOD_LABELS[t]}</span>
                   </button>
                 );
