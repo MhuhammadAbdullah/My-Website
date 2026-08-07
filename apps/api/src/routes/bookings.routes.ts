@@ -14,6 +14,7 @@ import {
   bookingDetailInclude,
   nextAllowedStatuses,
   transitionBooking,
+  overrideBookingStatus,
   recordBookingPayment,
   getInfluencerSettings,
 } from "../lib/booking.js";
@@ -255,6 +256,21 @@ bookingsRouter.patch(
   }),
 );
 
+// Admin override: set any status directly, bypassing the guided workflow --
+// for fixing mistakes (e.g. wrongly marked Payment Received when the client
+// never actually paid). Gated on "delete" rather than "update" since it can
+// void real Payment records, unlike the guided /status route above.
+bookingsRouter.patch(
+  "/admin/:id/status-override",
+  requireAuth,
+  requirePermission("bookings", "delete"),
+  asyncHandler(async (req, res) => {
+    const data = bookingStatusTransitionSchema.parse(req.body);
+    const updated = await overrideBookingStatus(req.params.id!, data.toStatus, req.user!.id, data.note || undefined);
+    res.json({ item: { ...updated, allowedTransitions: nextAllowedStatuses(updated.status) } });
+  }),
+);
+
 const bookingPaymentSchema = paymentSchema.omit({ id: true, invoiceId: true });
 
 bookingsRouter.post(
@@ -277,5 +293,53 @@ bookingsRouter.post(
       req.user!.id,
     );
     res.json({ item: { ...updated, allowedTransitions: nextAllowedStatuses(updated.status) } });
+  }),
+);
+
+const bulkDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1) });
+
+// A booking already batched into a payout is protected by
+// InfluencerPayoutBooking's FK to Booking (no onDelete: Cascade there) --
+// Postgres rejects the delete (P2003 -> 409) rather than silently orphaning
+// payout history. On top of that DB-level guard, also block deleting any
+// booking with a real recorded client payment (invoice.amountPaid > 0) --
+// that's actual money having moved, which "delete" shouldn't be able to
+// erase; cancel the booking instead.
+async function assertBookingsDeletable(ids: string[]) {
+  const bookings = await prisma.booking.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, invoice: { select: { amountPaid: true } } },
+  });
+  const paid = bookings.filter((b) => b.invoice && Number(b.invoice.amountPaid) > 0);
+  if (paid.length > 0) {
+    throw new ApiError(
+      409,
+      `${paid.length} selected booking${paid.length === 1 ? " has" : "s have"} recorded payments and can't be deleted — cancel ${paid.length === 1 ? "it" : "them"} instead.`,
+    );
+  }
+}
+
+bookingsRouter.post(
+  "/admin/bulk-delete",
+  requireAuth,
+  requirePermission("bookings", "delete"),
+  asyncHandler(async (req, res) => {
+    const { ids } = bulkDeleteSchema.parse(req.body);
+    await assertBookingsDeletable(ids);
+    const { count } = await prisma.booking.deleteMany({ where: { id: { in: ids } } });
+    res.json({ count });
+  }),
+);
+
+bookingsRouter.delete(
+  "/admin/:id",
+  requireAuth,
+  requirePermission("bookings", "delete"),
+  asyncHandler(async (req, res) => {
+    const booking = await prisma.booking.findUnique({ where: { id: req.params.id } });
+    if (!booking) throw new ApiError(404, "Booking not found.");
+    await assertBookingsDeletable([req.params.id!]);
+    await prisma.booking.delete({ where: { id: req.params.id } });
+    res.status(204).send();
   }),
 );

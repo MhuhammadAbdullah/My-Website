@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { z } from "zod";
 import { prisma, type Prisma } from "@agency/database";
 import { testimonialSchema } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
@@ -100,6 +101,19 @@ testimonialsRouter.patch(
       include: testimonialInclude,
     });
     res.json({ item });
+  }),
+);
+
+const bulkDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1) });
+
+testimonialsRouter.post(
+  "/bulk-delete",
+  requireAuth,
+  requirePermission("testimonials", "delete"),
+  asyncHandler(async (req, res) => {
+    const { ids } = bulkDeleteSchema.parse(req.body);
+    const { count } = await prisma.testimonial.deleteMany({ where: { id: { in: ids } } });
+    res.json({ count });
   }),
 );
 

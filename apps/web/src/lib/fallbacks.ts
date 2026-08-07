@@ -6,6 +6,7 @@ import type {
   AffiliateToolsPageContentRead,
   ContactPageContentRead,
   HomeContentRead,
+  InfluencerMarketplacePageContentRead,
   PaginatedResponse,
   PortfolioPageContentRead,
   ServicesPageContentRead,
@@ -84,6 +85,18 @@ export const EMPTY_CONTACT_PAGE_CONTENT: ContactPageContentRead = {
   heroDescription: "We're updating this page — please check back shortly.",
   whatsappLabel: "Chat on WhatsApp",
   calendlyLabel: "Book an intro call",
+};
+
+// Unlike the other EMPTY_*_PAGE_CONTENT fallbacks above (generic "updating
+// this page" copy), this is the page's real original launch copy verbatim --
+// no admin has ever saved a row here yet (nothing seeds one), so until they
+// visit Influencer Marketplace > Settings and save once, every real
+// pageview hits this exact fallback. Using the actual copy instead of a
+// placeholder avoids the already-live public page regressing to generic text
+// the moment this editable-content feature ships.
+export const EMPTY_INFLUENCER_MARKETPLACE_PAGE_CONTENT: InfluencerMarketplacePageContentRead = {
+  heroHeading: "Influencer Marketplace",
+  heroDescription: "Discover vetted creators, compare audience data and pricing, and book campaigns — we handle the rest.",
 };
 
 export const EMPTY_ABOUT_TEAM_DATA = {

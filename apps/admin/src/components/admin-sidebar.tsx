@@ -19,6 +19,40 @@ import {
 } from "@agency/ui";
 import { adminNavGroups, findGroupKeyForPath, type AdminNavGroup } from "@/lib/nav-config";
 import { usePermissions } from "@/lib/use-permissions";
+import { useSiteBranding } from "@/lib/use-site-branding";
+
+// Shared by the desktop sidebar, the mobile Sheet header (admin-shell.tsx),
+// and the topbar (admin-topbar.tsx) -- shows the admin-configured site logo
+// (Settings > Branding) once it's loaded, falling back to a letter mark
+// (brand name's first letter) so there's never a blank box while the one
+// shared /settings fetch resolves.
+//
+// Deliberately a plain <img> at its natural aspect ratio (h-* + w-auto +
+// object-contain), matching apps/web/src/components/site-header.tsx's own
+// logo rendering exactly -- NOT next/image's `fill` inside a fixed square
+// box. Real uploaded logos are usually a wide horizontal lockup (mark +
+// wordmark, often with their own padding/canvas baked into the asset, e.g.
+// this app's current one is ~2:1) -- forcing that into a small SQUARE
+// avatar-style box (object-contain fitting by width) left most of the box
+// as dead vertical letterboxing, and paired with an opaque background behind
+// it, that empty space visually swallowed the whole logo (confirmed via
+// devtools: the image loaded fine, it just rendered inside a mostly-empty
+// box). Sizing here is controlled entirely by `className` (a height +
+// max-width pair) so each call site can fit its own available space.
+export function AdminBrandMark({ className = "h-8 max-w-28" }: { className?: string }) {
+  const { brandName, logoUrl } = useSiteBranding();
+  if (logoUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- arbitrary Cloudinary URL, not a static asset (same reasoning as site-header.tsx)
+      <img src={logoUrl} alt={brandName} className={cn("w-auto shrink-0 object-contain", className)} />
+    );
+  }
+  return (
+    <div className={cn("flex aspect-square shrink-0 items-center justify-center rounded-lg bg-heading text-body-sm font-bold text-white", className)}>
+      {brandName.charAt(0).toUpperCase()}
+    </div>
+  );
+}
 
 const GROUP_STORAGE_KEY = "admin-sidebar-expanded-group";
 
@@ -221,6 +255,8 @@ export function AdminSidebar({
   collapsed: boolean;
   onToggleCollapse: () => void;
 }) {
+  const { brandName } = useSiteBranding();
+
   return (
     <aside
       className={cn(
@@ -229,12 +265,10 @@ export function AdminSidebar({
       )}
     >
       <div className={cn("flex items-center gap-2.5 px-2 py-3", collapsed && "flex-col justify-center px-0")}>
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-heading text-body-sm font-bold text-white">
-          C
-        </div>
+        <AdminBrandMark className={collapsed ? "h-7 max-w-10" : "h-8 max-w-28"} />
         {!collapsed && (
           <div className="min-w-0 flex-1">
-            <p className="truncate font-heading text-body font-semibold text-heading">MAB Digital</p>
+            <p className="truncate font-heading text-body font-semibold text-heading">{brandName}</p>
             <p className="truncate text-body-sm text-neutral-400">Admin panel</p>
           </div>
         )}
@@ -249,7 +283,7 @@ export function AdminSidebar({
         </Button>
       </div>
 
-      <div className="mt-4 flex flex-1 flex-col overflow-hidden border-t border-neutral-100 pt-4">
+      <div className="scrollbar-thin mt-4 flex flex-1 flex-col overflow-y-auto overflow-x-hidden border-t border-neutral-100 pt-4">
         <SidebarNav collapsed={collapsed} />
       </div>
     </aside>

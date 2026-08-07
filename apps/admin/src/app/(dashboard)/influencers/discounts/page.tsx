@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Suspense } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import {
   Badge,
   Button,
@@ -37,6 +37,7 @@ import { request } from "@/lib/api";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { useAsyncData } from "@/lib/use-resource";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
+import { usePermissions } from "@/lib/use-permissions";
 
 type DiscountType = "PERCENT" | "FIXED";
 type DiscountScope = (typeof DISCOUNT_SCOPES)[number];
@@ -121,19 +122,67 @@ function DiscountsPageInner() {
   });
   const [dialogItem, setDialogItem] = React.useState<DiscountListItem | null | "new">(null);
   const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
+  const { can } = usePermissions();
+  const canDelete = can("discounts", "delete");
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
   const rows = list.data ?? [];
+
+  React.useEffect(() => {
+    setSelected(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list.page, list.search, list.sortBy, list.sortOrder, JSON.stringify(list.filters)]);
 
   function handleDelete(item: DiscountListItem) {
     confirmDelete({
       title: `Delete "${item.label}"?`,
-      description: "This action cannot be undone.",
+      description: `Removes it immediately from every influencer card it's currently showing on${item.code ? `, and the promo code "${item.code}" stops working right away for new bookings` : ""}.\n\nBlocked if any booking has already used this discount (that record can't be broken) — uncheck "Active" in Edit instead in that case.\n\nThis action cannot be undone.`,
       onConfirm: async () => {
         await request(`/discounts/${item.id}`, { method: "DELETE" });
         toast.success("Discount deleted");
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(item.id);
+          return next;
+        });
         list.reload();
       },
     });
   }
+
+  function handleBulkDelete() {
+    const ids = Array.from(selected);
+    confirmDelete({
+      title: `Delete ${ids.length} discount${ids.length === 1 ? "" : "s"}?`,
+      description: `Removes all ${ids.length} selected discounts immediately from any influencer cards they're showing on, and any promo codes among them stop working right away.\n\nThe whole selection is blocked if even one has already been used by a booking (that record can't be broken) — deactivate those instead.\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        const res = await request<{ count: number }>("/discounts/bulk-delete", {
+          method: "POST",
+          body: JSON.stringify({ ids }),
+        });
+        toast.success(`${res.count} discount${res.count === 1 ? "" : "s"} deleted`);
+        setSelected(new Set());
+        list.reload();
+      },
+    });
+  }
+
+  const allSelected = rows.length > 0 && selected.size === rows.length;
+  const someSelected = selected.size > 0 && !allSelected;
+
+  function toggleAll(checked: boolean) {
+    setSelected(checked ? new Set(rows.map((r) => r.id)) : new Set());
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  const columnCount = canDelete ? 10 : 9;
 
   return (
     <div>
@@ -145,9 +194,16 @@ function DiscountsPageInner() {
             eligible bookings.
           </p>
         </div>
-        <Button onClick={() => setDialogItem("new")}>
-          <Plus /> New discount
-        </Button>
+        <div className="flex items-center gap-2">
+          {canDelete && selected.size > 0 && (
+            <Button variant="outline" className="text-error-500" onClick={handleBulkDelete}>
+              <Trash2 className="size-4" /> Delete {selected.size} selected
+            </Button>
+          )}
+          <Button onClick={() => setDialogItem("new")}>
+            <Plus /> New discount
+          </Button>
+        </div>
       </div>
 
       <div className="mt-6">
@@ -188,6 +244,15 @@ function DiscountsPageInner() {
           <Table>
             <TableHeader>
               <TableRow>
+                {canDelete && (
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                      onCheckedChange={(checked) => toggleAll(checked === true)}
+                      aria-label="Select all discounts"
+                    />
+                  </TableHead>
+                )}
                 <TableHead>Color</TableHead>
                 <TableHead>Label</TableHead>
                 <TableHead>Code</TableHead>
@@ -202,6 +267,15 @@ function DiscountsPageInner() {
             <TableBody>
               {rows.map((d) => (
                 <TableRow key={d.id}>
+                  {canDelete && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(d.id)}
+                        onCheckedChange={(checked) => toggleOne(d.id, checked === true)}
+                        aria-label={`Select ${d.label}`}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <ColorDot color={d.color} />
                   </TableCell>
@@ -240,16 +314,18 @@ function DiscountsPageInner() {
                       <Button variant="outline" size="sm" onClick={() => setDialogItem(d)}>
                         Edit
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-error-500" onClick={() => handleDelete(d)}>
-                        Delete
-                      </Button>
+                      {canDelete && (
+                        <Button variant="ghost" size="sm" className="text-error-500" onClick={() => handleDelete(d)}>
+                          Delete
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center text-neutral-400">
+                  <TableCell colSpan={columnCount} className="text-center text-neutral-400">
                     {list.hasActiveFilters ? <EmptyState hasActiveFilters label="discounts" /> : <Badge variant="neutral">No discounts yet</Badge>}
                   </TableCell>
                 </TableRow>

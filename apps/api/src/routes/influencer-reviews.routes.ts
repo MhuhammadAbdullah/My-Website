@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { z } from "zod";
 import { prisma, type Prisma } from "@agency/database";
 import { influencerReviewSchema } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
@@ -283,6 +284,25 @@ influencerReviewsRouter.patch(
     await recomputeRating(existing.influencerId);
     if (existing.influencerId !== data.influencerId) await recomputeRating(data.influencerId);
     res.json({ item });
+  }),
+);
+
+const bulkDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1) });
+
+influencerReviewsRouter.post(
+  "/bulk-delete",
+  requireAuth,
+  requirePermission("influencers", "delete"),
+  asyncHandler(async (req, res) => {
+    const { ids } = bulkDeleteSchema.parse(req.body);
+    const existing = await prisma.influencerReview.findMany({ where: { id: { in: ids } }, select: { influencerId: true } });
+    const influencerIds = [...new Set(existing.map((r) => r.influencerId))];
+    const { count } = await prisma.influencerReview.deleteMany({ where: { id: { in: ids } } });
+    // Reviews being deleted can span multiple influencers (the summary page
+    // groups by influencer, but this bulk action isn't itself scoped to
+    // one) -- recompute every affected influencer's rating, not just one.
+    await Promise.all(influencerIds.map((id) => recomputeRating(id)));
+    res.json({ count });
   }),
 );
 

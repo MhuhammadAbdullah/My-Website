@@ -42,6 +42,7 @@ function TestimonialsPageInner() {
       title="Testimonials"
       description="Client quotes shown across the home page, service pages, and their related project's detail page."
       resourceClient={client}
+      bulkDeleteResource="testimonials"
       searchPlaceholder="Search author, company, or quote…"
       sortOptions={[
         { value: "author", label: "Author" },

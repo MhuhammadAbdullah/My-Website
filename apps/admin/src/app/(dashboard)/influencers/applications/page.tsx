@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import { Suspense } from "react";
+import { Trash2 } from "lucide-react";
 import {
   Badge,
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -25,6 +27,8 @@ import {
 import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-list-toolbar";
 import { request } from "@/lib/api";
 import { usePaginatedList } from "@/lib/use-paginated-list";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
+import { usePermissions } from "@/lib/use-permissions";
 
 interface ApplicationListItem {
   id: string;
@@ -101,14 +105,93 @@ function ApplicationsPageInner() {
     filterKeys: ["status"],
   });
   const [openId, setOpenId] = React.useState<string | null>(null);
+  const { can } = usePermissions();
+  const canDelete = can("influencerApplications", "delete");
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
   const rows = list.data ?? [];
+
+  React.useEffect(() => {
+    setSelected(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list.page, list.search, list.sortBy, list.sortOrder, JSON.stringify(list.filters)]);
+
+  function afterDelete(deletedCount: number) {
+    const remaining = rows.length - deletedCount;
+    if (remaining <= 0 && list.page > 1) {
+      list.setPage(list.page - 1);
+    } else {
+      list.reload();
+    }
+  }
+
+  function handleDelete(app: ApplicationListItem) {
+    confirmDelete({
+      title: "Delete this application?",
+      description: `This permanently deletes ${app.name}'s account, login, and all submitted profile data — not just the application entry. They would need to apply again from scratch to rejoin.\n\nIf they have any bookings or payouts, deletion is blocked (that history can't be erased) — reject the application instead.\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        await request(`/influencer-applications/admin/${app.id}`, { method: "DELETE" });
+        toast.success("Application and account deleted");
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(app.id);
+          return next;
+        });
+        afterDelete(1);
+      },
+    });
+  }
+
+  function handleBulkDelete() {
+    const ids = Array.from(selected);
+    confirmDelete({
+      title: `Delete ${ids.length} application${ids.length === 1 ? "" : "s"}?`,
+      description: `This permanently deletes all ${ids.length} account${ids.length === 1 ? "" : "s"}, logins, and submitted profile data — not just the application entries. They would need to apply again to rejoin.\n\nThe whole selection is blocked if even one of them has any bookings or payouts (real business history can't be erased) — reject those instead.\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        const res = await request<{ count: number }>("/influencer-applications/admin/bulk-delete", {
+          method: "POST",
+          body: JSON.stringify({ ids }),
+        });
+        toast.success(`${res.count} account${res.count === 1 ? "" : "s"} deleted`);
+        setSelected(new Set());
+        afterDelete(ids.length);
+      },
+    });
+  }
+
+  const allSelected = rows.length > 0 && selected.size === rows.length;
+  const someSelected = selected.size > 0 && !allSelected;
+
+  function toggleAll(checked: boolean) {
+    setSelected(checked ? new Set(rows.map((r) => r.id)) : new Set());
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  const columnCount = canDelete ? 9 : 8;
 
   return (
     <div>
-      <Heading level={2}>Influencer Applications</Heading>
-      <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
-        Review "Become an Influencer" submissions. Approving one publishes their profile and gives them dashboard access.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <Heading level={2}>Influencer Applications</Heading>
+          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+            Review "Become an Influencer" submissions. Approving one publishes their profile and gives them dashboard access.
+          </p>
+        </div>
+        {canDelete && selected.size > 0 && (
+          <Button variant="outline" className="text-error-500" onClick={handleBulkDelete}>
+            <Trash2 className="size-4" /> Delete {selected.size} selected
+          </Button>
+        )}
+      </div>
 
       <div className="mt-6">
         <AdminListToolbar
@@ -138,6 +221,15 @@ function ApplicationsPageInner() {
           <Table>
             <TableHeader>
               <TableRow>
+                {canDelete && (
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                      onCheckedChange={(checked) => toggleAll(checked === true)}
+                      aria-label="Select all applications"
+                    />
+                  </TableHead>
+                )}
                 <TableHead>Name</TableHead>
                 <TableHead>Username</TableHead>
                 <TableHead>Email</TableHead>
@@ -151,6 +243,15 @@ function ApplicationsPageInner() {
             <TableBody>
               {rows.map((app) => (
                 <TableRow key={app.id}>
+                  {canDelete && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(app.id)}
+                        onCheckedChange={(checked) => toggleOne(app.id, checked === true)}
+                        aria-label={`Select ${app.name}`}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>{app.name}</TableCell>
                   <TableCell>{app.profile ? `@${app.profile.username}` : "—"}</TableCell>
                   <TableCell>{app.email}</TableCell>
@@ -165,15 +266,22 @@ function ApplicationsPageInner() {
                     <Badge variant={statusBadgeVariant[app.status]}>{app.status.replace(/_/g, " ")}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" onClick={() => setOpenId(app.id)}>
-                      Review
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setOpenId(app.id)}>
+                        Review
+                      </Button>
+                      {canDelete && (
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(app)} aria-label={`Delete ${app.name}`}>
+                          <Trash2 className="size-4 text-error-500" />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-neutral-400">
+                  <TableCell colSpan={columnCount} className="text-center text-neutral-400">
                     {list.hasActiveFilters ? (
                       <EmptyState hasActiveFilters label="applications" />
                     ) : (
@@ -204,6 +312,8 @@ function ApplicationsPageInner() {
           }}
         />
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }

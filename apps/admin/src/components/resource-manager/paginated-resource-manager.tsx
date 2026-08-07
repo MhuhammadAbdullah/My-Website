@@ -4,6 +4,7 @@ import * as React from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -22,6 +23,7 @@ import {
 import { AdminListToolbar, EmptyState, ListSummary, type FilterOption, type SortOption } from "@/components/admin-list-toolbar";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
+import { usePermissions } from "@/lib/use-permissions";
 import type { createResourceClient } from "@/lib/api";
 import { ResourceForm, type FormValues } from "./resource-form";
 import type { ColumnConfig, FieldConfig } from "./types";
@@ -40,6 +42,12 @@ interface PaginatedResourceManagerProps<T extends { id: string }> {
   defaultSortBy?: string;
   defaultSortOrder?: "asc" | "desc";
   defaultLimit?: number;
+  // Opt-in, permission-resource key (e.g. "testimonials"): only pass this for
+  // a resource whose route file actually has a POST `${basePath}/bulk-delete`
+  // route (see testimonials.routes.ts) -- other PaginatedResourceManager
+  // consumers (team/faqs/affiliate/finance clients) are unaffected by
+  // omitting it, since the checkbox column/bulk button only render when set.
+  bulkDeleteResource?: string;
 }
 
 export function PaginatedResourceManager<T extends { id: string }>({
@@ -56,6 +64,7 @@ export function PaginatedResourceManager<T extends { id: string }>({
   defaultSortBy = "createdAt",
   defaultSortOrder = "desc",
   defaultLimit = 10,
+  bulkDeleteResource,
 }: PaginatedResourceManagerProps<T>) {
   const list = usePaginatedList<T>({
     endpoint: `${resourceClient.basePath}/admin`,
@@ -70,6 +79,15 @@ export function PaginatedResourceManager<T extends { id: string }>({
   const [values, setValues] = React.useState<FormValues>(defaultValues);
   const [saving, setSaving] = React.useState(false);
   const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
+  const { can } = usePermissions();
+  const canBulkDelete = !!bulkDeleteResource && can(bulkDeleteResource, "delete");
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
+  const rows = list.data ?? [];
+
+  React.useEffect(() => {
+    setSelected(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list.page, list.search, list.sortBy, list.sortOrder, JSON.stringify(list.filters)]);
 
   function openCreate() {
     setEditing(null);
@@ -110,8 +128,44 @@ export function PaginatedResourceManager<T extends { id: string }>({
       onConfirm: async () => {
         await resourceClient.remove(item.id);
         toast.success("Deleted");
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(item.id);
+          return next;
+        });
         list.reload();
       },
+    });
+  }
+
+  function handleBulkDelete() {
+    const ids = Array.from(selected);
+    const label = title.toLowerCase().replace(/s$/, "");
+    confirmDelete({
+      title: `Delete ${ids.length} ${label}${ids.length === 1 ? "" : "s"}?`,
+      description: `Permanently removes all ${ids.length} selected ${label}${ids.length === 1 ? "" : "s"}.\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        const res = await resourceClient.bulkDelete(ids);
+        toast.success(`${res.count} ${label}${res.count === 1 ? "" : "s"} deleted`);
+        setSelected(new Set());
+        list.reload();
+      },
+    });
+  }
+
+  const allSelected = rows.length > 0 && selected.size === rows.length;
+  const someSelected = selected.size > 0 && !allSelected;
+
+  function toggleAll(checked: boolean) {
+    setSelected(checked ? new Set(rows.map((r) => r.id)) : new Set());
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
     });
   }
 
@@ -122,9 +176,16 @@ export function PaginatedResourceManager<T extends { id: string }>({
           <Heading level={2}>{title}</Heading>
           {description && <p className="mt-1 text-body-sm text-neutral-500">{description}</p>}
         </div>
-        <Button onClick={openCreate}>
-          <Plus /> Add new
-        </Button>
+        <div className="flex items-center gap-2">
+          {canBulkDelete && selected.size > 0 && (
+            <Button variant="outline" className="text-error-500" onClick={handleBulkDelete}>
+              <Trash2 className="size-4" /> Delete {selected.size} selected
+            </Button>
+          )}
+          <Button onClick={openCreate}>
+            <Plus /> Add new
+          </Button>
+        </div>
       </div>
 
       <div className="mt-6">
@@ -159,6 +220,15 @@ export function PaginatedResourceManager<T extends { id: string }>({
           <Table>
             <TableHeader>
               <TableRow>
+                {canBulkDelete && (
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                      onCheckedChange={(checked) => toggleAll(checked === true)}
+                      aria-label={`Select all ${title.toLowerCase()}`}
+                    />
+                  </TableHead>
+                )}
                 {columns.map((col) => (
                   <TableHead key={col.key}>{col.label}</TableHead>
                 ))}
@@ -166,8 +236,17 @@ export function PaginatedResourceManager<T extends { id: string }>({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(list.data ?? []).map((item) => (
+              {rows.map((item) => (
                 <TableRow key={item.id}>
+                  {canBulkDelete && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(item.id)}
+                        onCheckedChange={(checked) => toggleOne(item.id, checked === true)}
+                        aria-label="Select row"
+                      />
+                    </TableCell>
+                  )}
                   {columns.map((col) => (
                     <TableCell key={col.key}>
                       {col.render ? col.render(item) : String((item as Record<string, unknown>)[col.key] ?? "—")}
@@ -185,9 +264,9 @@ export function PaginatedResourceManager<T extends { id: string }>({
                   </TableCell>
                 </TableRow>
               ))}
-              {(list.data ?? []).length === 0 && (
+              {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={columns.length + 1}>
+                  <TableCell colSpan={columns.length + (canBulkDelete ? 2 : 1)}>
                     <EmptyState hasActiveFilters={list.hasActiveFilters} label={title.toLowerCase()} />
                   </TableCell>
                 </TableRow>

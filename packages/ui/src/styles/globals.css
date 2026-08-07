@@ -409,3 +409,30 @@
     transform: translateX(-50%);
   }
 }
+
+/* Thin, theme-matched scrollbar for panels that need a *visible* scroll
+   affordance (unlike tabs.tsx/icon-picker.tsx's fully-hidden horizontal
+   scrollers) -- e.g. the admin sidebar, where a hidden scrollbar would
+   defeat the point of making an overflowing accordion group scrollable at
+   all. Firefox uses `scrollbar-*`; everything else uses the `::-webkit-*`
+   pseudo-elements. Track is transparent so it disappears when there's
+   nothing to scroll, thumb only tints in on hover of the scrolling element
+   itself. */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-neutral-200) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--color-neutral-200);
+  border-radius: var(--radius-sm);
+}
+.scrollbar-thin:hover::-webkit-scrollbar-thumb {
+  background-color: var(--color-neutral-300);
+}

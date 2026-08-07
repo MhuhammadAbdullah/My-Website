@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import {
   Badge,
   Button,
@@ -37,6 +37,7 @@ import { ColorDot, ColorSelect } from "@/components/color-select";
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
+import { usePermissions } from "@/lib/use-permissions";
 
 interface BadgeCatalogItem {
   id: string;
@@ -288,6 +289,9 @@ function ManualAwardDialog({ onClose, onAwarded }: { onClose: () => void; onAwar
 function BadgeCatalogManager() {
   const [dialogItem, setDialogItem] = React.useState<BadgeCatalogItem | null | "new">(null);
   const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
+  const { can } = usePermissions();
+  const canDelete = can("influencerBadges", "delete");
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
 
   const { data: badges, loading, reload } = useAsyncData<BadgeCatalogItem[]>(
     () => request<{ items: BadgeCatalogItem[] }>("/influencer-badges/admin/catalog").then((r) => r.items),
@@ -298,18 +302,63 @@ function BadgeCatalogManager() {
   function handleDelete(item: BadgeCatalogItem) {
     confirmDelete({
       title: `Delete "${item.label}"?`,
-      description: "This also removes it from every influencer it's currently awarded to. This action cannot be undone.",
+      description: `Deletes this badge type from the catalog and immediately removes it from every influencer's public profile it's currently awarded on (both approved awards and pending recommendations are wiped).\n\nThis action cannot be undone.`,
       onConfirm: async () => {
         await request(`/influencer-badges/admin/catalog/${item.id}`, { method: "DELETE" });
         toast.success("Badge deleted");
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(item.id);
+          return next;
+        });
         reload();
       },
     });
   }
 
+  function handleBulkDelete() {
+    const ids = Array.from(selected);
+    confirmDelete({
+      title: `Delete ${ids.length} badge type${ids.length === 1 ? "" : "s"}?`,
+      description: `Deletes all ${ids.length} selected badge types from the catalog and immediately removes them from every influencer's public profile they're currently awarded on (both approved awards and pending recommendations are wiped).\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        const res = await request<{ count: number }>("/influencer-badges/admin/catalog/bulk-delete", {
+          method: "POST",
+          body: JSON.stringify({ ids }),
+        });
+        toast.success(`${res.count} deleted`);
+        setSelected(new Set());
+        reload();
+      },
+    });
+  }
+
+  const allSelected = rows.length > 0 && selected.size === rows.length;
+  const someSelected = selected.size > 0 && !allSelected;
+
+  function toggleAll(checked: boolean) {
+    setSelected(checked ? new Set(rows.map((r) => r.id)) : new Set());
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  const columnCount = canDelete ? 6 : 5;
+
   return (
     <div className="mt-6">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        {canDelete && selected.size > 0 && (
+          <Button variant="outline" className="text-error-500" onClick={handleBulkDelete}>
+            <Trash2 className="size-4" /> Delete {selected.size} selected
+          </Button>
+        )}
         <Button onClick={() => setDialogItem("new")}>
           <Plus /> New badge type
         </Button>
@@ -322,6 +371,15 @@ function BadgeCatalogManager() {
           <Table>
             <TableHeader>
               <TableRow>
+                {canDelete && (
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                      onCheckedChange={(checked) => toggleAll(checked === true)}
+                      aria-label="Select all badge types"
+                    />
+                  </TableHead>
+                )}
                 <TableHead>Color</TableHead>
                 <TableHead>Label</TableHead>
                 <TableHead>Key</TableHead>
@@ -332,6 +390,15 @@ function BadgeCatalogManager() {
             <TableBody>
               {rows.map((b) => (
                 <TableRow key={b.id}>
+                  {canDelete && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(b.id)}
+                        onCheckedChange={(checked) => toggleOne(b.id, checked === true)}
+                        aria-label={`Select ${b.label}`}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <ColorDot color={b.color} />
                   </TableCell>
@@ -345,16 +412,18 @@ function BadgeCatalogManager() {
                       <Button variant="outline" size="sm" onClick={() => setDialogItem(b)}>
                         Edit
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-error-500" onClick={() => handleDelete(b)}>
-                        Delete
-                      </Button>
+                      {canDelete && (
+                        <Button variant="ghost" size="sm" className="text-error-500" onClick={() => handleDelete(b)}>
+                          Delete
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-neutral-400">
+                  <TableCell colSpan={columnCount} className="text-center text-neutral-400">
                     <Badge variant="neutral">No badge types yet</Badge>
                   </TableCell>
                 </TableRow>

@@ -47,3 +47,13 @@ export const payoutStatusUpdateSchema = z.object({
   notes: z.string().max(1000).optional().or(z.literal("")),
 });
 export type PayoutStatusUpdateInput = z.infer<typeof payoutStatusUpdateSchema>;
+
+// Admin override -- unlike the guided workflow above (PAYOUT_TRANSITIONABLE_STATUSES,
+// which excludes PENDING since it's only ever the starting state), this lets
+// staff correct a mistake by moving a payout to ANY status including back to
+// PENDING, bypassing PAYOUT_TRANSITIONS entirely.
+export const payoutStatusOverrideSchema = z.object({
+  status: z.enum(PAYOUT_STATUSES),
+  notes: z.string().max(1000).optional().or(z.literal("")),
+});
+export type PayoutStatusOverrideInput = z.infer<typeof payoutStatusOverrideSchema>;

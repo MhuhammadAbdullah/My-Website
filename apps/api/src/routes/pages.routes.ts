@@ -7,6 +7,7 @@ import {
   portfolioPageContentSchema,
   affiliateToolsPageContentSchema,
   contactPageContentSchema,
+  influencerMarketplacePageContentSchema,
 } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
@@ -254,6 +255,32 @@ pagesRouter.put(
     const item = existing
       ? await prisma.contactPageContent.update({ where: { id: existing.id }, data })
       : await prisma.contactPageContent.create({ data });
+    res.json({ item });
+  }),
+);
+
+pagesRouter.get(
+  "/influencers",
+  asyncHandler(async (_req, res) => {
+    const item = await prisma.influencerMarketplacePageContent.findFirst();
+    res.json({ item });
+  }),
+);
+
+// Gated on "influencerSettings" (not a dedicated resource) -- matches
+// apps/admin's Influencer Marketplace "Settings" page, which is where this
+// hero heading/paragraph editor lives (nav-config.ts's Settings item already
+// uses this same resource key).
+pagesRouter.put(
+  "/influencers",
+  requireAuth,
+  requirePermission("influencerSettings", "update"),
+  asyncHandler(async (req, res) => {
+    const data = influencerMarketplacePageContentSchema.parse(req.body);
+    const existing = await prisma.influencerMarketplacePageContent.findFirst();
+    const item = existing
+      ? await prisma.influencerMarketplacePageContent.update({ where: { id: existing.id }, data })
+      : await prisma.influencerMarketplacePageContent.create({ data });
     res.json({ item });
   }),
 );

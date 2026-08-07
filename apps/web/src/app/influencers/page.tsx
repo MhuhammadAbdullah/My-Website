@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Container, Section, Heading } from "@agency/ui";
-import { getInfluencers } from "@/lib/api";
+import { getInfluencers, getInfluencerMarketplacePageContent } from "@/lib/api";
 import { getInfluencerCategories } from "@/lib/influencer-api";
 import { getInfluencerFlags } from "@/lib/influencer-flags";
 import { withFallback } from "@/lib/safe-fetch";
+import { EMPTY_INFLUENCER_MARKETPLACE_PAGE_CONTENT } from "@/lib/fallbacks";
 import { InfluencerCard } from "@/components/influencer/influencer-card";
 import { InfluencerFilters } from "@/components/influencer/influencer-filters";
 import { InfluencerAuthButtons } from "@/components/influencer/influencer-auth-buttons";
@@ -69,7 +70,7 @@ export default async function InfluencersPage({
   const page = Number(params.page ?? 1);
   const pageSize = 12;
 
-  const [influencersPage, categories] = await Promise.all([
+  const [influencersPage, categories, content] = await Promise.all([
     withFallback(
       getInfluencers({
         page,
@@ -94,6 +95,9 @@ export default async function InfluencersPage({
       "influencers",
     ),
     withFallback(getInfluencerCategories(), [], "influencer categories"),
+    withFallback(getInfluencerMarketplacePageContent(), null, "influencer marketplace page content").then(
+      (item) => item ?? EMPTY_INFLUENCER_MARKETPLACE_PAGE_CONTENT,
+    ),
   ]);
 
   return (
@@ -104,11 +108,9 @@ export default async function InfluencersPage({
             <div className="flex flex-wrap items-start justify-between gap-6">
               <div>
                 <Heading level={1} display>
-                  Influencer Marketplace
+                  {content.heroHeading}
                 </Heading>
-                <p className="mt-5 max-w-2xl text-body-lg text-body">
-                  Discover vetted creators, compare audience data and pricing, and book campaigns — we handle the rest.
-                </p>
+                <p className="mt-5 max-w-2xl text-body-lg text-body">{content.heroDescription}</p>
               </div>
               <InfluencerAuthButtons registrationEnabled={flags.registrationEnabled} />
             </div>

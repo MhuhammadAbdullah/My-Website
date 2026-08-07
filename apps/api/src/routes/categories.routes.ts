@@ -1,5 +1,6 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
+import { z } from "zod";
 import { prisma } from "@agency/database";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
@@ -206,6 +207,19 @@ categoriesRouter.patch(
     res.json({ item: await prisma.influencerCategory.update({ where: { id: req.params.id }, data }) });
   }),
 );
+const categoryBulkDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1) });
+
+categoriesRouter.post(
+  "/influencers/bulk-delete",
+  requireAuth,
+  requirePermission("influencerCategories", "delete"),
+  asyncHandler(async (req, res) => {
+    const { ids } = categoryBulkDeleteSchema.parse(req.body);
+    const { count } = await prisma.influencerCategory.deleteMany({ where: { id: { in: ids } } });
+    res.json({ count });
+  }),
+);
+
 categoriesRouter.delete(
   "/influencers/:id",
   requireAuth,

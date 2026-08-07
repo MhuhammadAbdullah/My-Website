@@ -405,6 +405,87 @@ export async function recordBookingPayment(
   return updated;
 }
 
+// Statuses that imply the invoice was treated as fully paid at some point --
+// used only to decide whether an admin override needs to void recorded
+// payments, not part of the guided workflow's transition table.
+const PAID_STATUSES: BookingStatusId[] = ["PAYMENT_RECEIVED", "APPROVED", "IN_PROGRESS", "DELIVERED", "CLIENT_APPROVED", "COMPLETED"];
+
+// Admin's "fix a mistake" escape hatch (brief request, 2026-08-07): unlike
+// transitionBooking() above, this bypasses BOOKING_TRANSITIONS entirely --
+// any status to any status. Two real-money safety nets stay in place even
+// in override mode: (1) if the booking is still linked to an active (not
+// FAILED/CANCELLED) payout batch, refuse -- that payout's total is computed
+// off this booking's netInfluencerEarning, so changing status underneath it
+// would make the payout's own numbers wrong; reverse/cancel that payout
+// first (see overridePayoutStatus in lib/payout.ts, which releases the
+// booking back to eligible-for-payout). (2) Moving OUT of a "payment
+// confirmed" status (e.g. wrongly marked Payment Received when no money
+// actually arrived) voids every Payment row on the invoice and recomputes
+// its balance via the same recomputeInvoiceBalance() the real payment flow
+// uses, so Invoice/Payment records never silently disagree with the
+// booking's status.
+export async function overrideBookingStatus(
+  bookingId: string,
+  toStatus: BookingStatusId,
+  actorId: string,
+  note: string | undefined,
+): Promise<BookingWithDetail> {
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: { payoutBookings: { include: { payout: true } } },
+  });
+  if (!booking) throw new ApiError(404, "Booking not found.");
+  if (booking.status === toStatus) throw new ApiError(409, "Booking is already in this status.");
+
+  const activePayout = booking.payoutBookings.find((pb) => !["FAILED", "CANCELLED"].includes(pb.payout.status));
+  if (activePayout) {
+    throw new ApiError(409, `This booking is already included in payout ${activePayout.payout.payoutNumber} — reverse or cancel that payout first.`);
+  }
+
+  const fromStatus = booking.status;
+  const reversingPayment = PAID_STATUSES.includes(fromStatus) && !PAID_STATUSES.includes(toStatus) && !!booking.invoiceId;
+
+  await prisma.$transaction(async (tx) => {
+    let voidedAmount = 0;
+    if (reversingPayment) {
+      const payments = await tx.payment.findMany({ where: { invoiceId: booking.invoiceId! } });
+      voidedAmount = round2(payments.reduce((sum, p) => sum + p.amount.toNumber(), 0));
+      if (payments.length > 0) {
+        await tx.payment.deleteMany({ where: { invoiceId: booking.invoiceId! } });
+        await recomputeInvoiceBalance(booking.invoiceId!, tx);
+      }
+    }
+
+    const data: Prisma.BookingUpdateInput = { status: toStatus };
+    // A booking un-completed by override shouldn't keep showing final
+    // commission/earning figures as if the campaign had actually finished.
+    if (fromStatus === "COMPLETED" && toStatus !== "COMPLETED") {
+      data.completedAt = null;
+      data.commissionPercent = 0;
+      data.commissionAmount = 0;
+      data.platformFees = 0;
+      data.taxAmount = 0;
+      data.netInfluencerEarning = 0;
+    }
+
+    await tx.booking.update({ where: { id: bookingId }, data });
+
+    await tx.bookingStatusHistory.create({
+      data: {
+        bookingId,
+        fromStatus,
+        toStatus,
+        changedById: actorId,
+        note: ["Admin override", voidedAmount > 0 ? `voided ${voidedAmount} in recorded payments` : null, note || null]
+          .filter(Boolean)
+          .join(" — "),
+      },
+    });
+  }, { timeout: 15_000 });
+
+  return prisma.booking.findUniqueOrThrow({ where: { id: bookingId }, include: bookingDetailInclude });
+}
+
 const CLIENT_PRIVATE_FIELDS = ["contactPerson", "contactEmail", "contactPhone", "businessWebsite"] as const;
 
 // The influencer-facing booking detail response must never carry the

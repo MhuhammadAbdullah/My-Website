@@ -1,11 +1,19 @@
 import { Router } from "express";
+import { z } from "zod";
 import { prisma } from "@agency/database";
-import { payoutBatchCreateSchema, payoutStatusUpdateSchema, payoutMethodReviewSchema } from "@agency/types";
+import { payoutBatchCreateSchema, payoutStatusUpdateSchema, payoutStatusOverrideSchema, payoutMethodReviewSchema } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
 import { ApiError } from "../middleware/error-handler.js";
 import { parseListQuery, paginationMeta, exactFilter } from "../lib/list-query.js";
-import { getEligibleBookingsForPayout, createPayoutBatch, nextAllowedPayoutStatuses, transitionPayout, payoutDetailInclude } from "../lib/payout.js";
+import {
+  getEligibleBookingsForPayout,
+  createPayoutBatch,
+  nextAllowedPayoutStatuses,
+  transitionPayout,
+  overridePayoutStatus,
+  payoutDetailInclude,
+} from "../lib/payout.js";
 
 export const influencerPayoutsRouter = Router();
 
@@ -92,6 +100,23 @@ influencerPayoutsRouter.patch(
   }),
 );
 
+// Admin override: move a payout to ANY status directly (including back to
+// PENDING, which the guided /status route above never allows), for fixing
+// mistakes like a payout marked PAID when the transfer never actually went
+// through. Gated on "delete" rather than "update" -- like Bookings'
+// equivalent override, this can undo a real processedAt/processedById
+// record and release bundled bookings, unlike the guided transition route.
+influencerPayoutsRouter.patch(
+  "/admin/:id/status-override",
+  requireAuth,
+  requirePermission("influencerPayouts", "delete"),
+  asyncHandler(async (req, res) => {
+    const data = payoutStatusOverrideSchema.parse(req.body);
+    const updated = await overridePayoutStatus(req.params.id!, data.status, req.user!.id, data.notes || undefined);
+    res.json({ item: { ...updated, allowedTransitions: nextAllowedPayoutStatuses(updated.status) } });
+  }),
+);
+
 // Payout *method* review queue (bank/IBAN/wallet details an influencer
 // submitted from their dashboard) -- separate resource namespace under the
 // same router since both concepts share the "influencerPayouts" permission.
@@ -136,5 +161,45 @@ influencerPayoutsRouter.patch(
     });
 
     res.json({ item: updated });
+  }),
+);
+
+const bulkDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1) });
+const deletablePayoutStatuses = ["PENDING", "CANCELLED"] as const;
+
+// Payouts are financial audit records -- delete is restricted to statuses
+// that never represent money having actually moved (PENDING was never
+// processed, CANCELLED explicitly didn't go through). PROCESSING/PAID/FAILED
+// can never be deleted, only transitioned. InfluencerPayoutBooking rows for
+// a deleted payout cascade (schema's onDelete: Cascade on payoutId), which
+// also releases those bookings back into the eligible-for-payout pool.
+influencerPayoutsRouter.post(
+  "/admin/bulk-delete",
+  requireAuth,
+  requirePermission("influencerPayouts", "delete"),
+  asyncHandler(async (req, res) => {
+    const { ids } = bulkDeleteSchema.parse(req.body);
+    const payouts = await prisma.influencerPayout.findMany({ where: { id: { in: ids } }, select: { id: true, status: true } });
+    const notDeletable = payouts.filter((p) => !(deletablePayoutStatuses as readonly string[]).includes(p.status));
+    if (notDeletable.length > 0) {
+      throw new ApiError(409, `${notDeletable.length} selected payout${notDeletable.length === 1 ? " is" : "s are"} processing or already paid and can't be deleted.`);
+    }
+    const { count } = await prisma.influencerPayout.deleteMany({ where: { id: { in: ids }, status: { in: [...deletablePayoutStatuses] } } });
+    res.json({ count });
+  }),
+);
+
+influencerPayoutsRouter.delete(
+  "/admin/:id",
+  requireAuth,
+  requirePermission("influencerPayouts", "delete"),
+  asyncHandler(async (req, res) => {
+    const payout = await prisma.influencerPayout.findUnique({ where: { id: req.params.id } });
+    if (!payout) throw new ApiError(404, "Payout not found.");
+    if (!(deletablePayoutStatuses as readonly string[]).includes(payout.status)) {
+      throw new ApiError(409, "Only pending or cancelled payouts can be deleted.");
+    }
+    await prisma.influencerPayout.delete({ where: { id: req.params.id } });
+    res.status(204).send();
   }),
 );

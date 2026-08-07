@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -26,6 +27,7 @@ import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-li
 import { request } from "@/lib/api";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
+import { usePermissions } from "@/lib/use-permissions";
 import { slugify } from "@agency/utils";
 import { TechnologiesList } from "./technologies-list";
 
@@ -43,7 +45,22 @@ const sortOptions = [
   { value: "updatedAt", label: "Date updated" },
 ];
 
-function CategoryList({ endpoint, paramPrefix, label }: { endpoint: string; paramPrefix: string; label: string }) {
+// `bulkDeleteResource` is opt-in: only the influencer-categories tab passes
+// it (its own `${endpoint}/bulk-delete` route exists -- see
+// categories.routes.ts). Services/Projects/Affiliate tabs are left alone
+// (own routers, no bulk-delete route added) rather than risk a bulk-delete
+// button that 404s on those.
+function CategoryList({
+  endpoint,
+  paramPrefix,
+  label,
+  bulkDeleteResource,
+}: {
+  endpoint: string;
+  paramPrefix: string;
+  label: string;
+  bulkDeleteResource?: string;
+}) {
   const list = usePaginatedList<CategoryItem>({
     endpoint: `${endpoint}/admin`,
     paramPrefix,
@@ -57,6 +74,15 @@ function CategoryList({ endpoint, paramPrefix, label }: { endpoint: string; para
   const [editSlug, setEditSlug] = React.useState("");
   const [editSaving, setEditSaving] = React.useState(false);
   const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
+  const { can } = usePermissions();
+  const canBulkDelete = !!bulkDeleteResource && can(bulkDeleteResource, "delete");
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
+  const rows = list.data ?? [];
+
+  React.useEffect(() => {
+    setSelected(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list.page, list.search, list.sortBy, list.sortOrder, JSON.stringify(list.filters)]);
 
   async function handleCreate() {
     if (!name.trim()) return;
@@ -76,15 +102,53 @@ function CategoryList({ endpoint, paramPrefix, label }: { endpoint: string; para
     }
   }
 
-  function handleDelete(id: string) {
+  function handleDelete(item: CategoryItem) {
     confirmDelete({
-      title: `Delete this ${label.toLowerCase()}?`,
-      description: "This action cannot be undone.",
+      title: `Delete "${item.name}"?`,
+      description: `Anything currently tagged with this ${label.toLowerCase()} will no longer show under it — the ${label.toLowerCase()} itself is removed, not what was tagged.\n\nThis action cannot be undone.`,
       onConfirm: async () => {
-        await request(`${endpoint}/${id}`, { method: "DELETE" });
-        toast.success("Deleted");
+        await request(`${endpoint}/${item.id}`, { method: "DELETE" });
+        toast.success(`${label} deleted`);
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(item.id);
+          return next;
+        });
         list.reload();
       },
+    });
+  }
+
+  function handleBulkDelete() {
+    const ids = Array.from(selected);
+    confirmDelete({
+      title: `Delete ${ids.length} ${label.toLowerCase()}${ids.length === 1 ? "" : "s"}?`,
+      description: `Anything currently tagged with these ${label.toLowerCase()}s will no longer show under them — only the ${label.toLowerCase()}s themselves are removed.\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        const res = await request<{ count: number }>(`${endpoint}/bulk-delete`, {
+          method: "POST",
+          body: JSON.stringify({ ids }),
+        });
+        toast.success(`${res.count} ${label.toLowerCase()}${res.count === 1 ? "" : "s"} deleted`);
+        setSelected(new Set());
+        list.reload();
+      },
+    });
+  }
+
+  const allSelected = rows.length > 0 && selected.size === rows.length;
+  const someSelected = selected.size > 0 && !allSelected;
+
+  function toggleAll(checked: boolean) {
+    setSelected(checked ? new Set(rows.map((r) => r.id)) : new Set());
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
     });
   }
 
@@ -123,16 +187,22 @@ function CategoryList({ endpoint, paramPrefix, label }: { endpoint: string; para
 
   return (
     <div>
-      <div className="flex gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={`New ${label.toLowerCase()} name…`}
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+          className="flex-1"
         />
         <Button onClick={handleCreate} disabled={saving}>
           <Plus /> Add
         </Button>
+        {canBulkDelete && selected.size > 0 && (
+          <Button variant="outline" className="text-error-500" onClick={handleBulkDelete}>
+            <Trash2 className="size-4" /> Delete {selected.size} selected
+          </Button>
+        )}
       </div>
 
       <div className="mt-4">
@@ -153,17 +223,37 @@ function CategoryList({ endpoint, paramPrefix, label }: { endpoint: string; para
         />
       </div>
 
+      {canBulkDelete && rows.length > 0 && !list.loading && (
+        <label className="mt-3 flex items-center gap-2 text-body-sm text-neutral-500">
+          <Checkbox
+            checked={allSelected ? true : someSelected ? "indeterminate" : false}
+            onCheckedChange={(checked) => toggleAll(checked === true)}
+            aria-label={`Select all ${label.toLowerCase()}s`}
+          />
+          Select all
+        </label>
+      )}
+
       <div className="mt-4 space-y-2">
         {list.loading ? (
           Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)
-        ) : (list.data ?? []).length === 0 ? (
+        ) : rows.length === 0 ? (
           <EmptyState hasActiveFilters={list.hasActiveFilters} label={`${label.toLowerCase()}s`} />
         ) : (
-          list.data!.map((item) => (
+          rows.map((item) => (
             <div key={item.id} className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3">
-              <div>
-                <p className="text-body-sm font-medium text-heading">{item.name}</p>
-                <p className="font-mono text-label text-neutral-400">/{item.slug}</p>
+              <div className="flex items-center gap-3">
+                {canBulkDelete && (
+                  <Checkbox
+                    checked={selected.has(item.id)}
+                    onCheckedChange={(checked) => toggleOne(item.id, checked === true)}
+                    aria-label={`Select ${item.name}`}
+                  />
+                )}
+                <div>
+                  <p className="text-body-sm font-medium text-heading">{item.name}</p>
+                  <p className="font-mono text-label text-neutral-400">/{item.slug}</p>
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <Switch
@@ -174,7 +264,7 @@ function CategoryList({ endpoint, paramPrefix, label }: { endpoint: string; para
                 <Button variant="ghost" size="icon" onClick={() => openEdit(item)} aria-label="Edit">
                   <Pencil className="size-4 text-neutral-500" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} aria-label="Delete">
+                <Button variant="ghost" size="icon" onClick={() => handleDelete(item)} aria-label="Delete">
                   <Trash2 className="size-4 text-error-500" />
                 </Button>
               </div>
@@ -250,7 +340,7 @@ function CategoriesPageInner() {
           <CategoryList endpoint="/affiliate/categories" paramPrefix="aff" label="Category" />
         </TabsContent>
         <TabsContent value="influencers">
-          <CategoryList endpoint="/categories/influencers" paramPrefix="inf" label="Category" />
+          <CategoryList endpoint="/categories/influencers" paramPrefix="inf" label="Category" bulkDeleteResource="influencerCategories" />
         </TabsContent>
       </Tabs>
     </div>

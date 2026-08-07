@@ -3,10 +3,11 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, Plus, Star } from "lucide-react";
+import { ArrowLeft, Plus, Star, Trash2 } from "lucide-react";
 import {
   Badge,
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -29,6 +30,7 @@ import { request } from "@/lib/api";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { useAsyncData } from "@/lib/use-resource";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
+import { usePermissions } from "@/lib/use-permissions";
 
 interface ReviewSummary {
   influencer: { id: string; name: string; username: string | null; profilePhoto: { url: string } | null };
@@ -80,9 +82,17 @@ export default function InfluencerReviewDetailPage() {
     defaultLimit: 10,
   });
   const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
+  const { can } = usePermissions();
+  const canDelete = can("influencers", "delete");
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
 
   const [dialogItem, setDialogItem] = React.useState<ReviewItem | null | "new">(null);
   const [togglingId, setTogglingId] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    setSelected(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list.page, list.search, list.sortBy, list.sortOrder, JSON.stringify(list.filters)]);
 
   function reloadAll() {
     reloadSummary();
@@ -115,16 +125,53 @@ export default function InfluencerReviewDetailPage() {
   function handleDelete(item: ReviewItem) {
     confirmDelete({
       title: `Delete this review by "${item.authorName}"?`,
-      description: "This action cannot be undone.",
+      description: `Removes the review immediately (if it was Published, it disappears from the public profile right away). The influencer's average rating and review count will be recalculated without it.\n\nThis action cannot be undone.`,
       onConfirm: async () => {
         await request(`/influencer-reviews/${item.id}`, { method: "DELETE" });
-        toast.success("Review deleted");
+        toast.success("Review deleted, rating recalculated");
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(item.id);
+          return next;
+        });
+        reloadAll();
+      },
+    });
+  }
+
+  function handleBulkDelete() {
+    const ids = Array.from(selected);
+    confirmDelete({
+      title: `Delete ${ids.length} review${ids.length === 1 ? "" : "s"}?`,
+      description: `Removes all ${ids.length} selected reviews immediately (any that were Published disappear from the public profile right away). Affected influencers' average ratings and review counts will be recalculated without them.\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        const res = await request<{ count: number }>("/influencer-reviews/bulk-delete", {
+          method: "POST",
+          body: JSON.stringify({ ids }),
+        });
+        toast.success(`${res.count} review${res.count === 1 ? "" : "s"} deleted, ratings recalculated`);
+        setSelected(new Set());
         reloadAll();
       },
     });
   }
 
   const rows = list.data ?? [];
+  const allSelected = rows.length > 0 && selected.size === rows.length;
+  const someSelected = selected.size > 0 && !allSelected;
+
+  function toggleAll(checked: boolean) {
+    setSelected(checked ? new Set(rows.map((r) => r.id)) : new Set());
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
 
   return (
     <div>
@@ -182,7 +229,25 @@ export default function InfluencerReviewDetailPage() {
       )}
 
       <div className="mt-8">
-        <Heading level={3}>Reviews</Heading>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Heading level={3}>Reviews</Heading>
+          {canDelete && selected.size > 0 && (
+            <Button variant="outline" className="text-error-500" onClick={handleBulkDelete}>
+              <Trash2 className="size-4" /> Delete {selected.size} selected
+            </Button>
+          )}
+        </div>
+
+        {canDelete && rows.length > 0 && !list.loading && (
+          <label className="mt-3 flex items-center gap-2 text-body-sm text-neutral-500">
+            <Checkbox
+              checked={allSelected ? true : someSelected ? "indeterminate" : false}
+              onCheckedChange={(checked) => toggleAll(checked === true)}
+              aria-label="Select all reviews"
+            />
+            Select all
+          </label>
+        )}
 
         <div className="mt-4">
           {list.loading ? (
@@ -196,19 +261,29 @@ export default function InfluencerReviewDetailPage() {
               {rows.map((r) => (
                 <div key={r.id} className="rounded-xl border border-neutral-200 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-heading">
-                          {r.authorName}
-                          {r.authorCompany ? <span className="font-normal text-neutral-400">, {r.authorCompany}</span> : null}
-                        </p>
-                        <Badge variant={r.status === "PUBLISHED" ? "success" : r.status === "DRAFT" ? "warning" : "neutral"}>
-                          {r.status}
-                        </Badge>
-                      </div>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Stars rating={r.rating} />
-                        <span className="text-label text-neutral-400">{new Date(r.createdAt).toLocaleDateString()}</span>
+                    <div className="flex items-start gap-3">
+                      {canDelete && (
+                        <Checkbox
+                          className="mt-1"
+                          checked={selected.has(r.id)}
+                          onCheckedChange={(checked) => toggleOne(r.id, checked === true)}
+                          aria-label={`Select review by ${r.authorName}`}
+                        />
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-heading">
+                            {r.authorName}
+                            {r.authorCompany ? <span className="font-normal text-neutral-400">, {r.authorCompany}</span> : null}
+                          </p>
+                          <Badge variant={r.status === "PUBLISHED" ? "success" : r.status === "DRAFT" ? "warning" : "neutral"}>
+                            {r.status}
+                          </Badge>
+                        </div>
+                        <div className="mt-1 flex items-center gap-2">
+                          <Stars rating={r.rating} />
+                          <span className="text-label text-neutral-400">{new Date(r.createdAt).toLocaleDateString()}</span>
+                        </div>
                       </div>
                     </div>
                     <div className="flex shrink-0 gap-1">
@@ -223,9 +298,11 @@ export default function InfluencerReviewDetailPage() {
                       <Button variant="outline" size="sm" onClick={() => setDialogItem(r)}>
                         Edit
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-error-500" onClick={() => handleDelete(r)}>
-                        Delete
-                      </Button>
+                      {canDelete && (
+                        <Button variant="ghost" size="sm" className="text-error-500" onClick={() => handleDelete(r)}>
+                          Delete
+                        </Button>
+                      )}
                     </div>
                   </div>
                   <p className="mt-3 text-body-sm text-body">{r.comment}</p>

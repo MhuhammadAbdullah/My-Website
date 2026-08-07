@@ -32,6 +32,12 @@ export function createResourceClient<TItem>(basePath: string) {
         (r) => r.item,
       ),
     remove: (id: string) => request<void>(`${basePath}/${id}`, { method: "DELETE" }),
+    // Opt-in: only meaningful for resources whose route file actually
+    // registers a POST `${basePath}/bulk-delete` route (e.g. testimonials.routes.ts)
+    // -- harmless to have on every client since it's never called unless a
+    // consumer's PaginatedResourceManager explicitly passes bulkDeleteResource.
+    bulkDelete: (ids: string[]) =>
+      request<{ count: number }>(`${basePath}/bulk-delete`, { method: "POST", body: JSON.stringify({ ids }) }),
   };
 }
 

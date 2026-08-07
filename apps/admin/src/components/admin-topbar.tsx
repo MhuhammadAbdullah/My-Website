@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, Button } from "@agency/ui";
 import { authClient } from "@/lib/auth-client";
 import { getPageTitle } from "@/lib/nav-config";
 import { NotificationBell } from "@/components/notification-bell";
+import { AdminBrandMark } from "@/components/admin-sidebar";
 
 export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
   const router = useRouter();
@@ -43,6 +44,9 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
       <div className="flex shrink-0 items-center gap-3">
         <NotificationBell />
+        <div className="flex items-center border-r border-neutral-200 pr-3">
+          <AdminBrandMark className="h-7 max-w-24" />
+        </div>
         <Avatar className="size-9">
           <AvatarFallback>{user?.name?.charAt(0) ?? "A"}</AvatarFallback>
         </Avatar>

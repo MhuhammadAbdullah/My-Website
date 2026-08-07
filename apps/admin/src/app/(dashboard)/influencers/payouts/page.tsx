@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Suspense } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import {
   Badge,
   Button,
@@ -13,7 +13,13 @@ import {
   DialogHeader,
   DialogTitle,
   Heading,
+  Label,
   Pagination,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Skeleton,
   Table,
   TableBody,
@@ -32,6 +38,9 @@ import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-li
 import { request } from "@/lib/api";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { useAsyncData } from "@/lib/use-resource";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
+import { usePermissions } from "@/lib/use-permissions";
+import { PAYOUT_STATUSES } from "@agency/types";
 
 type PayoutStatus = "PENDING" | "PROCESSING" | "PAID" | "FAILED" | "CANCELLED";
 
@@ -108,6 +117,8 @@ function formatMoney(value: string | number, currency = "") {
   return `${currency ? `${currency} ` : ""}${Number(value).toLocaleString()}`;
 }
 
+const DELETABLE_PAYOUT_STATUSES: PayoutStatus[] = ["PENDING", "CANCELLED"];
+
 function PayoutsPageInner() {
   const list = usePaginatedList<PayoutListItem>({
     endpoint: "/influencer-payouts/admin",
@@ -117,7 +128,78 @@ function PayoutsPageInner() {
   });
   const [openId, setOpenId] = React.useState<string | null>(null);
   const [showCreate, setShowCreate] = React.useState(false);
+  const { can } = usePermissions();
+  const canDelete = can("influencerPayouts", "delete");
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
   const rows = list.data ?? [];
+  const deletableRows = rows.filter((r) => DELETABLE_PAYOUT_STATUSES.includes(r.status));
+
+  React.useEffect(() => {
+    setSelected(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list.page, list.search, list.sortBy, list.sortOrder, JSON.stringify(list.filters)]);
+
+  function afterDelete(deletedCount: number) {
+    const remaining = rows.length - deletedCount;
+    if (remaining <= 0 && list.page > 1) {
+      list.setPage(list.page - 1);
+    } else {
+      list.reload();
+    }
+  }
+
+  function handleDelete(p: PayoutListItem) {
+    confirmDelete({
+      title: `Delete payout ${p.payoutNumber}?`,
+      description: `Only shown here because it's Pending or Cancelled — Processing/Paid/Failed payouts can never be deleted, to protect financial records.\n\nDeleting it also releases the bookings bundled into ${p.payoutNumber}, so they become eligible for a new payout batch again.\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        await request(`/influencer-payouts/admin/${p.id}`, { method: "DELETE" });
+        toast.success("Payout deleted, its bookings are eligible for payout again");
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(p.id);
+          return next;
+        });
+        afterDelete(1);
+      },
+    });
+  }
+
+  function handleBulkDelete() {
+    const ids = Array.from(selected);
+    confirmDelete({
+      title: `Delete ${ids.length} payout${ids.length === 1 ? "" : "s"}?`,
+      description: `Deletes all ${ids.length} selected payout${ids.length === 1 ? "" : "s"} and releases their bundled bookings, making them eligible for a new payout batch again.\n\nThe whole selection is blocked if even one selected payout is Processing, Paid, or Failed (financial records are protected) — only Pending/Cancelled payouts can be deleted.\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        const res = await request<{ count: number }>("/influencer-payouts/admin/bulk-delete", {
+          method: "POST",
+          body: JSON.stringify({ ids }),
+        });
+        toast.success(`${res.count} payout${res.count === 1 ? "" : "s"} deleted, bookings released for payout again`);
+        setSelected(new Set());
+        afterDelete(ids.length);
+      },
+    });
+  }
+
+  const allSelected = deletableRows.length > 0 && selected.size === deletableRows.length;
+  const someSelected = selected.size > 0 && !allSelected;
+
+  function toggleAll(checked: boolean) {
+    setSelected(checked ? new Set(deletableRows.map((r) => r.id)) : new Set());
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  const columnCount = canDelete ? 8 : 7;
 
   return (
     <div>
@@ -128,6 +210,11 @@ function PayoutsPageInner() {
             Batch completed bookings into payouts, track their status, and review influencer payout method requests.
           </p>
         </div>
+        {canDelete && selected.size > 0 && (
+          <Button variant="outline" className="text-error-500" onClick={handleBulkDelete}>
+            <Trash2 className="size-4" /> Delete {selected.size} selected
+          </Button>
+        )}
       </div>
 
       <Tabs defaultValue="payouts" className="mt-6">
@@ -171,6 +258,16 @@ function PayoutsPageInner() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    {canDelete && (
+                      <TableHead className="w-10">
+                        <Checkbox
+                          checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                          onCheckedChange={(checked) => toggleAll(checked === true)}
+                          aria-label="Select all deletable payouts"
+                          disabled={deletableRows.length === 0}
+                        />
+                      </TableHead>
+                    )}
                     <TableHead>Payout #</TableHead>
                     <TableHead>Influencer</TableHead>
                     <TableHead>Method</TableHead>
@@ -181,26 +278,46 @@ function PayoutsPageInner() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {rows.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-medium text-heading">{p.payoutNumber}</TableCell>
-                      <TableCell>{p.influencer.profile ? `@${p.influencer.profile.username}` : p.influencer.name}</TableCell>
-                      <TableCell>{p.method.replace(/_/g, " ")}</TableCell>
-                      <TableCell>{formatMoney(p.totalAmount, p.currency)}</TableCell>
-                      <TableCell>
-                        <Badge variant={statusVariant(p.status)}>{p.status}</Badge>
-                      </TableCell>
-                      <TableCell>{new Date(p.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm" onClick={() => setOpenId(p.id)}>
-                          Manage
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {rows.map((p) => {
+                    const isDeletable = DELETABLE_PAYOUT_STATUSES.includes(p.status);
+                    return (
+                      <TableRow key={p.id}>
+                        {canDelete && (
+                          <TableCell>
+                            <Checkbox
+                              checked={selected.has(p.id)}
+                              onCheckedChange={(checked) => toggleOne(p.id, checked === true)}
+                              aria-label={`Select ${p.payoutNumber}`}
+                              disabled={!isDeletable}
+                            />
+                          </TableCell>
+                        )}
+                        <TableCell className="font-medium text-heading">{p.payoutNumber}</TableCell>
+                        <TableCell>{p.influencer.profile ? `@${p.influencer.profile.username}` : p.influencer.name}</TableCell>
+                        <TableCell>{p.method.replace(/_/g, " ")}</TableCell>
+                        <TableCell>{formatMoney(p.totalAmount, p.currency)}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariant(p.status)}>{p.status}</Badge>
+                        </TableCell>
+                        <TableCell>{new Date(p.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setOpenId(p.id)}>
+                              Manage
+                            </Button>
+                            {canDelete && isDeletable && (
+                              <Button variant="ghost" size="icon" onClick={() => handleDelete(p)} aria-label={`Delete ${p.payoutNumber}`}>
+                                <Trash2 className="size-4 text-error-500" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                   {rows.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-neutral-400">
+                      <TableCell colSpan={columnCount} className="text-center text-neutral-400">
                         {list.hasActiveFilters ? <EmptyState hasActiveFilters label="payouts" /> : <Badge variant="neutral">No payouts yet</Badge>}
                       </TableCell>
                     </TableRow>
@@ -240,6 +357,8 @@ function PayoutsPageInner() {
           }}
         />
       )}
+
+      {ConfirmDialog}
     </div>
   );
 }
@@ -250,6 +369,11 @@ function PayoutManageDialog({ id, onClose, onChanged }: { id: string; onClose: (
   const [pendingTransition, setPendingTransition] = React.useState<PayoutStatus | null>(null);
   const [notes, setNotes] = React.useState("");
   const [saving, setSaving] = React.useState(false);
+  const { can } = usePermissions();
+  const canOverride = can("influencerPayouts", "delete");
+  const { confirmDelete: confirmOverride, ConfirmDialog: OverrideConfirmDialog } = useDeleteConfirmation();
+  const [overrideStatus, setOverrideStatus] = React.useState<PayoutStatus | "">("");
+  const [overrideNotes, setOverrideNotes] = React.useState("");
 
   const load = React.useCallback(() => {
     setLoading(true);
@@ -281,6 +405,42 @@ function PayoutManageDialog({ id, onClose, onChanged }: { id: string; onClose: (
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleOverride() {
+    if (!overrideStatus || !item) return;
+    const target = overrideStatus;
+    const from = item.status;
+    const releasesBookings = target === "PENDING" || target === "CANCELLED";
+    const reversingPaid = from === "PAID" && target !== "PAID";
+    confirmOverride({
+      title: `Override status to "${target}"?`,
+      description: [
+        `Moves this payout directly from "${from}" to "${target}", skipping the normal step-by-step workflow — use this only to correct a mistake.`,
+        reversingPaid
+          ? "Since it was marked PAID, this clears the \"processed\" record (who sent it and when). Use this if it was marked paid by mistake and the transfer never actually happened."
+          : null,
+        releasesBookings
+          ? `The bookings bundled into ${item.payoutNumber} will be released and become eligible for a new payout batch again.`
+          : null,
+        "This action cannot be undone.",
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
+      onConfirm: async () => {
+        await request(`/influencer-payouts/admin/${id}/status-override`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: target, notes: overrideNotes || undefined }),
+        });
+        toast.success(
+          releasesBookings ? `Status overridden to ${target} — bookings released for payout again` : `Status overridden to ${target}`,
+        );
+        setOverrideStatus("");
+        setOverrideNotes("");
+        load();
+        onChanged();
+      },
+    });
   }
 
   return (
@@ -375,6 +535,48 @@ function PayoutManageDialog({ id, onClose, onChanged }: { id: string; onClose: (
                   )}
                 </div>
               )}
+
+              {canOverride && (
+                <div>
+                  <h4 className="text-body-sm font-semibold text-heading">Admin override</h4>
+                  <p className="mt-1 text-label text-neutral-400">
+                    For correcting mistakes only — jump directly to any status, skipping the guided workflow above. Reversing out of
+                    PAID clears the "processed" record; moving to Pending or Cancelled also releases the bundled bookings so they can
+                    be paid out again.
+                  </p>
+                  <div className="mt-2">
+                    <Select value={overrideStatus} onValueChange={(v) => setOverrideStatus(v as PayoutStatus)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PAYOUT_STATUSES.filter((s) => s !== item.status).map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {overrideStatus && (
+                    <div className="mt-3 space-y-3 rounded-xl border border-error-200 p-4">
+                      <div>
+                        <Label>Note (optional)</Label>
+                        <Textarea value={overrideNotes} onChange={(e) => setOverrideNotes(e.target.value)} rows={2} />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setOverrideStatus("")}>
+                          Cancel
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-error-500" onClick={handleOverride}>
+                          Override — {overrideStatus}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
@@ -385,6 +587,8 @@ function PayoutManageDialog({ id, onClose, onChanged }: { id: string; onClose: (
           </Button>
         </div>
       </DialogContent>
+
+      {OverrideConfirmDialog}
     </Dialog>
   );
 }

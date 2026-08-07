@@ -2,15 +2,17 @@
 
 import * as React from "react";
 import { Sheet, SheetContent, SheetTitle } from "@agency/ui";
-import { AdminSidebar, SidebarNav } from "@/components/admin-sidebar";
+import { AdminSidebar, AdminBrandMark, SidebarNav } from "@/components/admin-sidebar";
 import { AdminTopbar } from "@/components/admin-topbar";
 import { AdminRouteGuard } from "@/components/admin-route-guard";
+import { useSiteBranding } from "@/lib/use-site-branding";
 
 const COLLAPSE_STORAGE_KEY = "admin-sidebar-collapsed";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const { brandName } = useSiteBranding();
 
   React.useEffect(() => {
     const stored = window.localStorage.getItem(COLLAPSE_STORAGE_KEY);
@@ -33,15 +35,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <SheetContent side="left" className="w-72 p-4">
           <SheetTitle className="sr-only">Navigation menu</SheetTitle>
           <div className="flex items-center gap-2.5 px-2 py-3">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-heading text-body-sm font-bold text-white">
-              C
-            </div>
+            <AdminBrandMark />
             <div className="min-w-0">
-              <p className="truncate font-heading text-body font-semibold text-heading">MAB Digital</p>
+              <p className="truncate font-heading text-body font-semibold text-heading">{brandName}</p>
               <p className="truncate text-body-sm text-neutral-400">Admin panel</p>
             </div>
           </div>
-          <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="scrollbar-thin mt-4 flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
             <SidebarNav collapsed={false} onNavigate={() => setMobileOpen(false)} />
           </div>
         </SheetContent>

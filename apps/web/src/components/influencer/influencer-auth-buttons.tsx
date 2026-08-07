@@ -14,7 +14,7 @@ export function InfluencerAuthButtons({ registrationEnabled }: { registrationEna
       <Button
         variant="outline"
         size="lg"
-        className="h-9 px-4 text-label sm:h-13 sm:px-8 sm:text-[length:var(--text-body)]"
+        className="h-9 px-4 text-[length:var(--text-label)] sm:h-13 sm:px-8 sm:text-[length:var(--text-body)]"
         onClick={() => openAuthModal("login")}
       >
         Login
@@ -22,7 +22,7 @@ export function InfluencerAuthButtons({ registrationEnabled }: { registrationEna
       {registrationEnabled && (
         <Button
           size="lg"
-          className="h-9 px-4 text-label sm:h-13 sm:px-8 sm:text-[length:var(--text-body)]"
+          className="h-9 px-4 text-[length:var(--text-label)] sm:h-13 sm:px-8 sm:text-[length:var(--text-body)]"
           onClick={() => openAuthModal("register")}
         >
           Become an Influencer

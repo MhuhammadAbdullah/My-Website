@@ -20,6 +20,7 @@ import {
 } from "@agency/ui";
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
+import { PageHeroContentForm } from "@/components/page-hero-content-form";
 import type { InfluencerFlagsSettings, InfluencerInsightsGuideSettings, InfluencerVideoGuideSettings, SiteSettings } from "@/lib/types";
 
 const DEFAULT_FLAGS: InfluencerFlagsSettings = {
@@ -181,6 +182,24 @@ export default function InfluencerSettingsPage() {
         <Skeleton className="mt-6 h-96 w-full" />
       ) : (
         <div className="mt-6 max-w-2xl space-y-8">
+          <section className="space-y-4">
+            <div>
+              <p className="font-medium text-heading">Marketplace page</p>
+              <p className="mb-2 text-body-sm text-neutral-500">
+                The heading and paragraph shown at the top of the public Influencer Marketplace listing page (calibre.digital/influencers).
+              </p>
+            </div>
+            <PageHeroContentForm
+              endpoint="/pages/influencers"
+              emptyValues={{ heroHeading: "", heroDescription: "" }}
+              fields={[
+                { key: "heroHeading", label: "Heading", isHeading: true, placeholder: "Influencer Marketplace" },
+                { key: "heroDescription", label: "Paragraph", type: "textarea", placeholder: "Discover vetted creators, compare audience data and pricing, and book campaigns — we handle the rest." },
+              ]}
+              successMessage="Marketplace page content updated"
+            />
+          </section>
+
           <section className="space-y-4 rounded-2xl border border-neutral-200 p-5">
             <div className="flex items-center justify-between">
               <div>

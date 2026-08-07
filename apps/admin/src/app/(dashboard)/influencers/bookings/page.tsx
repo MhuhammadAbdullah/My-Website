@@ -3,9 +3,11 @@
 import * as React from "react";
 import { Suspense } from "react";
 import Link from "next/link";
+import { Trash2 } from "lucide-react";
 import {
   Badge,
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -32,6 +34,8 @@ import {
 import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-list-toolbar";
 import { request } from "@/lib/api";
 import { usePaginatedList } from "@/lib/use-paginated-list";
+import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
+import { usePermissions } from "@/lib/use-permissions";
 import { BOOKING_STATUSES, BOOKING_STATUS_LABELS, type BookingStatusId } from "@agency/types";
 
 interface BookingListItem {
@@ -111,6 +115,11 @@ const sortOptions = [
 ];
 const paymentMethods = ["CASH", "BANK_TRANSFER", "STRIPE", "PAYPAL", "WISE", "JAZZCASH", "EASYPAISA", "CUSTOM"];
 
+// Mirrors PAID_STATUSES in apps/api/src/lib/booking.ts -- used only to word
+// the Admin override confirmation accurately (whether this specific move
+// will void recorded payments), the server enforces the real rule.
+const PAID_STATUSES: BookingStatusId[] = ["PAYMENT_RECEIVED", "APPROVED", "IN_PROGRESS", "DELIVERED", "CLIENT_APPROVED", "COMPLETED"];
+
 function statusVariant(status: BookingStatusId): "success" | "error" | "warning" | "accent" | "neutral" {
   if (status === "COMPLETED") return "success";
   if (status === "CANCELLED" || status === "DISPUTED" || status === "DECLINED_BY_INFLUENCER") return "error";
@@ -140,14 +149,93 @@ function BookingsPageInner() {
     filterKeys: ["status"],
   });
   const [openId, setOpenId] = React.useState<string | null>(null);
+  const { can } = usePermissions();
+  const canDelete = can("bookings", "delete");
+  const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
   const rows = list.data ?? [];
+
+  React.useEffect(() => {
+    setSelected(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list.page, list.search, list.sortBy, list.sortOrder, JSON.stringify(list.filters)]);
+
+  function afterDelete(deletedCount: number) {
+    const remaining = rows.length - deletedCount;
+    if (remaining <= 0 && list.page > 1) {
+      list.setPage(list.page - 1);
+    } else {
+      list.reload();
+    }
+  }
+
+  function handleDelete(b: BookingListItem) {
+    confirmDelete({
+      title: `Delete booking ${b.bookingNumber}?`,
+      description: `This permanently removes the booking, its full status history, and attachments.\n\nBlocked if it has a recorded payment or is included in a payout (that would erase real financial history) — cancel the booking (via "Move to" or Admin override) instead in that case.\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        await request(`/bookings/admin/${b.id}`, { method: "DELETE" });
+        toast.success("Booking deleted");
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(b.id);
+          return next;
+        });
+        afterDelete(1);
+      },
+    });
+  }
+
+  function handleBulkDelete() {
+    const ids = Array.from(selected);
+    confirmDelete({
+      title: `Delete ${ids.length} booking${ids.length === 1 ? "" : "s"}?`,
+      description: `This permanently removes all ${ids.length} booking${ids.length === 1 ? "" : "s"}, their status history, and attachments.\n\nThe whole selection is blocked if even one selected booking has a recorded payment or is included in a payout (real financial history can't be erased) — cancel those instead.\n\nThis action cannot be undone.`,
+      onConfirm: async () => {
+        const res = await request<{ count: number }>("/bookings/admin/bulk-delete", {
+          method: "POST",
+          body: JSON.stringify({ ids }),
+        });
+        toast.success(`${res.count} booking${res.count === 1 ? "" : "s"} deleted`);
+        setSelected(new Set());
+        afterDelete(ids.length);
+      },
+    });
+  }
+
+  const allSelected = rows.length > 0 && selected.size === rows.length;
+  const someSelected = selected.size > 0 && !allSelected;
+
+  function toggleAll(checked: boolean) {
+    setSelected(checked ? new Set(rows.map((r) => r.id)) : new Set());
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  const columnCount = canDelete ? 8 : 7;
 
   return (
     <div>
-      <Heading level={2}>Bookings</Heading>
-      <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
-        Review campaign booking requests, move them through the workflow, and record client payments.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <Heading level={2}>Bookings</Heading>
+          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+            Review campaign booking requests, move them through the workflow, and record client payments.
+          </p>
+        </div>
+        {canDelete && selected.size > 0 && (
+          <Button variant="outline" className="text-error-500" onClick={handleBulkDelete}>
+            <Trash2 className="size-4" /> Delete {selected.size} selected
+          </Button>
+        )}
+      </div>
 
       <div className="mt-6">
         <AdminListToolbar
@@ -177,6 +265,15 @@ function BookingsPageInner() {
           <Table>
             <TableHeader>
               <TableRow>
+                {canDelete && (
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                      onCheckedChange={(checked) => toggleAll(checked === true)}
+                      aria-label="Select all bookings"
+                    />
+                  </TableHead>
+                )}
                 <TableHead>Booking #</TableHead>
                 <TableHead>Business</TableHead>
                 <TableHead>Influencer</TableHead>
@@ -189,6 +286,15 @@ function BookingsPageInner() {
             <TableBody>
               {rows.map((b) => (
                 <TableRow key={b.id}>
+                  {canDelete && (
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(b.id)}
+                        onCheckedChange={(checked) => toggleOne(b.id, checked === true)}
+                        aria-label={`Select ${b.bookingNumber}`}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell className="font-medium text-heading">{b.bookingNumber}</TableCell>
                   <TableCell>{b.businessName}</TableCell>
                   <TableCell>{b.influencer.profile ? `@${b.influencer.profile.username}` : b.influencer.name}</TableCell>
@@ -198,15 +304,22 @@ function BookingsPageInner() {
                   <TableCell>{Number(b.grossAmount) > 0 ? formatMoney(b.grossAmount) : "—"}</TableCell>
                   <TableCell>{new Date(b.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" onClick={() => setOpenId(b.id)}>
-                      Manage
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setOpenId(b.id)}>
+                        Manage
+                      </Button>
+                      {canDelete && (
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(b)} aria-label={`Delete ${b.bookingNumber}`}>
+                          <Trash2 className="size-4 text-error-500" />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
               {rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-neutral-400">
+                  <TableCell colSpan={columnCount} className="text-center text-neutral-400">
                     {list.hasActiveFilters ? <EmptyState hasActiveFilters label="bookings" /> : <Badge variant="neutral">No bookings yet</Badge>}
                   </TableCell>
                 </TableRow>
@@ -224,6 +337,8 @@ function BookingsPageInner() {
       )}
 
       {openId && <BookingManageDialog id={openId} onClose={() => setOpenId(null)} onChanged={() => list.reload()} />}
+
+      {ConfirmDialog}
     </div>
   );
 }
@@ -239,6 +354,11 @@ function BookingManageDialog({ id, onClose, onChanged }: { id: string; onClose: 
   const [cancelReasonInput, setCancelReasonInput] = React.useState("");
   const [noteInput, setNoteInput] = React.useState("");
   const [showPayment, setShowPayment] = React.useState(false);
+  const { can } = usePermissions();
+  const canOverride = can("bookings", "delete");
+  const { confirmDelete: confirmOverride, ConfirmDialog: OverrideConfirmDialog } = useDeleteConfirmation();
+  const [overrideStatus, setOverrideStatus] = React.useState<BookingStatusId | "">("");
+  const [overrideNote, setOverrideNote] = React.useState("");
 
   const load = React.useCallback(() => {
     setLoading(true);
@@ -281,6 +401,42 @@ function BookingManageDialog({ id, onClose, onChanged }: { id: string; onClose: 
     } finally {
       setTransitioning(false);
     }
+  }
+
+  function handleOverride() {
+    if (!overrideStatus || !item) return;
+    const target = overrideStatus;
+    const from = item.status;
+    const reversingPayment = PAID_STATUSES.includes(from) && !PAID_STATUSES.includes(target);
+    const unCompleting = from === "COMPLETED" && target !== "COMPLETED";
+    confirmOverride({
+      title: `Override status to "${BOOKING_STATUS_LABELS[target]}"?`,
+      description: [
+        `Moves this booking directly from "${BOOKING_STATUS_LABELS[from]}" to "${BOOKING_STATUS_LABELS[target]}", skipping the normal step-by-step workflow — use this only to correct a mistake.`,
+        reversingPayment
+          ? `"${BOOKING_STATUS_LABELS[from]}" is a payment-confirmed status — moving out of it will VOID every recorded payment on this booking's invoice and reset its balance, since the invoice can no longer be treated as paid. Use this if the payment was recorded by mistake and the money never actually arrived.`
+          : null,
+        unCompleting ? "The commission and net-earning figures already calculated for this booking will be cleared." : null,
+        "This action cannot be undone.",
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
+      onConfirm: async () => {
+        await request(`/bookings/admin/${id}/status-override`, {
+          method: "PATCH",
+          body: JSON.stringify({ toStatus: target, note: overrideNote || undefined }),
+        });
+        toast.success(
+          reversingPayment
+            ? `Status overridden to ${BOOKING_STATUS_LABELS[target]} — recorded payments voided`
+            : `Status overridden to ${BOOKING_STATUS_LABELS[target]}`,
+        );
+        setOverrideStatus("");
+        setOverrideNote("");
+        load();
+        onChanged();
+      },
+    });
   }
 
   return (
@@ -455,6 +611,47 @@ function BookingManageDialog({ id, onClose, onChanged }: { id: string; onClose: 
                   )}
                 </section>
               )}
+
+              {canOverride && (
+                <section>
+                  <h4 className="text-body-sm font-semibold text-heading">Admin override</h4>
+                  <p className="mt-1 text-label text-neutral-400">
+                    For correcting mistakes only — jump directly to any status, skipping the guided workflow above. Moving out of a
+                    payment-confirmed status (e.g. wrongly marked "Payment received") voids the recorded payment automatically.
+                  </p>
+                  <div className="mt-2">
+                    <Select value={overrideStatus} onValueChange={(v) => setOverrideStatus(v as BookingStatusId)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BOOKING_STATUSES.filter((s) => s !== item.status).map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {BOOKING_STATUS_LABELS[s]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {overrideStatus && (
+                    <div className="mt-3 space-y-3 rounded-xl border border-error-200 p-4">
+                      <div>
+                        <Label>Note (optional)</Label>
+                        <Textarea value={overrideNote} onChange={(e) => setOverrideNote(e.target.value)} rows={2} />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setOverrideStatus("")}>
+                          Cancel
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-error-500" onClick={handleOverride}>
+                          Override — {BOOKING_STATUS_LABELS[overrideStatus]}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </section>
+              )}
             </>
           )}
         </div>
@@ -465,6 +662,8 @@ function BookingManageDialog({ id, onClose, onChanged }: { id: string; onClose: 
           </Button>
         </div>
       </DialogContent>
+
+      {OverrideConfirmDialog}
 
       {showPayment && item?.invoice && (
         <RecordBookingPaymentDialog

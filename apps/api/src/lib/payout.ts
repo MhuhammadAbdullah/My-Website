@@ -174,3 +174,39 @@ export async function transitionPayout(payoutId: string, toStatus: string, actor
 
   return updated;
 }
+
+// Admin's "fix a mistake" escape hatch, mirrors overrideBookingStatus() in
+// lib/booking.ts: any status to any status, bypassing PAYOUT_TRANSITIONS
+// (which -- unlike this -- never allows going back to PENDING). Reversing
+// OUT of PAID (e.g. mistakenly marked paid when the transfer never actually
+// went through) clears processedAt/processedById since those specifically
+// assert "this was sent." Moving to PENDING or CANCELLED also releases every
+// bundled booking (deletes the InfluencerPayoutBooking join rows) -- those
+// bookings' netInfluencerEarning was only ever "spoken for" by this payout,
+// so releasing them is what makes them eligible for a fresh payout batch
+// again (see eligibleBookingsWhere's `payoutBookings: { none: ... } }` check).
+export async function overridePayoutStatus(payoutId: string, toStatus: string, actorId: string, notes: string | undefined): Promise<PayoutWithDetail> {
+  const payout = await prisma.influencerPayout.findUnique({ where: { id: payoutId } });
+  if (!payout) throw new ApiError(404, "Payout not found.");
+  if (payout.status === toStatus) throw new ApiError(409, "Payout is already in this status.");
+
+  const releasesBookings = toStatus === "PENDING" || toStatus === "CANCELLED";
+  const wasPaid = payout.status === "PAID";
+
+  await prisma.$transaction(async (tx) => {
+    if (releasesBookings) {
+      await tx.influencerPayoutBooking.deleteMany({ where: { payoutId } });
+    }
+    await tx.influencerPayout.update({
+      where: { id: payoutId },
+      data: {
+        status: toStatus as Prisma.EnumPayoutStatusFieldUpdateOperationsInput["set"],
+        notes: notes || payout.notes,
+        ...(toStatus === "PAID" ? { processedAt: new Date(), processedById: actorId } : {}),
+        ...(wasPaid && toStatus !== "PAID" ? { processedAt: null, processedById: null } : {}),
+      },
+    });
+  });
+
+  return prisma.influencerPayout.findUniqueOrThrow({ where: { id: payoutId }, include: payoutDetailInclude });
+}

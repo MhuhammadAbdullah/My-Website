@@ -10,6 +10,7 @@ import type {
   HomeProcessStepRead,
   HomeStatRead,
   HomeWhyReasonRead,
+  InfluencerMarketplacePageContentRead,
   LegalPageContentRead,
   MediaRead,
   NavItemRead,
@@ -171,6 +172,9 @@ export const getAffiliateToolsPageContent = () =>
 
 export const getContactPageContent = () =>
   apiFetch<{ item: ContactPageContentRead | null }>("/pages/contact").then((r) => r.item);
+
+export const getInfluencerMarketplacePageContent = () =>
+  apiFetch<{ item: InfluencerMarketplacePageContentRead | null }>("/pages/influencers").then((r) => r.item);
 
 // `item` is null whenever the page has never been published -- callers use
 // withFallback()/EMPTY_PRIVACY_POLICY_CONTENT (or EMPTY_TERMS_CONTENT) the

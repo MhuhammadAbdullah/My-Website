@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { z } from "zod";
 import { prisma } from "@agency/database";
 import { discountSchema } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
@@ -121,6 +122,19 @@ discountsRouter.patch(
     await syncAndNotify(updated);
     const item = await prisma.discount.findUniqueOrThrow({ where: { id: updated.id }, include: detailInclude });
     res.json({ item });
+  }),
+);
+
+const bulkDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1) });
+
+discountsRouter.post(
+  "/bulk-delete",
+  requireAuth,
+  requirePermission("discounts", "delete"),
+  asyncHandler(async (req, res) => {
+    const { ids } = bulkDeleteSchema.parse(req.body);
+    const { count } = await prisma.discount.deleteMany({ where: { id: { in: ids } } });
+    res.json({ count });
   }),
 );
 

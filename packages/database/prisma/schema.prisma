@@ -970,6 +970,15 @@ model ContactPageContent {
   @@map("contact_page_content")
 }
 
+model InfluencerMarketplacePageContent {
+  id              String   @id @default(cuid())
+  heroHeading     String
+  heroDescription String
+  updatedAt       DateTime @updatedAt
+
+  @@map("influencer_marketplace_page_content")
+}
+
 // `content` only ever gets written by the publish action, so the public
 // route always serves the last published snapshot even mid-edit. `draftContent`
 // holds whatever was last "Save Draft"-ed and is null when there's nothing

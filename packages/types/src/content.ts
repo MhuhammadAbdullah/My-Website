@@ -284,6 +284,12 @@ export const contactPageContentSchema = z.object({
 });
 export type ContactPageContentInput = z.infer<typeof contactPageContentSchema>;
 
+export const influencerMarketplacePageContentSchema = z.object({
+  heroHeading: z.string().min(1, "Hero heading is required"),
+  heroDescription: z.string().min(1, "Hero paragraph is required"),
+});
+export type InfluencerMarketplacePageContentInput = z.infer<typeof influencerMarketplacePageContentSchema>;
+
 // Sitewide default CTA copy -- CtaSection's fallback when a page doesn't pass
 // explicit headline/subheadline/ctaLabel/ctaHref overrides (only the Home
 // page does, via HomePageContent.contactCta*). Stored as the `default_cta`

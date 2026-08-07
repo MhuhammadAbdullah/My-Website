@@ -92,6 +92,21 @@ influencerBadgesRouter.patch(
   }),
 );
 
+const catalogBulkDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1) });
+
+influencerBadgesRouter.post(
+  "/admin/catalog/bulk-delete",
+  requireAuth,
+  requirePermission("influencerBadges", "delete"),
+  asyncHandler(async (req, res) => {
+    const { ids } = catalogBulkDeleteSchema.parse(req.body);
+    // Same cascade as the single-delete route below: removes the catalog
+    // rows and every InfluencerBadgeAward built on them.
+    const { count } = await prisma.influencerBadge.deleteMany({ where: { id: { in: ids } } });
+    res.json({ count });
+  }),
+);
+
 influencerBadgesRouter.delete(
   "/admin/catalog/:id",
   requireAuth,

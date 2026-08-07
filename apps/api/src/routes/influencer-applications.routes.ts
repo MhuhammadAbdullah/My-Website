@@ -344,3 +344,34 @@ influencerApplicationsRouter.patch(
     }
   }),
 );
+
+const bulkDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1) });
+
+// Applications and Influencers (influencers.routes.ts) both operate on the
+// same Influencer model, just filtered by status -- deletion here is
+// gated on the "influencerApplications" permission (matching this
+// router's own review-queue resource) rather than reusing influencers.routes.ts's
+// delete route, which is gated on "influencers" instead. Same underlying
+// guardrail either way: bookings/payouts lack onDelete: Cascade, so
+// Postgres rejects (P2003 -> 409) deleting anyone with real business
+// history -- not that a PENDING/REJECTED applicant would have any.
+influencerApplicationsRouter.post(
+  "/admin/bulk-delete",
+  requireAuth,
+  requirePermission("influencerApplications", "delete"),
+  asyncHandler(async (req, res) => {
+    const { ids } = bulkDeleteSchema.parse(req.body);
+    const { count } = await prisma.influencer.deleteMany({ where: { id: { in: ids } } });
+    res.json({ count });
+  }),
+);
+
+influencerApplicationsRouter.delete(
+  "/admin/:id",
+  requireAuth,
+  requirePermission("influencerApplications", "delete"),
+  asyncHandler(async (req, res) => {
+    await prisma.influencer.delete({ where: { id: req.params.id } });
+    res.status(204).send();
+  }),
+);

@@ -260,6 +260,11 @@ export interface ContactPageContentRead {
   calendlyLabel: string;
 }
 
+export interface InfluencerMarketplacePageContentRead {
+  heroHeading: string;
+  heroDescription: string;
+}
+
 export interface DefaultCtaRead {
   headline: string;
   subheadline: string;
