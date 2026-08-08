@@ -156,7 +156,7 @@ export const getHomeProcessSteps = () =>
 export const getHomeWhyReasons = () =>
   apiFetch<{ items: HomeWhyReasonRead[] }>("/home-why-reasons").then((r) => r.items);
 
-export const getPageSeo = (page: "services" | "portfolio" | "affiliate-tools" | "contact") =>
+export const getPageSeo = (page: "services" | "portfolio" | "affiliate-tools" | "contact" | "influencers") =>
   apiFetch<{ item: PageSeoRead | null }>(`/page-seo/${page}`).then((r) => r.item);
 
 export const getAboutContent = () => apiFetch<{ item: AboutContentRead }>("/pages/about").then((r) => r.item);

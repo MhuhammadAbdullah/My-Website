@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Container, Section, Heading } from "@agency/ui";
-import { getInfluencers, getInfluencerMarketplacePageContent } from "@/lib/api";
+import { getInfluencers, getInfluencerMarketplacePageContent, getPageSeo } from "@/lib/api";
 import { getInfluencerCategories } from "@/lib/influencer-api";
 import { getInfluencerFlags } from "@/lib/influencer-flags";
 import { withFallback } from "@/lib/safe-fetch";
@@ -13,8 +13,9 @@ import { PageHeading } from "@/components/marketing/page-heading";
 import { buildPageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getPageSeo("influencers").catch(() => null);
   return buildPageMetadata({
-    seo: null,
+    seo,
     fallbackTitle: "Influencer Marketplace",
     fallbackDescription: "Discover and book vetted creators across Instagram, TikTok, YouTube, and more for your next campaign.",
   });

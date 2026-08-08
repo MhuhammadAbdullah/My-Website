@@ -77,7 +77,7 @@ export const hrefSchema = z
 // Tools/Contact are static route components) get SEO settings keyed by a
 // plain string rather than a relation -- add a new page by adding its key
 // here, no database migration required.
-export const SEO_PAGE_KEYS = ["services", "portfolio", "affiliate-tools", "contact"] as const;
+export const SEO_PAGE_KEYS = ["services", "portfolio", "affiliate-tools", "contact", "influencers"] as const;
 export const seoPageKeySchema = z.enum(SEO_PAGE_KEYS);
 export type SeoPageKey = z.infer<typeof seoPageKeySchema>;
 

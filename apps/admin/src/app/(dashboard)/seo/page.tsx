@@ -80,6 +80,7 @@ const PAGE_TABS = [
   { key: "portfolio", label: "Portfolio" },
   { key: "affiliate-tools", label: "Affiliate Tools" },
   { key: "contact", label: "Contact" },
+  { key: "influencers", label: "Influencer Marketplace" },
 ] as const;
 
 export default function SeoOverviewPage() {
