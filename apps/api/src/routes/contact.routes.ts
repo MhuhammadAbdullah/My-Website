@@ -43,7 +43,7 @@ contactRouter.post(
         phone: data.phone,
         country: data.country,
         city: data.city,
-        budget: data.budget || null,
+        companyName: data.companyName || null,
         message: data.message,
         source: data.source,
       },

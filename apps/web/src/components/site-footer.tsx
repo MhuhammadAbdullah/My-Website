@@ -18,7 +18,7 @@ export function SiteFooter({
   );
 
   return (
-    <footer className="bg-neutral-950 text-neutral-400">
+    <footer className="text-neutral-400" style={{ backgroundColor: "#000000" }}>
       <div className="mx-auto max-w-[1400px] px-6 py-16">
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div className="max-w-sm">

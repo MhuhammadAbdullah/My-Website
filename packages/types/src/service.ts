@@ -65,7 +65,7 @@ export const contactSubmissionSchema = z.object({
   phone: z.string().min(1, "Phone number is required").max(30),
   country: z.string().min(1, "Country is required").max(100),
   city: z.string().min(1, "City is required").max(100),
-  budget: z.string().max(60).optional().or(z.literal("")),
+  companyName: z.string().max(150).optional().or(z.literal("")),
   message: z.string().min(10).max(4000),
   source: z.string().max(120).optional(),
 });

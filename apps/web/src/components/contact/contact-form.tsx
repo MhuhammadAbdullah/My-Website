@@ -49,12 +49,12 @@ export function ContactForm() {
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <Label htmlFor="name">Name</Label>
-          <Input id="name" {...register("name")} aria-invalid={!!errors.name} placeholder="Jane Cooper" />
+          <Input id="name" {...register("name")} aria-invalid={!!errors.name} placeholder="Enter your full name" />
           <FieldError>{errors.name?.message}</FieldError>
         </div>
         <div>
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" {...register("email")} aria-invalid={!!errors.email} placeholder="jane@company.com" />
+          <Input id="email" type="email" {...register("email")} aria-invalid={!!errors.email} placeholder="Enter your email address" />
           <FieldError>{errors.email?.message}</FieldError>
         </div>
       </div>
@@ -62,12 +62,12 @@ export function ContactForm() {
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <Label htmlFor="phone">Phone</Label>
-          <Input id="phone" {...register("phone")} aria-invalid={!!errors.phone} placeholder="+1 (555) 000-0000" />
+          <Input id="phone" {...register("phone")} aria-invalid={!!errors.phone} placeholder="Enter your phone number" />
           <FieldError>{errors.phone?.message}</FieldError>
         </div>
         <div>
-          <Label htmlFor="budget">Budget (optional)</Label>
-          <Input id="budget" {...register("budget")} placeholder="$5,000 – $15,000" />
+          <Label htmlFor="companyName">Company name (optional)</Label>
+          <Input id="companyName" {...register("companyName")} placeholder="Enter your company name" />
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export function ContactForm() {
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger id="country" aria-invalid={!!errors.country}>
-                  <SelectValue placeholder="Select country" />
+                  <SelectValue placeholder="Select your country" />
                 </SelectTrigger>
                 <SelectContent>
                   {COUNTRIES.map((country) => (
@@ -96,18 +96,18 @@ export function ContactForm() {
         </div>
         <div>
           <Label htmlFor="city">City</Label>
-          <Input id="city" {...register("city")} aria-invalid={!!errors.city} placeholder="San Francisco" />
+          <Input id="city" {...register("city")} aria-invalid={!!errors.city} placeholder="Enter your city" />
           <FieldError>{errors.city?.message}</FieldError>
         </div>
       </div>
 
       <div>
-        <Label htmlFor="message">Project details</Label>
+        <Label htmlFor="message">Tell us about your project</Label>
         <Textarea
           id="message"
           {...register("message")}
           aria-invalid={!!errors.message}
-          placeholder="Tell us what you're building and what timeline you're working with…"
+          placeholder="Describe what you're building, your goals, and your timeline…"
         />
         <FieldError>{errors.message?.message}</FieldError>
       </div>

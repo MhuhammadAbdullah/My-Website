@@ -6,7 +6,7 @@ interface ContactSubmissionEmailData {
   phone: string;
   country: string;
   city: string;
-  budget: string | null;
+  companyName: string | null;
   message: string;
   source: string | null;
 }
@@ -24,7 +24,7 @@ export async function sendContactNotificationEmail(submission: ContactSubmission
     phone: submission.phone,
     country: submission.country,
     city: submission.city,
-    budget: submission.budget ?? "—",
+    companyName: submission.companyName ?? "—",
     source: submission.source ?? "—",
     message: submission.message.replace(/\n/g, "<br />"),
   });

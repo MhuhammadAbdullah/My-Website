@@ -237,7 +237,7 @@ export async function submitContactForm(data: {
   phone: string;
   country: string;
   city: string;
-  budget?: string;
+  companyName?: string;
   message: string;
   source?: string;
 }) {

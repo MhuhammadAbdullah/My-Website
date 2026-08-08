@@ -62,12 +62,12 @@ export const EMAIL_TEMPLATE_DEFAULTS: Record<EmailTemplateKey, EmailTemplateDefa
 <tr><td><strong>Phone</strong></td><td>{{phone}}</td></tr>
 <tr><td><strong>Country</strong></td><td>{{country}}</td></tr>
 <tr><td><strong>City</strong></td><td>{{city}}</td></tr>
-<tr><td><strong>Budget</strong></td><td>{{budget}}</td></tr>
+<tr><td><strong>Company</strong></td><td>{{companyName}}</td></tr>
 <tr><td><strong>Source</strong></td><td>{{source}}</td></tr>
 </table>
 <p><strong>Message:</strong></p>
 <p>{{message}}</p>`,
-    variables: ["name", "email", "phone", "country", "city", "budget", "source", "message"],
+    variables: ["name", "email", "phone", "country", "city", "companyName", "source", "message"],
   },
   "influencer.application_submitted": {
     key: "influencer.application_submitted",
