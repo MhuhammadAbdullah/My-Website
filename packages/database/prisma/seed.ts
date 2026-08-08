@@ -38,6 +38,7 @@ async function main() {
     // Influencer Marketplace
     "influencers", "influencerApplications", "influencerCategories", "bookings",
     "discounts", "influencerBadges", "influencerPayouts", "influencerSettings",
+    "popups",
   ];
   const actions = ["view", "create", "update", "delete"];
 

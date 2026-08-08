@@ -2,6 +2,16 @@
 // Distinct from the write schemas in @agency/types, which describe admin
 // form payloads, not query results.
 
+import type {
+  PopupTemplateType,
+  PopupDeviceTarget,
+  PopupCountdownExpiryAction,
+  PopupDesignInput,
+  PopupTargetingInput,
+  PopupTriggerInput,
+  PopupFrequencyInput,
+} from "@agency/types";
+
 export interface MediaRead {
   id: string;
   url: string;
@@ -386,4 +396,32 @@ export interface PaginatedResponse<T> {
   page: number;
   pageSize: number;
   totalPages: number;
+}
+
+// The design/targeting/trigger/frequency blobs are stored as Prisma `Json`
+// and written by the admin form via popupSchema (@agency/types) -- reusing
+// those same *Input types here keeps this read shape and the write shape
+// from drifting apart instead of hand-duplicating four object shapes.
+export interface PopupRead {
+  id: string;
+  templateType: PopupTemplateType;
+  priority: number;
+  heading: string | null;
+  description: string | null;
+  image: MediaRead | null;
+  imageLinkUrl: string | null;
+  ctaEnabled: boolean;
+  ctaText: string | null;
+  ctaUrl: string | null;
+  ctaOpenNewTab: boolean;
+  countdownEndAt: string | null;
+  countdownTimezone: string | null;
+  countdownExpiryAction: PopupCountdownExpiryAction;
+  countdownExpiryMessage: string | null;
+  design: PopupDesignInput;
+  targeting: PopupTargetingInput;
+  trigger: PopupTriggerInput;
+  frequency: PopupFrequencyInput;
+  deviceTarget: PopupDeviceTarget;
+  closeOnOverlayClick: boolean;
 }

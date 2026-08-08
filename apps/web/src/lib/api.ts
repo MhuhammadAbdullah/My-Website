@@ -21,6 +21,7 @@ import type {
   ProjectListItem,
   ServiceDetail,
   ServiceListItem,
+  PopupRead,
   ServicesPageContentRead,
   SiteSettings,
   TeamMemberRead,
@@ -189,6 +190,15 @@ export const getSettings = (init?: RequestInit & { next?: NextFetchRequestConfig
 
 export const getNav = (location: "HEADER" | "FOOTER") =>
   apiFetch<{ items: NavItemRead[] }>("/navigation").then((r) => r.items.filter((n) => n.location === location));
+
+// Shorter revalidate than the 300s default -- popups are schedule-sensitive
+// (a flash-sale popup's startsAt/endsAt window) so a 5-minute-stale cache
+// would leave one visibly live or dead past its configured time. Targeting/
+// device/frequency filtering happens client-side in PopupProvider; this just
+// narrows to "currently on and inside its schedule window," already sorted
+// by priority.
+export const getActivePopups = () =>
+  apiFetch<{ items: PopupRead[] }>("/popups/active", { next: { revalidate: 60 } }).then((r) => r.items);
 
 export interface InfluencerListParams {
   page?: number;

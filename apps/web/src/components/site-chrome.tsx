@@ -1,13 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { cn } from "@agency/ui";
-import type { NavItemRead, SiteSettings } from "@/lib/types";
+import type { NavItemRead, SiteSettings, PopupRead } from "@/lib/types";
 import type { ResolvedBranding } from "@/lib/branding";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { getVisibleAnnouncementMessages } from "@/lib/announcement";
+
+// ssr:false -- popups are a fully client-driven overlay (targeting/trigger
+// logic needs pathname/viewport, only known post-hydration), so there's no
+// benefit to including this in the server-rendered payload or the initial
+// client bundle; it loads once the page is already interactive.
+const PopupProvider = dynamic(() => import("@/components/popups/popup-provider").then((m) => m.PopupProvider), { ssr: false });
 
 // The influencer dashboard is its own admin-style app-shell (sidebar + topbar,
 // see InfluencerDashboardShell) and manages its own chrome entirely, so the
@@ -22,12 +29,14 @@ export function SiteChrome({
   footerNav,
   settings,
   branding,
+  popups,
   children,
 }: {
   headerNav: NavItemRead[];
   footerNav: NavItemRead[];
   settings: SiteSettings;
   branding: ResolvedBranding;
+  popups: PopupRead[];
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -45,6 +54,7 @@ export function SiteChrome({
       <SiteHeader navItems={headerNav} branding={branding} hasAnnouncement={hasAnnouncement} />
       <main className={cn(hasAnnouncement ? "pt-40" : "pt-32")}>{children}</main>
       <SiteFooter navItems={footerNav} settings={settings} branding={branding} />
+      {popups.length > 0 && <PopupProvider popups={popups} />}
     </>
   );
 }

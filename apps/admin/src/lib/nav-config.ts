@@ -40,6 +40,7 @@ import {
   Award,
   FileBarChart2,
   Megaphone,
+  AppWindow,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -161,6 +162,12 @@ export const adminNavGroups: AdminNavGroup[] = [
     label: "Communications",
     icon: Mail,
     items: [{ label: "Email Templates", href: "/email-templates", icon: Mail, resource: "emailTemplates" }],
+  },
+  {
+    key: "marketing",
+    label: "Marketing",
+    icon: AppWindow,
+    items: [{ label: "Popups", href: "/popups", icon: AppWindow, resource: "popups" }],
   },
   {
     key: "influencers",

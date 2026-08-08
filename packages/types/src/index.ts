@@ -11,3 +11,4 @@ export * from "./booking.js";
 export * from "./payout.js";
 export * from "./discount.js";
 export * from "./email-template.js";
+export * from "./popup.js";

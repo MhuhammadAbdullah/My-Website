@@ -41,6 +41,7 @@ import { influencerDiscountsRouter } from "./influencer-discounts.routes.js";
 import { influencerReviewsRouter } from "./influencer-reviews.routes.js";
 import { notificationsRouter } from "./notifications.routes.js";
 import { emailTemplatesRouter } from "./email-templates.routes.js";
+import { popupsRouter } from "./popups.routes.js";
 
 export const apiRouter = Router();
 
@@ -95,3 +96,4 @@ apiRouter.use("/influencer-dashboard", influencerDashboardRouter);
 apiRouter.use("/influencer-reports", influencerReportsRouter);
 apiRouter.use("/notifications", notificationsRouter);
 apiRouter.use("/email-templates", emailTemplatesRouter);
+apiRouter.use("/popups", popupsRouter);

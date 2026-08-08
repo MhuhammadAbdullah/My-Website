@@ -391,6 +391,7 @@ model Media {
   influencerCollaborationLogos InfluencerCollaboration[]
   bookingAttachments           BookingAttachment[]
   influencerIdentityDocuments  Influencer[]
+  popupImages                  Popup[]
 
   @@map("media")
 }
@@ -1872,4 +1873,91 @@ model EmailTemplate {
   updatedAt     DateTime           @updatedAt
 
   @@map("email_templates")
+}
+
+// ---------------------------------------------------------------------------
+// Marketing Popups
+// ---------------------------------------------------------------------------
+
+enum PopupTemplateType {
+  IMAGE_ONLY
+  IMAGE_TEXT
+  IMAGE_TEXT_COUNTDOWN
+  TEXT_COUNTDOWN
+  TEXT_ONLY
+  COUNTDOWN_ONLY
+}
+
+enum PopupDeviceTarget {
+  ALL
+  DESKTOP
+  MOBILE
+  TABLET
+}
+
+enum PopupCountdownExpiryAction {
+  HIDE_POPUP
+  DISABLE_CTA
+  SHOW_MESSAGE
+}
+
+// Phase 1: schema + admin CRUD only -- nothing here is read by the public
+// site yet (that's Phase 2's GET /active + impression/click endpoints).
+// Template-specific requiredness (e.g. IMAGE_ONLY needs imageId, a
+// countdown template needs countdownEndAt) is enforced by popupSchema in
+// @agency/types (POPUP_TEMPLATE_FIELD_CONFIG), not at the DB level -- every
+// content column here is nullable so one model serves all six templates,
+// and a future seventh template is a new registry entry, not a migration.
+model Popup {
+  id            String            @id @default(cuid())
+  name          String
+  internalNotes String?
+  templateType  PopupTemplateType
+  isActive      Boolean           @default(true)
+  priority      Int               @default(0)
+
+  // Schedule -- same shape as Discount.startsAt/endsAt (both nullable =
+  // open-ended range).
+  startsAt DateTime?
+  endsAt   DateTime?
+
+  // Content
+  heading       String?
+  description   String?
+  imageId       String?
+  image         Media?  @relation(fields: [imageId], references: [id])
+  imageLinkUrl  String?
+  ctaEnabled    Boolean @default(false)
+  ctaText       String?
+  ctaUrl        String?
+  ctaOpenNewTab Boolean @default(false)
+
+  // Countdown -- endAt is an absolute timestamp so the client-side timer
+  // never resets on refresh (it always diffs against Date.now(), not a
+  // page-load time). timezone only matters for how admin picks the date.
+  countdownEndAt         DateTime?
+  countdownTimezone      String?
+  countdownExpiryAction  PopupCountdownExpiryAction @default(HIDE_POPUP)
+  countdownExpiryMessage String?
+
+  // Structured, validated config blobs (Zod schemas in @agency/types) --
+  // these are genuinely open-ended per-popup settings with no query/index
+  // need, unlike the scalar columns above.
+  design    Json // width/height/borderRadius/backgroundColor/textAlign/buttonTextColor/buttonBackgroundColor/overlayColor/overlayOpacity/closeButtonStyle/imagePosition/contentAlignment
+  targeting Json // { scope: ALL|HOME|SPECIFIC_PAGES|SPECIFIC_URLS, pages: string[], urls: string[] }
+  trigger   Json // { type: IMMEDIATE|DELAY|SCROLL|EXIT_INTENT|PAGE_VIEWS, delaySeconds?, scrollPercent?, pageViewCount? }
+  frequency Json // { mode: SESSION|DAY|WEEK|EVERY_VISIT|CUSTOM, customHours?, maxImpressionsPerUser? }
+
+  deviceTarget        PopupDeviceTarget @default(ALL)
+  closeOnOverlayClick Boolean           @default(true)
+
+  // Analytics -- same atomic-increment pattern as Discount.usedCount, CTR
+  // computed at read time rather than stored.
+  impressionCount Int @default(0)
+  clickCount      Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("popups")
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Toaster } from "@agency/ui";
 import { manrope, playfairDisplay, ibmPlexMono } from "@/lib/fonts";
-import { getNav, getSettings } from "@/lib/api";
+import { getNav, getSettings, getActivePopups } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
 import { resolveBranding } from "@/lib/branding";
 import { SiteChrome } from "@/components/site-chrome";
@@ -35,11 +35,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [headerNav, footerNav, settings, influencerFlags] = await Promise.all([
+  const [headerNav, footerNav, settings, influencerFlags, popups] = await Promise.all([
     withFallback(getNav("HEADER"), [], "header navigation"),
     withFallback(getNav("FOOTER"), [], "footer navigation"),
     withFallback(getSettings(), {}, "site settings"),
     getInfluencerFlags(),
+    withFallback(getActivePopups(), [], "popups"),
   ]);
 
   const branding = resolveBranding(settings, "MAB Digital");
@@ -68,7 +69,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {renderRawHtml(integrations?.bodyScript, "body-script")}
         <TrackingScripts integrations={integrations} />
         <AuthModalProvider registrationFlags={influencerFlags}>
-          <SiteChrome headerNav={headerNav} footerNav={footerNav} settings={settings} branding={branding}>
+          <SiteChrome headerNav={headerNav} footerNav={footerNav} settings={settings} branding={branding} popups={popups}>
             {children}
           </SiteChrome>
         </AuthModalProvider>
