@@ -165,6 +165,27 @@ export const influencerCommissionNoticeSchema = z.object({
 });
 export type InfluencerCommissionNoticeInput = z.infer<typeof influencerCommissionNoticeSchema>;
 
+// Sitewide scrolling announcement bar shown above the header on every public
+// page (SiteChrome). Same SiteSetting-blob mechanism as `influencer_flags`
+// above -- `enabled` lets admin hide it instantly without losing saved
+// colors/messages, `messages` is one marquee loop of N items (the web app
+// duplicates the array once and translates -50% for a seamless CSS-only
+// loop, same technique as TechMarquee/ReviewsMarquee).
+const hexColor = (fallback: string) =>
+  z
+    .string()
+    .trim()
+    .regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, "Enter a valid hex color, e.g. #111111.")
+    .default(fallback);
+
+export const announcementBarSchema = z.object({
+  enabled: z.boolean().default(false),
+  backgroundColor: hexColor("#111111"),
+  textColor: hexColor("#ffffff"),
+  messages: z.array(z.string().trim().min(1).max(200)).max(20).default([]),
+});
+export type AnnouncementBarInput = z.infer<typeof announcementBarSchema>;
+
 export const influencerInsightsGuideSchema = z.object({
   instagram: z.string().max(10_000).optional().default(""),
   tiktok: z.string().max(10_000).optional().default(""),

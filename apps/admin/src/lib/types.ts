@@ -30,6 +30,14 @@ export interface SiteSettings {
   influencer_video_guide?: InfluencerVideoGuideSettings;
   influencer_insights_guide?: InfluencerInsightsGuideSettings;
   influencer_commission_notice?: InfluencerCommissionNoticeSettings;
+  announcement_bar?: AnnouncementBarSettings;
+}
+
+export interface AnnouncementBarSettings {
+  enabled: boolean;
+  backgroundColor: string;
+  textColor: string;
+  messages: string[];
 }
 
 export interface InfluencerFlagsSettings {

@@ -39,6 +39,7 @@ import {
   TrendingUp,
   Award,
   FileBarChart2,
+  Megaphone,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -146,6 +147,7 @@ export const adminNavGroups: AdminNavGroup[] = [
     items: [
       { label: "Navigation", href: "/navigation", icon: Compass, resource: "navigation" },
       { label: "Footer", href: "/footer", icon: PanelBottom, resource: "navigation" },
+      { label: "Announcement Bar", href: "/announcement-bar", icon: Megaphone, resource: "settings" },
       { label: "SEO", href: "/seo", icon: SearchCheck, resource: "seo" },
       { label: "Integrations", href: "/integrations", icon: Plug, resource: "settings" },
       { label: "Messages", href: "/analytics", icon: Mail, resource: "settings" },

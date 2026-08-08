@@ -8,7 +8,15 @@ import { Button, cn } from "@agency/ui";
 import type { NavItemRead } from "@/lib/types";
 import type { ResolvedBranding } from "@/lib/branding";
 
-export function SiteHeader({ navItems, branding }: { navItems: NavItemRead[]; branding: ResolvedBranding }) {
+export function SiteHeader({
+  navItems,
+  branding,
+  hasAnnouncement = false,
+}: {
+  navItems: NavItemRead[];
+  branding: ResolvedBranding;
+  hasAnnouncement?: boolean;
+}) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
@@ -17,7 +25,12 @@ export function SiteHeader({ navItems, branding }: { navItems: NavItemRead[]; br
   }, [pathname]);
 
   return (
-    <header className="fixed inset-x-0 top-4 z-50 flex justify-center px-4">
+    <header
+      className={cn(
+        "fixed inset-x-0 z-50 flex justify-center px-4",
+        hasAnnouncement ? "top-12" : "top-4",
+      )}
+    >
       <div className="glass flex w-full max-w-[1400px] items-center justify-between gap-8 rounded-2xl px-6 py-3">
         <Link href="/" className="flex h-14 shrink-0 items-center gap-2.5 pl-1">
           {branding.logoUrl ? (

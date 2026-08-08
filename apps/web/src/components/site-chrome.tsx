@@ -1,10 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { cn } from "@agency/ui";
 import type { NavItemRead, SiteSettings } from "@/lib/types";
 import type { ResolvedBranding } from "@/lib/branding";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { AnnouncementBar } from "@/components/announcement-bar";
+import { getVisibleAnnouncementMessages } from "@/lib/announcement";
 
 // The influencer dashboard is its own admin-style app-shell (sidebar + topbar,
 // see InfluencerDashboardShell) and manages its own chrome entirely, so the
@@ -34,10 +37,13 @@ export function SiteChrome({
     return <>{children}</>;
   }
 
+  const hasAnnouncement = getVisibleAnnouncementMessages(settings.announcement_bar).length > 0;
+
   return (
     <>
-      <SiteHeader navItems={headerNav} branding={branding} />
-      <main className="pt-32">{children}</main>
+      <AnnouncementBar settings={settings.announcement_bar} />
+      <SiteHeader navItems={headerNav} branding={branding} hasAnnouncement={hasAnnouncement} />
+      <main className={cn(hasAnnouncement ? "pt-40" : "pt-32")}>{children}</main>
       <SiteFooter navItems={footerNav} settings={settings} branding={branding} />
     </>
   );

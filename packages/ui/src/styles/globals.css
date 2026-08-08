@@ -262,6 +262,21 @@
       animation: none;
     }
   }
+
+  .announcement-marquee-track {
+    animation: marquee var(--announcement-marquee-duration, 22s) linear infinite;
+    will-change: transform;
+  }
+  @media (hover: hover) {
+    .announcement-marquee-track:hover {
+      animation-play-state: paused;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .announcement-marquee-track {
+      animation: none;
+    }
+  }
 }
 
 @keyframes shimmer {
