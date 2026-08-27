@@ -36,12 +36,12 @@ export function Hero({ content }: { content: HomeContentRead }) {
         </Reveal>
       )}
       <Reveal delay={0.08}>
-        <Heading level={1} display className="mx-auto mt-6 max-w-3xl [&_em]:text-accent-600">
+        <Heading level={1} display className="mx-auto mt-6 max-w-5xl [&_em]:text-accent-600">
           {content.heroHeadline.includes("**") ? content.heroHeadline : `**${content.heroHeadline}**`}
         </Heading>
       </Reveal>
       <Reveal delay={0.16}>
-        <p className="mx-auto mt-6 max-w-xl text-body-lg text-body">{content.heroSubheadline}</p>
+        <p className="mx-auto mt-6 max-w-4xl text-body-lg text-body">{content.heroSubheadline}</p>
       </Reveal>
       {content.heroDescription && (
         <Reveal delay={0.2}>
