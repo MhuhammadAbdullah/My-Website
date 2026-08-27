@@ -104,7 +104,7 @@ export default async function AboutPage() {
       <Section>
         <Container>
           <Heading level={2}>{about.timelineHeading ?? "Our **timeline**"}</Heading>
-          <ol className="mt-10 space-y-8 border-l border-neutral-200 pl-8">
+          <ol className="mt-10 max-w-2xl space-y-8 border-l border-neutral-200 pl-8">
             {teamData.timeline.map((event) => (
               <li key={event.id} className="relative">
                 <span className="absolute -left-[2.35rem] top-1 flex size-4 items-center justify-center rounded-full bg-accent-500 ring-4 ring-background" />
