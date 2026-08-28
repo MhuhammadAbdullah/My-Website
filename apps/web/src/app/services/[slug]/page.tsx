@@ -55,7 +55,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             breadcrumb={[{ label: "Home", href: "/" }, { label: "Services", href: "/services" }, { label: service.name }]}
           >
             {service.category && <Badge variant="accent">{service.category.name}</Badge>}
-            <Heading level={1} display className="mt-4 max-w-8xl">
+            <Heading level={1} display className="mt-4">
               {service.name}
             </Heading>
             <p className="mt-5 text-body-lg text-body">{service.description}</p>
