@@ -50,12 +50,12 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <Section className="pb-0">
-        <Container className="max-w-8xl">
+        <Container>
           <PageHeading
             breadcrumb={[{ label: "Home", href: "/" }, { label: "Services", href: "/services" }, { label: service.name }]}
           >
             {service.category && <Badge variant="accent">{service.category.name}</Badge>}
-            <Heading level={1} display className="mt-4">
+            <Heading level={1} display className="mt-4 max-w-8xl">
               {service.name}
             </Heading>
             <p className="mt-5 text-body-lg text-body">{service.description}</p>
