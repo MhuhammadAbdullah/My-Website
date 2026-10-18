@@ -17,7 +17,23 @@ export interface SiteSettings {
     displayMode: "LOGO" | "TEXT";
     footerLogoMediaId?: string | null;
     footerLogoUrl?: string | null;
+    logoDarkMediaId?: string | null;
+    logoDarkUrl?: string | null;
+    faviconMediaId?: string | null;
+    faviconUrl?: string | null;
+    footerTagline?: string;
+    copyrightText?: string;
+    emailSenderName?: string;
   };
+  theme?: { accent: "lime" | "orange" | "blue" | "yellow" };
+  header?: { ctaVisible: boolean; ctaLabel: string; ctaHref: string; ctaNewTab: boolean };
+  footer_columns?: { title: string; links: { label: string; href: string; newTab: boolean }[] }[];
+  legal_links?: { label: string; href: string; newTab: boolean }[];
+  seo_defaults?: { titleTemplate: string; defaultTitle: string; description: string; ogImageUrl: string; twitterHandle: string };
+  organization?: { legalName: string; description: string; foundingDate: string; areaServed: string };
+  business_schedule?: Record<string, { closed: boolean; open: string; close: string }>;
+  timezone?: string;
+  whatsapp_message?: string;
   default_cta?: {
     headline: string;
     subheadline: string;
@@ -38,6 +54,8 @@ export interface AnnouncementBarSettings {
   backgroundColor: string;
   textColor: string;
   messages: string[];
+  link?: string;
+  dismissible?: boolean;
 }
 
 export interface InfluencerFlagsSettings {
@@ -75,6 +93,7 @@ export interface IntegrationsSettings {
   googleAdsConversionLabel?: string;
   clarityId?: string;
   googleSiteVerification?: string;
+  turnstileSiteKey?: string;
   headScript?: string;
   bodyScript?: string;
   footerScript?: string;

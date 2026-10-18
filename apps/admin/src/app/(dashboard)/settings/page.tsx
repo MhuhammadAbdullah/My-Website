@@ -15,6 +15,7 @@ import {
   SelectValue,
   SocialIcon,
   Skeleton,
+  Switch,
   Textarea,
   toast,
   type SocialPlatformId,
@@ -26,7 +27,15 @@ import {
   CURRENCY_OPTIONS,
   DEFAULT_CURRENCY,
   BRANDING_DISPLAY_MODES,
+  BUSINESS_DAYS,
+  DEFAULT_TIMEZONE,
+  buildWhatsAppLink,
+  businessHoursSchema,
+  timezoneSchema,
+  whatsappNumberSchema,
   type BrandingDisplayMode,
+  type BusinessDay,
+  type BusinessHoursInput,
 } from "@agency/types";
 import { isGoogleMapsUrl, extractGoogleMapsEmbedSrc } from "@agency/utils";
 import { request } from "@/lib/api";
@@ -56,6 +65,32 @@ const SOCIAL_PLATFORM_LABELS: Record<SocialPlatformId, string> = {
   telegram: "Telegram",
 };
 
+const DAY_LABELS: Record<BusinessDay, string> = {
+  mon: "Monday",
+  tue: "Tuesday",
+  wed: "Wednesday",
+  thu: "Thursday",
+  fri: "Friday",
+  sat: "Saturday",
+  sun: "Sunday",
+};
+
+const DEFAULT_SCHEDULE: BusinessHoursInput = Object.fromEntries(
+  BUSINESS_DAYS.map((d) => [d, { closed: d === "sat" || d === "sun", open: "09:00", close: "18:00" }]),
+) as BusinessHoursInput;
+
+const dayText = (d: BusinessHoursInput[BusinessDay]) => (d.closed ? "Closed" : `${d.open} – ${d.close}`);
+
+// The legacy two-line `business_hours` record is still what the public contact
+// page renders; keep it in sync with the structured schedule so there is only
+// one place to edit.
+function legacyHours(schedule: BusinessHoursInput): Record<string, string> {
+  const weekdays = BUSINESS_DAYS.slice(0, 5).map((d) => dayText(schedule[d]));
+  const mon_fri = weekdays.every((t) => t === weekdays[0]) ? weekdays[0]! : weekdays.map((t, i) => `${DAY_LABELS[BUSINESS_DAYS[i]!].slice(0, 3)}: ${t}`).join(" · ");
+  const sat_sun = dayText(schedule.sat) === dayText(schedule.sun) ? dayText(schedule.sat) : `Sat: ${dayText(schedule.sat)} · Sun: ${dayText(schedule.sun)}`;
+  return { mon_fri, sat_sun };
+}
+
 export default function SettingsPage() {
   const { data: settings, loading } = useAsyncData<SiteSettings>(
     () => request<{ settings: SiteSettings }>("/settings").then((r) => r.settings),
@@ -67,6 +102,10 @@ export default function SettingsPage() {
   const [logo, setLogo] = React.useState<LogoValue>({ mediaId: null, url: null });
   const [footerLogo, setFooterLogo] = React.useState<LogoValue>({ mediaId: null, url: null });
   const [displayMode, setDisplayMode] = React.useState<BrandingDisplayMode>("TEXT");
+  const [logoDark, setLogoDark] = React.useState<LogoValue>({ mediaId: null, url: null });
+  const [favicon, setFavicon] = React.useState<LogoValue>({ mediaId: null, url: null });
+  const [schedule, setSchedule] = React.useState<BusinessHoursInput>(DEFAULT_SCHEDULE);
+  const [contactErrors, setContactErrors] = React.useState<Record<string, string>>({});
   const [saving, setSaving] = React.useState(false);
 
   React.useEffect(() => {
@@ -80,8 +119,11 @@ export default function SettingsPage() {
       calendly_url: settings.calendly_url ?? "",
       google_maps_embed: settings.google_maps_embed ?? "",
       google_maps_embed_code: settings.google_maps_embed_code ?? "",
-      business_hours_weekday: settings.business_hours?.mon_fri ?? "",
-      business_hours_weekend: settings.business_hours?.sat_sun ?? "",
+      timezone: settings.timezone ?? DEFAULT_TIMEZONE,
+      whatsapp_message: settings.whatsapp_message ?? "",
+      footer_tagline: settings.branding?.footerTagline ?? "",
+      copyright_text: settings.branding?.copyrightText ?? "",
+      email_sender_name: settings.branding?.emailSenderName ?? "",
       currency: settings.currency ?? DEFAULT_CURRENCY,
       brand_name: settings.branding?.brandName ?? settings.company_name ?? "",
       default_cta_headline: settings.default_cta?.headline ?? "",
@@ -94,6 +136,10 @@ export default function SettingsPage() {
     setLogo({ mediaId: settings.branding?.logoMediaId ?? null, url: settings.branding?.logoUrl ?? null });
     setFooterLogo({ mediaId: settings.branding?.footerLogoMediaId ?? null, url: settings.branding?.footerLogoUrl ?? null });
     setDisplayMode(settings.branding?.displayMode ?? "TEXT");
+    setLogoDark({ mediaId: settings.branding?.logoDarkMediaId ?? null, url: settings.branding?.logoDarkUrl ?? null });
+    setFavicon({ mediaId: settings.branding?.faviconMediaId ?? null, url: settings.branding?.faviconUrl ?? null });
+    const parsedSchedule = businessHoursSchema.safeParse(settings.business_schedule);
+    setSchedule(parsedSchedule.success ? parsedSchedule.data : DEFAULT_SCHEDULE);
   }, [settings]);
 
   async function handleSave() {
@@ -133,12 +179,33 @@ export default function SettingsPage() {
       displayMode,
       footerLogoMediaId: footerLogo.mediaId,
       footerLogoUrl: footerLogo.url,
+      logoDarkMediaId: logoDark.mediaId,
+      logoDarkUrl: logoDark.url,
+      faviconMediaId: favicon.mediaId,
+      faviconUrl: favicon.url,
+      footerTagline: form.footer_tagline ?? "",
+      copyrightText: form.copyright_text ?? "",
+      emailSenderName: form.email_sender_name ?? "",
     };
     const brandingParsed = brandingSchema.safeParse(brandingValue);
     if (!brandingParsed.success) {
       toast.error("Brand name is required.");
       return;
     }
+
+    const contactIssues: Record<string, string> = {};
+    const waParsed = whatsappNumberSchema.safeParse(form.whatsapp_number ?? "");
+    if (!waParsed.success) contactIssues.whatsapp_number = waParsed.error.issues[0]!.message;
+    const tzParsed = timezoneSchema.safeParse(form.timezone || DEFAULT_TIMEZONE);
+    if (!tzParsed.success) contactIssues.timezone = tzParsed.error.issues[0]!.message;
+    const scheduleParsed = businessHoursSchema.safeParse(schedule);
+    if (!scheduleParsed.success) contactIssues.schedule = "Use HH:MM times for every open day.";
+    if (Object.keys(contactIssues).length > 0) {
+      setContactErrors(contactIssues);
+      toast.error("Please fix the highlighted contact fields.");
+      return;
+    }
+    setContactErrors({});
 
     setSaving(true);
     try {
@@ -155,10 +222,10 @@ export default function SettingsPage() {
           body: JSON.stringify({ value: form.google_maps_embed_code }),
         }),
         request("/settings/currency", { method: "PUT", body: JSON.stringify({ value: form.currency }) }),
-        request("/settings/business_hours", {
-          method: "PUT",
-          body: JSON.stringify({ value: { mon_fri: form.business_hours_weekday, sat_sun: form.business_hours_weekend } }),
-        }),
+        request("/settings/business_schedule", { method: "PUT", body: JSON.stringify({ value: schedule }) }),
+        request("/settings/business_hours", { method: "PUT", body: JSON.stringify({ value: legacyHours(schedule) }) }),
+        request("/settings/timezone", { method: "PUT", body: JSON.stringify({ value: form.timezone || DEFAULT_TIMEZONE }) }),
+        request("/settings/whatsapp_message", { method: "PUT", body: JSON.stringify({ value: form.whatsapp_message ?? "" }) }),
         request("/settings/socials", { method: "PUT", body: JSON.stringify({ value: parsed.data }) }),
         request("/settings/branding", { method: "PUT", body: JSON.stringify({ value: brandingParsed.data }) }),
         request("/settings/default_cta", {
@@ -227,12 +294,69 @@ export default function SettingsPage() {
             Used for any service that doesn't set its own currency override.
           </p>
         </div>
-        {field("whatsapp_number", "WhatsApp number")}
-        {field("address", "Address")}
-        <div className="grid gap-5 sm:grid-cols-2">
-          {field("business_hours_weekday", "Hours (Mon–Fri)")}
-          {field("business_hours_weekend", "Hours (Sat–Sun)")}
+        <div>
+          {field("whatsapp_number", "WhatsApp number")}
+          <FieldError>{contactErrors.whatsapp_number}</FieldError>
+          <p className="mt-1.5 text-body-sm text-neutral-500">International format, e.g. +923001234567.</p>
         </div>
+        <div>
+          <Label>WhatsApp prefilled message</Label>
+          <Input
+            value={form.whatsapp_message ?? ""}
+            maxLength={300}
+            onChange={(e) => setForm({ ...form, whatsapp_message: e.target.value })}
+            placeholder="Hi! I'd like to talk about a project."
+          />
+          {buildWhatsAppLink(form.whatsapp_number, form.whatsapp_message) ? (
+            <p className="mt-1.5 break-all text-body-sm text-neutral-500">
+              Link: <a className="underline" href={buildWhatsAppLink(form.whatsapp_number, form.whatsapp_message)} target="_blank" rel="noopener noreferrer">{buildWhatsAppLink(form.whatsapp_number, form.whatsapp_message)}</a>
+            </p>
+          ) : (
+            <p className="mt-1.5 text-body-sm text-neutral-500">Enter a WhatsApp number to generate the wa.me link.</p>
+          )}
+        </div>
+        {field("address", "Address")}
+
+        <fieldset className="rounded-xl border border-neutral-200 p-4">
+          <legend className="px-1 text-body-sm font-medium text-heading">Business hours</legend>
+          <div className="grid gap-2">
+            {BUSINESS_DAYS.map((d) => (
+              <div key={d} className="grid grid-cols-[6rem_1fr_1fr_auto] items-center gap-2">
+                <span className="text-body-sm text-heading">{DAY_LABELS[d]}</span>
+                <Input
+                  type="time"
+                  aria-label={`${DAY_LABELS[d]} opens`}
+                  disabled={schedule[d].closed}
+                  value={schedule[d].open}
+                  onChange={(e) => setSchedule({ ...schedule, [d]: { ...schedule[d], open: e.target.value } })}
+                />
+                <Input
+                  type="time"
+                  aria-label={`${DAY_LABELS[d]} closes`}
+                  disabled={schedule[d].closed}
+                  value={schedule[d].close}
+                  onChange={(e) => setSchedule({ ...schedule, [d]: { ...schedule[d], close: e.target.value } })}
+                />
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id={`closed-${d}`}
+                    checked={schedule[d].closed}
+                    onCheckedChange={(v) => setSchedule({ ...schedule, [d]: { ...schedule[d], closed: v } })}
+                  />
+                  <Label htmlFor={`closed-${d}`} className="mb-0 text-body-sm">
+                    Closed
+                  </Label>
+                </div>
+              </div>
+            ))}
+          </div>
+          <FieldError>{contactErrors.schedule}</FieldError>
+          <div className="mt-4">
+            <Label>Timezone</Label>
+            <Input value={form.timezone ?? ""} onChange={(e) => setForm({ ...form, timezone: e.target.value })} placeholder={DEFAULT_TIMEZONE} aria-invalid={!!contactErrors.timezone} />
+            <FieldError>{contactErrors.timezone}</FieldError>
+          </div>
+        </fieldset>
         {field("calendly_url", "Calendly URL")}
 
         <div>
@@ -273,7 +397,25 @@ export default function SettingsPage() {
             <LogoField label="Website logo (header)" value={logo} folder="branding" onChange={setLogo} />
             <LogoField label="Footer logo" value={footerLogo} folder="branding" onChange={setFooterLogo} />
             <p className="-mt-3 text-body-sm text-neutral-500">Leave the footer logo empty to reuse the header logo above.</p>
+            <LogoField label="Logo for dark background (used by the new dark theme)" value={logoDark} folder="branding" onChange={setLogoDark} />
+            {displayMode === "LOGO" && !logoDark.url && (
+              <p className="-mt-3 text-body-sm text-warning-700">
+                No dark-background logo yet — the header falls back to the standard logo, which may be hard to see on dark.
+              </p>
+            )}
+            <LogoField label="Favicon" value={favicon} folder="branding" onChange={setFavicon} />
             {field("brand_name", "Brand name")}
+            {field("footer_tagline", "Footer tagline")}
+            <div>
+              {field("copyright_text", "Copyright text")}
+              <p className="mt-1.5 text-body-sm text-neutral-500">
+                Use <code>{"{year}"}</code> and <code>{"{brand}"}</code>. Empty shows “© year brand. All rights reserved.”
+              </p>
+            </div>
+            <div>
+              {field("email_sender_name", "Email sender name")}
+              <p className="mt-1.5 text-body-sm text-neutral-500">Shown as the “From” name on emails the site sends. Empty uses the brand name.</p>
+            </div>
             <div>
               <Label>Branding display mode</Label>
               <Select value={displayMode} onValueChange={(v) => setDisplayMode(v as BrandingDisplayMode)}>

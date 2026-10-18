@@ -9,6 +9,8 @@ interface NavItem {
   href: string;
   location: "HEADER" | "FOOTER";
   order: number;
+  visible: boolean;
+  openInNewTab: boolean;
 }
 
 const client = createResourceClient<NavItem>("/navigation");
@@ -23,6 +25,7 @@ export default function NavigationPage() {
         { key: "label", label: "Label" },
         { key: "href", label: "URL" },
         { key: "location", label: "Location" },
+        { key: "visible", label: "Shown", render: (item) => (item.visible === false ? "Hidden" : "Shown") },
       ]}
       fields={[
         { key: "label", label: "Label", type: "text", required: true },
@@ -38,8 +41,10 @@ export default function NavigationPage() {
           required: true,
         },
         { key: "order", label: "Sort order", type: "number" },
+        { key: "visible", label: "Show in the menu", type: "checkbox" },
+        { key: "openInNewTab", label: "Open in a new tab", type: "checkbox" },
       ]}
-      defaultValues={{ label: "", href: "/", location: "HEADER", order: 0 }}
+      defaultValues={{ label: "", href: "/", location: "HEADER", order: 0, visible: true, openInNewTab: false }}
     />
   );
 }

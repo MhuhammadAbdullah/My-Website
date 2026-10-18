@@ -7,13 +7,14 @@ import { ServiceCard } from "@/components/marketing/service-card";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { buildPageMetadata } from "@/lib/seo";
+import { getBrandName } from "@/lib/branding";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getPageSeo("services").catch(() => null);
+  const [seo, brand] = await Promise.all([getPageSeo("services").catch(() => null), getBrandName()]);
   return buildPageMetadata({
     seo,
     fallbackTitle: "Services",
-    fallbackDescription: "Web development, product design, and growth engineering services from MAB Digital.",
+    fallbackDescription: `Web development, product design, and growth engineering services${brand ? ` from ${brand}` : ""}.`,
   });
 }
 

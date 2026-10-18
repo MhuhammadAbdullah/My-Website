@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { ACCENT_OPTIONS } from "@agency/types";
 import { Toaster } from "@agency/ui";
-import { manrope, playfairDisplay, ibmPlexMono } from "@/lib/fonts";
+import { manrope, syne, playfairDisplay, ibmPlexMono } from "@/lib/fonts";
 import { getNav, getSettings, getActivePopups } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
-import { resolveBranding } from "@/lib/branding";
+import { fillTokens, resolveBranding } from "@/lib/branding";
+import { toJsonLd } from "@/lib/seo";
 import { SiteChrome } from "@/components/site-chrome";
 import { env } from "@/lib/env";
 import { TrackingScripts } from "@/lib/tracking";
@@ -13,23 +15,35 @@ import { getInfluencerFlags } from "@/lib/influencer-flags";
 import { AuthModalProvider } from "@/components/influencer/auth-modal-provider";
 import "./globals.css";
 
-// Dynamic (not a static `export const metadata`) so the template suffix
-// tracks the actual configured brand name from Settings instead of a
-// hardcoded string that goes stale the moment the site is rebranded --
-// every child page's title was getting "| MAB Digital" appended
-// regardless of what the business is actually called today.
+// Everything here is read from Site Settings (Admin > Site Settings / Settings)
+// -- there is no brand name or copy in code. `{brand}` and `%s` tokens in the
+// SEO defaults are filled in below.
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings().catch(() => null);
-  const brandName = resolveBranding(settings ?? {}, "MAB Digital").name;
+  const brandName = resolveBranding(settings ?? {}, "").name;
+  const seo = settings?.seo_defaults;
   const googleVerification = extractGoogleSiteVerificationCode(settings?.integrations?.googleSiteVerification);
+  const favicon = settings?.branding?.faviconUrl;
+
+  const titleTemplate = brandName ? fillTokens(seo?.titleTemplate ?? "%s | {brand}", brandName) : "%s";
+  const defaultTitle = fillTokens(seo?.defaultTitle ?? "{brand}", brandName) || "Home";
+  const description = seo?.description ? fillTokens(seo.description, brandName) : undefined;
+  const twitterHandle = seo?.twitterHandle ? `@${seo.twitterHandle.replace(/^@/, "")}` : undefined;
 
   return {
     metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
-    title: {
-      default: `${brandName} — Premium Web Design & Engineering`,
-      template: `%s | ${brandName}`,
+    title: { default: defaultTitle, template: titleTemplate.includes("%s") ? titleTemplate : "%s" },
+    ...(description ? { description } : {}),
+    ...(favicon ? { icons: { icon: favicon } } : {}),
+    openGraph: {
+      type: "website",
+      siteName: brandName || undefined,
+      ...(seo?.ogImageUrl ? { images: [{ url: seo.ogImageUrl }] } : {}),
     },
-    description: `${brandName} designs and engineers premium web products for startups and teams who refuse to ship something average.`,
+    twitter: {
+      card: "summary_large_image",
+      ...(twitterHandle ? { creator: twitterHandle, site: twitterHandle } : {}),
+    },
     ...(googleVerification ? { verification: { google: googleVerification } } : {}),
   };
 }
@@ -43,28 +57,45 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     withFallback(getActivePopups(), [], "popups"),
   ]);
 
-  const branding = resolveBranding(settings, "MAB Digital");
+  const branding = resolveBranding(settings, "");
+  const accent = settings.theme?.accent && (ACCENT_OPTIONS as readonly string[]).includes(settings.theme.accent) ? settings.theme.accent : "lime";
 
+  const org = settings.organization;
+  const sameAs = Object.values(settings.socials ?? {}).filter(Boolean);
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: settings.company_name ?? "MAB Digital",
+    name: branding.name || undefined,
+    legalName: org?.legalName || undefined,
+    description: org?.description || undefined,
+    foundingDate: org?.foundingDate || undefined,
+    areaServed: org?.areaServed || undefined,
     url: env.NEXT_PUBLIC_SITE_URL,
-    email: settings.contact_email,
-    telephone: settings.contact_phone,
-    address: settings.address,
-    sameAs: Object.values(settings.socials ?? {}),
+    logo: branding.logoUrl || undefined,
+    email: settings.contact_email || undefined,
+    telephone: settings.contact_phone || undefined,
+    address: settings.address || undefined,
+    sameAs: sameAs.length ? sameAs : undefined,
+  };
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: branding.name || undefined,
+    url: env.NEXT_PUBLIC_SITE_URL,
   };
 
   const integrations = settings.integrations;
 
   return (
-    <html lang="en" className={`${manrope.variable} ${playfairDisplay.variable} ${ibmPlexMono.variable}`}>
+    <html
+      lang="en"
+      data-theme="noir"
+      data-accent={accent}
+      className={`${manrope.variable} ${syne.variable} ${playfairDisplay.variable} ${ibmPlexMono.variable}`}
+    >
       <body>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(organizationJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(websiteJsonLd) }} />
         {renderRawHtml(integrations?.headScript, "head-script")}
         {renderRawHtml(integrations?.bodyScript, "body-script")}
         <TrackingScripts integrations={integrations} />

@@ -10,7 +10,9 @@ interface SiteBrandingValue {
   loading: boolean;
 }
 
-const DEFAULT_BRAND_NAME = "MAB Digital";
+// No brand literal in code: the name comes from Site Settings; until it loads
+// (or if it never does) the UI shows the neutral word "Admin".
+const DEFAULT_BRAND_NAME = "";
 
 const SiteBrandingContext = React.createContext<SiteBrandingValue | null>(null);
 
@@ -35,7 +37,7 @@ export function SiteBrandingProvider({ children }: { children: React.ReactNode }
         if (cancelled) return;
         const branding = r.settings.branding;
         setValue({
-          brandName: branding?.brandName || DEFAULT_BRAND_NAME,
+          brandName: branding?.brandName || r.settings.company_name || DEFAULT_BRAND_NAME,
           logoUrl: branding?.displayMode === "LOGO" ? (branding.logoUrl ?? null) : null,
         });
       })

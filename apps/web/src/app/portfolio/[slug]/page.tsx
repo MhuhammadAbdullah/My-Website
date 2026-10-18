@@ -13,6 +13,7 @@ import { ProjectToc } from "@/components/portfolio/project-toc";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { env } from "@/lib/env";
+import { getBrandName } from "@/lib/branding";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -40,12 +41,13 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const project = await getProject(slug).catch(() => null);
   if (!project) notFound();
 
+  const brand = await getBrandName();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
     name: project.title,
     description: project.summary,
-    creator: { "@type": "Organization", name: "MAB Digital" },
+    ...(brand ? { creator: { "@type": "Organization", name: brand } } : {}),
   };
 
   return (

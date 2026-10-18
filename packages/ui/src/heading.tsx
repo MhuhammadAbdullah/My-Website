@@ -36,18 +36,21 @@ export function Heading({
   className,
   children,
   display = false,
+  style,
 }: {
   level?: HeadingLevel;
   as?: React.ElementType;
   className?: string;
   children: React.ReactNode;
   display?: boolean;
+  style?: React.CSSProperties;
 }) {
   const Tag = as ?? (`h${level}` as React.ElementType);
   const content = typeof children === "string" ? renderWithEmphasis(children) : children;
 
   return (
     <Tag
+      style={style}
       className={cn(
         display ? "text-display" : sizeByLevel[level],
         "text-balance",

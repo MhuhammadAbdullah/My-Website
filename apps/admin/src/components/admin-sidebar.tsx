@@ -44,12 +44,12 @@ export function AdminBrandMark({ className = "h-8 max-w-28" }: { className?: str
   if (logoUrl) {
     return (
       // eslint-disable-next-line @next/next/no-img-element -- arbitrary Cloudinary URL, not a static asset (same reasoning as site-header.tsx)
-      <img src={logoUrl} alt={brandName} className={cn("w-auto shrink-0 object-contain", className)} />
+      <img src={logoUrl} alt={brandName || "Admin"} className={cn("w-auto shrink-0 object-contain", className)} />
     );
   }
   return (
     <div className={cn("flex aspect-square shrink-0 items-center justify-center rounded-lg bg-heading text-body-sm font-bold text-white", className)}>
-      {brandName.charAt(0).toUpperCase()}
+      {(brandName || "A").charAt(0).toUpperCase()}
     </div>
   );
 }
@@ -268,7 +268,7 @@ export function AdminSidebar({
         <AdminBrandMark className={collapsed ? "h-7 max-w-10" : "h-8 max-w-28"} />
         {!collapsed && (
           <div className="min-w-0 flex-1">
-            <p className="truncate font-heading text-body font-semibold text-heading">{brandName}</p>
+            <p className="truncate font-heading text-body font-semibold text-heading">{brandName || "Admin"}</p>
             <p className="truncate text-body-sm text-neutral-400">Admin panel</p>
           </div>
         )}

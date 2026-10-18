@@ -11,7 +11,8 @@
     "build": "tsc --noEmit",
     "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "serve": "tsx --env-file=.env src/index.ts"
   },
   "dependencies": {
     "@agency/auth": "workspace:*",
@@ -26,6 +27,7 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.0.0",
     "nodemailer": "^6.9.16",
+    "sanitize-html": "^2.18.1",
     "tsx": "^4.19.0",
     "zod": "^3.24.0"
   },

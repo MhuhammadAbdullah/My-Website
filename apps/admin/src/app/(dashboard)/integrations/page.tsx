@@ -15,6 +15,7 @@ const EMPTY_FORM: IntegrationsInput = {
   googleAdsConversionLabel: "",
   clarityId: "",
   googleSiteVerification: "",
+  turnstileSiteKey: "",
   headScript: "",
   bodyScript: "",
   footerScript: "",
@@ -48,6 +49,7 @@ export default function IntegrationsPage() {
       googleAdsConversionLabel: integrations.googleAdsConversionLabel ?? "",
       clarityId: integrations.clarityId ?? "",
       googleSiteVerification: integrations.googleSiteVerification ?? "",
+      turnstileSiteKey: integrations.turnstileSiteKey ?? "",
       headScript: integrations.headScript ?? "",
       bodyScript: integrations.bodyScript ?? "",
       footerScript: integrations.footerScript ?? "",
@@ -232,6 +234,28 @@ export default function IntegrationsPage() {
               aria-invalid={!!errors.googleSiteVerification}
             />
             <FieldError>{errors.googleSiteVerification}</FieldError>
+          </div>
+        </section>
+
+        <section className="border-t border-neutral-200 pt-6">
+          <div className="flex items-center justify-between">
+            <Heading level={3}>Form spam protection (Cloudflare Turnstile)</Heading>
+            <StatusBadge active={!!saved.turnstileSiteKey} />
+          </div>
+          <p className="mt-1 text-body-sm text-neutral-500">
+            Paste the public <strong>site key</strong> from your Cloudflare Turnstile widget. The matching secret
+            key is never stored here — set it as the <code>TURNSTILE_SECRET_KEY</code> environment variable on the
+            API. Leave empty to rely on the built-in honeypot and rate limiting only.
+          </p>
+          <div className="mt-4">
+            <Label>Turnstile site key</Label>
+            <Input
+              value={form.turnstileSiteKey}
+              onChange={(e) => setField("turnstileSiteKey", e.target.value)}
+              placeholder="0x4AAAAAAA..."
+              aria-invalid={!!errors.turnstileSiteKey}
+            />
+            <FieldError>{errors.turnstileSiteKey}</FieldError>
           </div>
         </section>
 

@@ -39,7 +39,7 @@ export function ServiceCard({ service }: { service: ServiceListItem }) {
                 className="text-heading"
               />
               {hasDiscount && (
-                <Price amount={plan.regularPrice!} currency={plan.currency} className="text-neutral-300 line-through" />
+                <Price amount={plan.regularPrice!} currency={plan.currency} className="text-neutral-400 line-through" />
               )}
               {billingSuffix(plan.billingType)}
             </p>

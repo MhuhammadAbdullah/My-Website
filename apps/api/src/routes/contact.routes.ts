@@ -4,7 +4,7 @@ import { z } from "zod";
 import { prisma } from "@agency/database";
 import { contactSubmissionSchema } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
-import { requireAuth, requirePermission } from "../middleware/require-auth.js";
+import { requireAnyPermission, requireAuth } from "../middleware/require-auth.js";
 import { sendContactNotificationEmail } from "../lib/mailer.js";
 import { parseListQuery, paginationMeta, searchFilter, exactFilter } from "../lib/list-query.js";
 
@@ -59,7 +59,7 @@ contactRouter.post(
 contactRouter.get(
   "/",
   requireAuth,
-  requirePermission("settings", "view"),
+  requireAnyPermission(["leads", "view"], ["settings", "view"]),
   asyncHandler(async (req, res) => {
     const { page, limit, skip, search, sortBy, sortOrder } = parseListQuery(req.query, {
       sortableFields: contactSortableFields,
@@ -84,7 +84,7 @@ contactRouter.get(
 contactRouter.patch(
   "/:id",
   requireAuth,
-  requirePermission("settings", "update"),
+  requireAnyPermission(["leads", "update"], ["settings", "update"]),
   asyncHandler(async (req, res) => {
     const item = await prisma.contactSubmission.update({
       where: { id: req.params.id },
@@ -97,7 +97,7 @@ contactRouter.patch(
 contactRouter.post(
   "/bulk-delete",
   requireAuth,
-  requirePermission("settings", "delete"),
+  requireAnyPermission(["leads", "delete"], ["settings", "delete"]),
   asyncHandler(async (req, res) => {
     const { ids } = bulkDeleteSchema.parse(req.body);
     const { count } = await prisma.contactSubmission.deleteMany({ where: { id: { in: ids } } });
@@ -108,7 +108,7 @@ contactRouter.post(
 contactRouter.delete(
   "/:id",
   requireAuth,
-  requirePermission("settings", "delete"),
+  requireAnyPermission(["leads", "delete"], ["settings", "delete"]),
   asyncHandler(async (req, res) => {
     await prisma.contactSubmission.delete({ where: { id: req.params.id } });
     res.status(204).send();

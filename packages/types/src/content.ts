@@ -95,6 +95,9 @@ export const navItemSchema = z.object({
   location: navLocationSchema,
   parentId: z.string().nullable().optional(),
   order: z.number().int().default(0),
+  // Show/hide without deleting; open in a new tab.
+  visible: z.boolean().default(true),
+  openInNewTab: z.boolean().default(false),
 });
 export type NavItemInput = z.infer<typeof navItemSchema>;
 

@@ -4,6 +4,7 @@ import type {
   AffiliateCategoryRead,
   AffiliateToolRead,
   AffiliateToolsPageContentRead,
+  CmsSectionRead,
   ContactPageContentRead,
   FaqRead,
   HomeContentRead,
@@ -185,11 +186,21 @@ export const getPrivacyPolicyContent = () =>
 
 export const getTermsContent = () => apiFetch<{ item: LegalPageContentRead | null }>("/pages/terms").then((r) => r.item);
 
+// Short revalidate: theme/branding/nav changes made in admin should reach the
+// whole site within about half a minute, not five.
 export const getSettings = (init?: RequestInit & { next?: NextFetchRequestConfig }) =>
-  apiFetch<{ settings: SiteSettings }>("/settings", init).then((r) => r.settings);
+  apiFetch<{ settings: SiteSettings }>("/settings", { next: { revalidate: 30 }, ...init }).then((r) => r.settings);
 
 export const getNav = (location: "HEADER" | "FOOTER") =>
-  apiFetch<{ items: NavItemRead[] }>("/navigation").then((r) => r.items.filter((n) => n.location === location));
+  apiFetch<{ items: NavItemRead[] }>("/navigation", { next: { revalidate: 30 } }).then((r) =>
+    r.items.filter((n) => n.location === location && n.visible !== false).sort((a, b) => a.order - b.order),
+  );
+
+// ---- Homepage layout (Admin > Home Page > Page Sections) ----
+// `sections` is empty until a layout has been saved in admin; the legacy
+// homepage renders in that case.
+export const getHomeLayout = () =>
+  apiFetch<{ sections: CmsSectionRead[] }>("/home-layout", { next: { revalidate: 30 } }).then((r) => r.sections);
 
 // Shorter revalidate than the 300s default -- popups are schedule-sensitive
 // (a flash-sale popup's startsAt/endsAt window) so a 5-minute-stale cache

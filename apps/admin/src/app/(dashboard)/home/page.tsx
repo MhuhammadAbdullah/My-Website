@@ -3,7 +3,6 @@
 import * as React from "react";
 import {
   Button,
-  Checkbox,
   Heading,
   Input,
   Label,
@@ -23,9 +22,7 @@ import {
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { LogoField, type LogoValue } from "@/components/logo-field";
-import { HomeStatsManager } from "@/components/home/home-stats-manager";
-import { HomeProcessManager } from "@/components/home/home-process-manager";
-import { HomeWhyReasonsManager } from "@/components/home/home-why-reasons-manager";
+import { HomeSectionsEditor } from "@/components/home/home-sections-editor";
 
 interface MediaRef {
   id: string;
@@ -140,8 +137,6 @@ const ROBOTS_OPTIONS = ["index, follow", "noindex, follow", "index, nofollow", "
 // in italic serif and everything else in the regular sans font (see the
 // Heading component in packages/ui). Admins can mark which words get that
 // treatment; they can't change fonts directly.
-const HEADING_HINT = "wrap words in **bold** to italicize them";
-
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div>
@@ -172,7 +167,7 @@ export default function HomeContentPage() {
   const [form, setForm] = React.useState<HomeContent>(EMPTY_FORM);
   const [keywordsInput, setKeywordsInput] = React.useState("");
   const [saving, setSaving] = React.useState(false);
-  const [tab, setTab] = React.useState("content");
+  const [tab, setTab] = React.useState("sections");
 
   React.useEffect(() => {
     if (!content) return;
@@ -186,11 +181,6 @@ export default function HomeContentPage() {
 
   function setSeo<K extends keyof SeoContent>(key: K, value: SeoContent[K]) {
     setForm((f) => ({ ...f, seo: { ...(f.seo ?? EMPTY_SEO), [key]: value } }));
-  }
-
-  function handleHeroBackgroundChange(next: LogoValue) {
-    set("heroBackgroundImageId", next.mediaId);
-    set("heroBackgroundImage", next.mediaId && next.url ? { id: next.mediaId, url: next.url } : null);
   }
 
   function handleOgImageChange(next: LogoValue) {
@@ -249,9 +239,9 @@ export default function HomeContentPage() {
       <div className="flex items-center justify-between">
         <div>
           <Heading level={2}>Home Page</Heading>
-          <p className="mt-1 text-body-sm text-neutral-500">Everything shown on the public home page — fully editable, no code changes needed.</p>
+          <p className="mt-1 text-body-sm text-neutral-500">Build your homepage from sections and set how it appears in search results.</p>
         </div>
-        {!["statistics", "process", "why"].includes(tab) && (
+        {!["sections", "statistics", "process", "why"].includes(tab) && (
           <Button onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Save changes"}
           </Button>
@@ -260,179 +250,17 @@ export default function HomeContentPage() {
 
       <Tabs value={tab} onValueChange={setTab} className="mt-6">
         <TabsList>
-          <TabsTrigger value="content">Content</TabsTrigger>
-          <TabsTrigger value="statistics">Statistics</TabsTrigger>
-          <TabsTrigger value="process">How We Work</TabsTrigger>
-          <TabsTrigger value="why">Why Work With Us</TabsTrigger>
+          <TabsTrigger value="sections">Page Sections</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="content">
-          <div className="grid max-w-3xl gap-6">
-            <SectionCard title="Hero section" description="The first thing visitors see.">
-              <Field label="Badge text (optional)">
-                <Input value={form.heroBadgeText ?? ""} onChange={(e) => set("heroBadgeText", e.target.value || null)} placeholder="Now booking Q3 projects" />
-              </Field>
-              <Field label="Heading">
-                <Input value={form.heroHeadline} onChange={(e) => set("heroHeadline", e.target.value)} />
-              </Field>
-              <Field label="Subheading">
-                <Textarea value={form.heroSubheadline} onChange={(e) => set("heroSubheadline", e.target.value)} />
-              </Field>
-              <Field label="Description (optional)">
-                <Textarea value={form.heroDescription ?? ""} onChange={(e) => set("heroDescription", e.target.value || null)} />
-              </Field>
-              <LogoField
-                label="Background image (optional)"
-                value={{ mediaId: form.heroBackgroundImageId, url: form.heroBackgroundImage?.url ?? null }}
-                folder="agency-website/home"
-                onChange={handleHeroBackgroundChange}
-              />
-            </SectionCard>
-
-            <SectionCard title="Primary CTA">
-              <div className="grid gap-5 sm:grid-cols-2">
-                <Field label="Button text">
-                  <Input value={form.heroCtaLabel} onChange={(e) => set("heroCtaLabel", e.target.value)} placeholder="Get Started" />
-                </Field>
-                <Field label="Button URL">
-                  <Input value={form.heroCtaHref} onChange={(e) => set("heroCtaHref", e.target.value)} placeholder="/contact" />
-                </Field>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Checkbox checked={form.heroCtaNewTab} onCheckedChange={(c) => set("heroCtaNewTab", c === true)} />
-                <Label className="mb-0">Open in new tab</Label>
-              </div>
-            </SectionCard>
-
-            <SectionCard title="Secondary CTA" description={'The "View Our Work" button next to the primary CTA.'}>
-              <div className="flex items-center gap-2.5">
-                <Checkbox checked={form.heroSecondaryCtaEnabled} onCheckedChange={(c) => set("heroSecondaryCtaEnabled", c === true)} />
-                <Label className="mb-0">Enable this button</Label>
-              </div>
-              <div className="grid gap-5 sm:grid-cols-2">
-                <Field label="Button text">
-                  <Input
-                    value={form.heroSecondaryCtaLabel ?? ""}
-                    onChange={(e) => set("heroSecondaryCtaLabel", e.target.value || null)}
-                    placeholder="View Our Work"
-                    disabled={!form.heroSecondaryCtaEnabled}
-                  />
-                </Field>
-                <Field label="Button URL">
-                  <Input
-                    value={form.heroSecondaryCtaHref ?? ""}
-                    onChange={(e) => set("heroSecondaryCtaHref", e.target.value || null)}
-                    placeholder="/portfolio"
-                    disabled={!form.heroSecondaryCtaEnabled}
-                  />
-                </Field>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Checkbox
-                  checked={form.heroSecondaryCtaNewTab}
-                  onCheckedChange={(c) => set("heroSecondaryCtaNewTab", c === true)}
-                  disabled={!form.heroSecondaryCtaEnabled}
-                />
-                <Label className="mb-0">Open in new tab</Label>
-              </div>
-            </SectionCard>
-
-            <SectionCard title="Contact CTA" description="The call-to-action block near the bottom of the home page.">
-              <Field label="Heading (optional — falls back to default copy)">
-                <Input value={form.contactCtaHeading ?? ""} onChange={(e) => set("contactCtaHeading", e.target.value || null)} placeholder="Ready to build something inevitable?" />
-              </Field>
-              <Field label="Description (optional)">
-                <Textarea value={form.contactCtaDescription ?? ""} onChange={(e) => set("contactCtaDescription", e.target.value || null)} />
-              </Field>
-              <div className="grid gap-5 sm:grid-cols-2">
-                <Field label="Button text (optional)">
-                  <Input value={form.contactCtaButtonText ?? ""} onChange={(e) => set("contactCtaButtonText", e.target.value || null)} placeholder="Start a project" />
-                </Field>
-                <Field label="Button URL (optional)">
-                  <Input value={form.contactCtaButtonHref ?? ""} onChange={(e) => set("contactCtaButtonHref", e.target.value || null)} placeholder="/contact" />
-                </Field>
-              </div>
-            </SectionCard>
-
-            <SectionCard title="Story preview" description="The section right below the hero, previewing the About page.">
-              <Field label="Heading" hint={HEADING_HINT}>
-                <Input value={form.storyHeading ?? ""} onChange={(e) => set("storyHeading", e.target.value || null)} placeholder="**Design and engineering** — one discipline, not a handoff." />
-              </Field>
-              <div className="grid gap-5 sm:grid-cols-2">
-                <Field label="Button text">
-                  <Input value={form.storyButtonLabel ?? ""} onChange={(e) => set("storyButtonLabel", e.target.value || null)} placeholder="More about us" />
-                </Field>
-                <Field label="Mission card label">
-                  <Input value={form.storyMissionLabel ?? ""} onChange={(e) => set("storyMissionLabel", e.target.value || null)} placeholder="Our mission" />
-                </Field>
-              </div>
-              <p className="-mt-2 text-body-sm text-neutral-400">
-                The story text itself, and the "years in business"/"projects shipped" figures, are managed on the About Page and Home Page → Statistics.
-              </p>
-            </SectionCard>
-
-            <SectionCard title="Services preview">
-              <Field label="Heading" hint={HEADING_HINT}>
-                <Input value={form.servicesHeading ?? ""} onChange={(e) => set("servicesHeading", e.target.value || null)} placeholder="What we **build**" />
-              </Field>
-              <Field label="Description">
-                <Textarea value={form.servicesDescription ?? ""} onChange={(e) => set("servicesDescription", e.target.value || null)} />
-              </Field>
-              <Field label="Button text">
-                <Input value={form.servicesButtonLabel ?? ""} onChange={(e) => set("servicesButtonLabel", e.target.value || null)} placeholder="All services" />
-              </Field>
-            </SectionCard>
-
-            <SectionCard title="Portfolio preview">
-              <Field label="Heading" hint={HEADING_HINT}>
-                <Input value={form.portfolioHeading ?? ""} onChange={(e) => set("portfolioHeading", e.target.value || null)} placeholder="Recent **work**" />
-              </Field>
-              <Field label="Description">
-                <Textarea value={form.portfolioDescription ?? ""} onChange={(e) => set("portfolioDescription", e.target.value || null)} />
-              </Field>
-              <Field label="Button text">
-                <Input value={form.portfolioButtonLabel ?? ""} onChange={(e) => set("portfolioButtonLabel", e.target.value || null)} placeholder="Full portfolio" />
-              </Field>
-            </SectionCard>
-
-            <SectionCard title="Process" description='The "How we work" steps section heading — steps themselves are on the How We Work tab.'>
-              <Field label="Heading" hint={HEADING_HINT}>
-                <Input value={form.processHeading ?? ""} onChange={(e) => set("processHeading", e.target.value || null)} placeholder="How we **work**" />
-              </Field>
-            </SectionCard>
-
-            <SectionCard title="Technologies">
-              <Field label="Heading" hint={HEADING_HINT}>
-                <Input value={form.technologiesHeading ?? ""} onChange={(e) => set("technologiesHeading", e.target.value || null)} placeholder="The **stack** behind the work" />
-              </Field>
-            </SectionCard>
-
-            <SectionCard title="Why work with us" description="Section heading — reasons themselves are on the Why Work With Us tab.">
-              <Field label="Heading" hint={HEADING_HINT}>
-                <Input value={form.whyHeading ?? ""} onChange={(e) => set("whyHeading", e.target.value || null)} placeholder="Why work with **us**" />
-              </Field>
-            </SectionCard>
-
-            <SectionCard title="Testimonials">
-              <Field label="Heading" hint={HEADING_HINT}>
-                <Input value={form.testimonialsHeading ?? ""} onChange={(e) => set("testimonialsHeading", e.target.value || null)} placeholder="What clients **say**" />
-              </Field>
-            </SectionCard>
-          </div>
+        <TabsContent value="sections">
+          <HomeSectionsEditor />
         </TabsContent>
 
-        <TabsContent value="statistics">
-          <HomeStatsManager />
-        </TabsContent>
 
-        <TabsContent value="process">
-          <HomeProcessManager />
-        </TabsContent>
 
-        <TabsContent value="why">
-          <HomeWhyReasonsManager />
-        </TabsContent>
+
 
         <TabsContent value="seo">
           <div className="grid max-w-3xl gap-6">

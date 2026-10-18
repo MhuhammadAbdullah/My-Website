@@ -10,13 +10,14 @@ import { ContactForm } from "@/components/contact/contact-form";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { buildPageMetadata } from "@/lib/seo";
+import { getBrandName } from "@/lib/branding";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getPageSeo("contact").catch(() => null);
+  const [seo, brand] = await Promise.all([getPageSeo("contact").catch(() => null), getBrandName()]);
   return buildPageMetadata({
     seo,
     fallbackTitle: "Contact",
-    fallbackDescription: "Start a project with MAB Digital — get a response within one business day.",
+    fallbackDescription: `Start a project${brand ? ` with ${brand}` : ""} — get a response within one business day.`,
   });
 }
 

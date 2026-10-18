@@ -19,7 +19,8 @@
     "db:migrate-sections": "tsx prisma/migrate-project-sections.ts",
     "db:backfill-page-content": "tsx prisma/backfill-page-content.ts",
     "db:studio": "prisma studio",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:seed-cms": "tsx prisma/seed-cms.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0"

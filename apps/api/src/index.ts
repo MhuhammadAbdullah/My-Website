@@ -10,6 +10,7 @@ import { influencerAuth, setInfluencerResetPasswordSender } from "@agency/auth/i
 import { env } from "./env.js";
 import { apiRouter } from "./routes/index.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
+import { csrfOriginCheck } from "./middleware/csrf.js";
 import { sendPasswordResetEmail } from "./lib/influencer-mailer.js";
 
 setInfluencerResetPasswordSender(async ({ user, url }) => {
@@ -87,6 +88,22 @@ app.use(
   }),
 );
 
+// Brute-force protection for credential endpoints (sign-in, sign-up, password
+// reset) on both the staff and influencer auth instances. Counts per IP; the
+// baseline limiter above still applies on top.
+const credentialLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts. Please wait a few minutes and try again." },
+});
+for (const base of ["/api/v1/auth", "/api/v1/influencer-auth"]) {
+  for (const action of ["sign-in", "sign-up", "forget-password", "reset-password"]) {
+    app.use(`${base}/${action}`, credentialLimiter);
+  }
+}
+
 // Better Auth needs the raw request before the JSON body parser touches it.
 app.all("/api/v1/auth/*", toNodeHandler(auth));
 // Separate principal/session space for Influencer Marketplace vendors --
@@ -99,7 +116,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
-app.use("/api/v1", apiRouter);
+// CSRF: state-changing requests must come from one of our own origins.
+app.use("/api/v1", csrfOriginCheck(allowedOrigins), apiRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

@@ -42,9 +42,13 @@ import { influencerReviewsRouter } from "./influencer-reviews.routes.js";
 import { notificationsRouter } from "./notifications.routes.js";
 import { emailTemplatesRouter } from "./email-templates.routes.js";
 import { popupsRouter } from "./popups.routes.js";
+import { cmsRouter } from "./cms.routes.js";
+import { homeLayoutRouter } from "./home-layout.routes.js";
 
 export const apiRouter = Router();
 
+apiRouter.use("/home-layout", homeLayoutRouter);
+apiRouter.use("/cms", cmsRouter);
 apiRouter.use("/services", servicesRouter);
 apiRouter.use("/projects", projectsRouter);
 apiRouter.use("/testimonials", testimonialsRouter);

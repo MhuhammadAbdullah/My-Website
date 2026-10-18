@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { cn } from "@agency/ui";
@@ -40,19 +41,56 @@ export function SiteChrome({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [dismissed, setDismissed] = React.useState(false);
+
+  // A dismissed announcement stays dismissed until its text/link changes.
+  const announcementKey = React.useMemo(() => {
+    const bar = settings.announcement_bar;
+    const raw = JSON.stringify([bar?.messages, bar?.link]);
+    let h = 0;
+    for (let i = 0; i < raw.length; i++) h = (h * 31 + raw.charCodeAt(i)) | 0;
+    return `announcement-dismissed:${h}`;
+  }, [settings.announcement_bar]);
+
+  React.useEffect(() => {
+    try {
+      setDismissed(localStorage.getItem(announcementKey) === "1");
+    } catch {
+      /* storage unavailable: just show the bar */
+    }
+  }, [announcementKey]);
+
   const hideChrome = CHROME_LESS_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
   if (hideChrome) {
     return <>{children}</>;
   }
 
-  const hasAnnouncement = getVisibleAnnouncementMessages(settings.announcement_bar).length > 0;
+  const dismissible = !!settings.announcement_bar?.dismissible;
+  const hasAnnouncement = getVisibleAnnouncementMessages(settings.announcement_bar).length > 0 && !(dismissible && dismissed);
+
+  function dismiss() {
+    setDismissed(true);
+    try {
+      localStorage.setItem(announcementKey, "1");
+    } catch {
+      /* ignore */
+    }
+  }
 
   return (
     <>
-      <AnnouncementBar settings={settings.announcement_bar} />
-      <SiteHeader navItems={headerNav} branding={branding} hasAnnouncement={hasAnnouncement} />
-      <main className={cn(hasAnnouncement ? "pt-40" : "pt-32")}>{children}</main>
+      <a
+        href="#main"
+        className="sr-only z-[100] rounded-full bg-accent-500 px-4 py-2 font-bold text-on-accent focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        Skip to content
+      </a>
+      {hasAnnouncement && <AnnouncementBar settings={settings.announcement_bar} onDismiss={dismissible ? dismiss : undefined} />}
+      <SiteHeader navItems={headerNav} branding={branding} header={settings.header} hasAnnouncement={hasAnnouncement} />
+      <main id="main" className={cn(hasAnnouncement ? "pt-40" : "pt-32")}>
+        {children}
+      </main>
       <SiteFooter navItems={footerNav} settings={settings} branding={branding} />
       {popups.length > 0 && <PopupProvider popups={popups} />}
     </>

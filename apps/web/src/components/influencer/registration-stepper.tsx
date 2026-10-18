@@ -21,7 +21,7 @@ export function RegistrationStepper({ steps, currentStep }: { steps: readonly st
             <span
               className={cn(
                 "relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full text-body-sm font-semibold ring-4 ring-background transition-colors",
-                isComplete || isCurrent ? "bg-accent-500 text-white" : "bg-neutral-100 text-neutral-400",
+                isComplete || isCurrent ? "bg-accent-500 text-on-accent" : "bg-neutral-100 text-neutral-400",
               )}
             >
               {isComplete ? <Check className="size-4" /> : i + 1}

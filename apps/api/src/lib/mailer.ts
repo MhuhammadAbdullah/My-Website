@@ -11,6 +11,10 @@ interface ContactSubmissionEmailData {
   source: string | null;
 }
 
+export async function sendInquiryAutoReply(to: string, name: string, message: string) {
+  await sendTemplatedEmail("contact.auto_reply", to, { name, message: message.replace(/\n/g, "<br />") });
+}
+
 export async function sendContactNotificationEmail(submission: ContactSubmissionEmailData) {
   const to = await getAdminRecipient();
   if (!to) {
