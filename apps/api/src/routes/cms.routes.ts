@@ -41,12 +41,13 @@ async function verifyTurnstile(token: string, ip: string | undefined): Promise<b
   if (!env.TURNSTILE_SECRET_KEY) return true; // not configured: honeypot + rate limit only
   if (!token) return false;
   try {
-    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    // Typed narrowly on purpose: Vercel's non-DOM type-check resolves a different `Response` type.
+    const res = (await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ secret: env.TURNSTILE_SECRET_KEY, response: token, ...(ip ? { remoteip: ip } : {}) }),
       signal: AbortSignal.timeout(8000),
-    });
+    })) as unknown as { json(): Promise<unknown> };
     const body = (await res.json()) as { success?: boolean };
     return body.success === true;
   } catch {
