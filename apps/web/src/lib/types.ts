@@ -322,7 +322,23 @@ export interface SiteSettings {
     displayMode: "LOGO" | "TEXT";
     footerLogoMediaId?: string | null;
     footerLogoUrl?: string | null;
+    logoDarkMediaId?: string | null;
+    logoDarkUrl?: string | null;
+    faviconMediaId?: string | null;
+    faviconUrl?: string | null;
+    footerTagline?: string;
+    copyrightText?: string;
+    emailSenderName?: string;
   };
+  theme?: { accent: "lime" | "orange" | "blue" | "yellow" };
+  header?: { ctaVisible: boolean; ctaLabel: string; ctaHref: string; ctaNewTab: boolean };
+  footer_columns?: { title: string; links: { label: string; href: string; newTab: boolean }[] }[];
+  legal_links?: { label: string; href: string; newTab: boolean }[];
+  seo_defaults?: { titleTemplate: string; defaultTitle: string; description: string; ogImageUrl: string; twitterHandle: string };
+  organization?: { legalName: string; description: string; foundingDate: string; areaServed: string };
+  business_schedule?: Record<string, { closed: boolean; open: string; close: string }>;
+  timezone?: string;
+  whatsapp_message?: string;
   tech_stack_display?: "TAGS" | "MARQUEE";
   default_cta?: DefaultCtaRead;
   faq_section_heading?: string;
@@ -339,6 +355,8 @@ export interface AnnouncementBarSettings {
   backgroundColor: string;
   textColor: string;
   messages: string[];
+  link?: string;
+  dismissible?: boolean;
 }
 
 export interface InfluencerFlags {
@@ -376,6 +394,7 @@ export interface IntegrationsSettings {
   googleAdsConversionLabel?: string;
   clarityId?: string;
   googleSiteVerification?: string;
+  turnstileSiteKey?: string;
   headScript?: string;
   bodyScript?: string;
   footerScript?: string;
@@ -388,6 +407,8 @@ export interface NavItemRead {
   order: number;
   parentId: string | null;
   location: "HEADER" | "FOOTER";
+  visible?: boolean;
+  openInNewTab?: boolean;
 }
 
 export interface PaginatedResponse<T> {
@@ -424,4 +445,13 @@ export interface PopupRead {
   frequency: PopupFrequencyInput;
   deviceTarget: PopupDeviceTarget;
   closeOnOverlayClick: boolean;
+}
+
+// Section-based CMS page as served by GET /cms/public/*.
+export interface CmsSectionRead {
+  id: string;
+  type: string;
+  // Shape depends on `type` (see SECTION_TYPES in @agency/types); collection
+  // fields arrive already resolved to items.
+  content: Record<string, unknown>;
 }

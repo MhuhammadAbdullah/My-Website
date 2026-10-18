@@ -52,6 +52,16 @@
   --color-error-500: oklch(55% 0.16 25);
   --color-error-700: oklch(38% 0.14 25);
 
+  /* ---- Semantic tokens (light defaults reproduce the pre-redesign look;
+     the web app's `noir.css` overrides them under [data-theme="noir"]) ---- */
+  --color-surface: var(--color-background);
+  --color-surface-2: var(--color-neutral-50);
+  --color-border-strong: var(--color-neutral-300);
+  --color-btn-primary: var(--color-heading);
+  --color-btn-primary-hover: var(--color-neutral-800);
+  --color-on-btn-primary: #ffffff;
+  --color-on-accent: #ffffff;
+
   /* ---- Typography ---- */
   --font-heading: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-serif-emphasis: "Playfair Display", ui-serif, Georgia, serif;
@@ -59,6 +69,8 @@
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
   --text-display: clamp(2.75rem, 2rem + 3vw, 5rem);
+  /* Hero heading; same as display until a theme overrides it. */
+  --text-hero: var(--text-display);
   --text-h1: clamp(2.25rem, 1.8rem + 2vw, 3.75rem);
   --text-h2: clamp(1.75rem, 1.5rem + 1.2vw, 2.75rem);
   --text-h3: clamp(1.375rem, 1.2rem + 0.7vw, 1.875rem);
@@ -92,27 +104,40 @@
   --spacing-section: clamp(4rem, 3rem + 4vw, 8rem);
 
   /* ---- Radix accordion animation ---- */
-  --animate-accordion-down: accordion-down var(--duration-base) var(--ease-premium);
-  --animate-accordion-up: accordion-up var(--duration-base) var(--ease-premium);
+  --animate-accordion-down: accordion-down var(--duration-slow) var(--ease-premium);
+  --animate-accordion-up: accordion-up var(--duration-slow) var(--ease-premium);
 
   /* ---- Tech stack marquee ---- */
   --animate-marquee: marquee var(--tech-marquee-duration, 30s) linear infinite;
 }
 
+:root {
+  --layout-max: 1400px;
+  --layout-pad: 1.5rem;
+}
+
 @keyframes accordion-down {
   from {
     height: 0;
+    opacity: 0;
+    transform: translateY(-6px);
   }
   to {
     height: var(--radix-accordion-content-height);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 @keyframes accordion-up {
   from {
     height: var(--radix-accordion-content-height);
+    opacity: 1;
+    transform: translateY(0);
   }
   to {
     height: 0;
+    opacity: 0;
+    transform: translateY(-6px);
   }
 }
 

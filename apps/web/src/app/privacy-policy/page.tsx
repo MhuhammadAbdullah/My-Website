@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { Container, Section, Heading, Breadcrumb, RichText } from "@agency/ui";
 import { getPrivacyPolicyContent } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
+import { getBrandName } from "@/lib/branding";
 
 export async function generateMetadata(): Promise<Metadata> {
   const content = await getPrivacyPolicyContent().catch(() => null);
   const seo = content?.seo;
   if (!seo) {
-    return { title: "Privacy Policy", description: "How MAB Digital collects, uses, and protects your information." };
+    const brand = await getBrandName();
+    return { title: "Privacy Policy", description: `How ${brand || "we"} collect${brand ? "s" : ""}, use${brand ? "s" : ""}, and protect${brand ? "s" : ""} your information.` };
   }
 
   return {

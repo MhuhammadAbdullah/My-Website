@@ -11,6 +11,7 @@ import { CtaSection } from "@/components/marketing/cta-section";
 import { ServiceCard } from "@/components/marketing/service-card";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { env } from "@/lib/env";
+import { getBrandName } from "@/lib/branding";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -37,12 +38,13 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
   const service = await getService(slug).catch(() => null);
   if (!service) notFound();
 
+  const brand = await getBrandName();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
     name: service.name,
     description: service.tagline,
-    provider: { "@type": "Organization", name: "MAB Digital" },
+    ...(brand ? { provider: { "@type": "Organization", name: brand } } : {}),
   };
 
   return (

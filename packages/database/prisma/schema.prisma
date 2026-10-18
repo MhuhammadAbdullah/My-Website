@@ -369,6 +369,9 @@ model Media {
   // per-request (see apps/api/src/lib/cloudinary.ts signPrivateMediaUrl)
   // and only ever handed to an authenticated, permissioned admin.
   isPrivate Boolean  @default(false)
+  // Focal point (0..1, from the top-left) used when cropping to a different aspect ratio.
+  focalX    Float?
+  focalY    Float?
   createdAt DateTime @default(now())
 
   serviceHero         Service[]         @relation("ServiceHeroMedia")
@@ -392,6 +395,7 @@ model Media {
   bookingAttachments           BookingAttachment[]
   influencerIdentityDocuments  Influencer[]
   popupImages                  Popup[]
+  pageOgImages                 Page[]
 
   @@map("media")
 }
@@ -663,7 +667,7 @@ model TeamMember {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
-  avatar Media?  @relation(fields: [avatarId], references: [id])
+  avatar Media? @relation(fields: [avatarId], references: [id])
 
   @@map("team_members")
 }
@@ -770,12 +774,15 @@ model ContactSubmission {
 // ---------------------------------------------------------------------------
 
 model NavItem {
-  id       String      @id @default(cuid())
-  label    String
-  href     String
-  location NavLocation
-  parentId String?
-  order    Int         @default(0)
+  id           String      @id @default(cuid())
+  label        String
+  href         String
+  location     NavLocation
+  parentId     String?
+  order        Int         @default(0)
+  // Site Settings > Navigation: hide an item without deleting it / open in a new tab.
+  visible      Boolean     @default(true)
+  openInNewTab Boolean     @default(false)
 
   parent   NavItem?  @relation("NavItemChildren", fields: [parentId], references: [id], onDelete: Cascade)
   children NavItem[] @relation("NavItemChildren")
@@ -1708,8 +1715,8 @@ model Discount {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
-  influencer Influencer?         @relation(fields: [influencerId], references: [id])
-  category   InfluencerCategory? @relation(fields: [categoryId], references: [id])
+  influencer Influencer?                  @relation(fields: [influencerId], references: [id])
+  category   InfluencerCategory?          @relation(fields: [categoryId], references: [id])
   bookings   Booking[]
   // Every discount -- whatever its scope -- only ever displays on or
   // applies to a given influencer's bookings once THAT influencer
@@ -1960,4 +1967,108 @@ model Popup {
   updatedAt DateTime @updatedAt
 
   @@map("popups")
+}
+
+// ---------------------------------------------------------------------------
+// Section-based CMS (Noir Lime foundation)
+//
+// A Page is an ordered list of PageSections. The PageSection rows are the
+// *working copy* an editor changes ("save draft"); `Page.publishedSnapshot`
+// is the frozen JSON the public site renders. Publish = copy working copy ->
+// snapshot (+ a PageRevision). Preview renders the working copy via a
+// PreviewToken. Existing singleton page models (HomePageContent, ...) are
+// untouched and keep working until each page is migrated.
+// ---------------------------------------------------------------------------
+
+model Page {
+  id     String        @id @default(cuid())
+  slug   String        @unique // "" is not allowed; the homepage uses "home"
+  title  String
+  // DRAFT = never shown publicly; PUBLISHED = rendered from publishedSnapshot.
+  status ContentStatus @default(DRAFT)
+
+  metaTitle       String?
+  metaDescription String?
+  ogImageId       String?
+  canonicalUrl    String?
+  noindex         Boolean @default(false)
+
+  publishedSnapshot     Json?
+  publishedAt           DateTime?
+  hasUnpublishedChanges Boolean   @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  updatedById String?
+
+  ogImage       Media?             @relation(fields: [ogImageId], references: [id])
+  sections      PageSection[]
+  revisions     PageRevision[]
+  previewTokens PagePreviewToken[]
+
+  @@map("pages")
+}
+
+model PageSection {
+  id        String   @id @default(cuid())
+  pageId    String
+  // Key into the section registry (packages/types/src/sections.ts).
+  type      String
+  order     Int      @default(0)
+  visible   Boolean  @default(true)
+  // Validated against the zod schema registered for `type` on every write.
+  content   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, order])
+  @@map("page_sections")
+}
+
+model PageRevision {
+  id          String   @id @default(cuid())
+  pageId      String
+  label       String?
+  // { title, seo, sections: [{ type, order, visible, content }] }
+  snapshot    Json
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, createdAt])
+  @@map("page_revisions")
+}
+
+model PagePreviewToken {
+  id        String   @id @default(cuid())
+  pageId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId])
+  @@map("page_preview_tokens")
+}
+
+// Generic repeatable content for collections that don't have their own table
+// (packages, client logos, creators, tools, ...). `collection` is a plain
+// string key so a new collection needs no migration; `data` is validated per
+// collection by the zod schemas in packages/types/src/sections.ts.
+model CollectionItem {
+  id         String   @id @default(cuid())
+  collection String
+  title      String
+  data       Json
+  order      Int      @default(0)
+  visible    Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([collection, order])
+  @@map("collection_items")
 }

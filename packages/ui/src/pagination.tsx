@@ -43,7 +43,7 @@ export function Pagination({
               aria-current={p === page ? "page" : undefined}
               className={cn(
                 "flex size-10 items-center justify-center rounded-full text-body-sm font-medium transition-colors",
-                p === page ? "bg-heading text-white" : "text-body hover:bg-neutral-100",
+                p === page ? "bg-btn-primary text-on-btn-primary" : "text-body hover:bg-neutral-100",
               )}
             >
               {p}

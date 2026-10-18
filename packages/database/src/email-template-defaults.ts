@@ -16,6 +16,7 @@ export interface EmailTemplateDefault {
 
 export const EMAIL_TEMPLATE_KEYS = [
   "contact.admin_notification",
+  "contact.auto_reply",
   "influencer.application_submitted",
   "influencer.application_received_admin_alert",
   "influencer.application_approved",
@@ -68,6 +69,18 @@ export const EMAIL_TEMPLATE_DEFAULTS: Record<EmailTemplateKey, EmailTemplateDefa
 <p><strong>Message:</strong></p>
 <p>{{message}}</p>`,
     variables: ["name", "email", "phone", "country", "city", "companyName", "source", "message"],
+  },
+  "contact.auto_reply": {
+    key: "contact.auto_reply",
+    name: "Enquiry auto-reply",
+    description: "Sent to the visitor right after they submit the homepage inquiry form.",
+    recipientRole: "CLIENT",
+    subject: "We received your message",
+    bodyHtml: `<p>Hi {{name}},</p>
+<p>Thanks for getting in touch — we received your message and will reply within one business day.</p>
+<p><strong>Your message:</strong></p>
+<p>{{message}}</p>`,
+    variables: ["name", "message"],
   },
   "influencer.application_submitted": {
     key: "influencer.application_submitted",

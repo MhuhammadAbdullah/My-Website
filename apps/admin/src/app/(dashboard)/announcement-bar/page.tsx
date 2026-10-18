@@ -12,6 +12,8 @@ const EMPTY_FORM: AnnouncementBarInput = {
   backgroundColor: "#111111",
   textColor: "#ffffff",
   messages: [],
+  link: "",
+  dismissible: false,
 };
 
 export default function AnnouncementBarPage() {
@@ -32,6 +34,8 @@ export default function AnnouncementBarPage() {
       backgroundColor: bar?.backgroundColor ?? EMPTY_FORM.backgroundColor,
       textColor: bar?.textColor ?? EMPTY_FORM.textColor,
       messages: bar?.messages ?? EMPTY_FORM.messages,
+      link: bar?.link ?? EMPTY_FORM.link,
+      dismissible: bar?.dismissible ?? EMPTY_FORM.dismissible,
     };
     setForm(next);
     setMessagesText(next.messages.join("\n"));
@@ -96,6 +100,27 @@ export default function AnnouncementBarPage() {
             <p className="mt-1 text-body-sm text-neutral-500">Goes live on the site as soon as you save.</p>
           </div>
           <Switch checked={form.enabled} onCheckedChange={(v) => setField("enabled", v)} />
+        </section>
+
+        <section className="grid gap-4">
+          <div>
+            <Label>Link (optional)</Label>
+            <Input
+              value={form.link}
+              onChange={(e) => setField("link", e.target.value)}
+              placeholder="/contact or https://..."
+              aria-invalid={!!errors.link}
+            />
+            <FieldError>{errors.link}</FieldError>
+            <p className="mt-1 text-body-sm text-neutral-500">Makes the whole bar clickable. Leave empty for plain text.</p>
+          </div>
+          <div className="flex items-center justify-between rounded-2xl border border-neutral-200 p-4">
+            <div>
+              <Label>Visitors can dismiss it</Label>
+              <p className="mt-1 text-body-sm text-neutral-500">Shows a close button; the choice is remembered in the browser.</p>
+            </div>
+            <Switch checked={form.dismissible} onCheckedChange={(v) => setField("dismissible", v)} />
+          </div>
         </section>
 
         <section className="grid gap-4 sm:grid-cols-2">

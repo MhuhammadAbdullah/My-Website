@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./styles.css": "./src/styles/globals.css",
     "./*": "./src/*.tsx",
-    "./lib/*": "./src/lib/*.ts"
+    "./lib/*": "./src/lib/*.ts",
+    "./noir.css": "./src/styles/noir.css"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

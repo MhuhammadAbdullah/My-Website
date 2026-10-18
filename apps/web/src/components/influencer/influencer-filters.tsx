@@ -99,7 +99,7 @@ export function InfluencerFilters({ categories }: { categories: InfluencerCatego
           onClick={() => updateParams({ category: null })}
           className={cn(
             "shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-body-sm font-medium transition-colors",
-            !activeCategory ? "bg-heading text-white" : "bg-neutral-100 text-body hover:bg-neutral-200",
+            !activeCategory ? "bg-btn-primary text-on-btn-primary" : "bg-neutral-100 text-body hover:bg-neutral-200",
           )}
         >
           All
@@ -111,7 +111,7 @@ export function InfluencerFilters({ categories }: { categories: InfluencerCatego
             onClick={() => updateParams({ category: category.slug })}
             className={cn(
               "shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-body-sm font-medium transition-colors",
-              activeCategory === category.slug ? "bg-heading text-white" : "bg-neutral-100 text-body hover:bg-neutral-200",
+              activeCategory === category.slug ? "bg-btn-primary text-on-btn-primary" : "bg-neutral-100 text-body hover:bg-neutral-200",
             )}
           >
             {category.name}

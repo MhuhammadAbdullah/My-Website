@@ -6,18 +6,27 @@ export interface UploadedMedia {
   url: string;
   width: number | null;
   height: number | null;
+  format?: string | null;
+  bytes?: number | null;
 }
 
 // Signs a direct-to-Cloudinary upload via the generic /media/sign endpoint,
 // uploads the file, then registers the asset in the Media table so it has an
 // id other resources (e.g. a testimonial's avatarId) can reference.
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif", "image/svg+xml"];
+const MAX_BYTES = 10 * 1024 * 1024;
+
 export async function uploadImageToCloudinary(file: File, folder = "agency-website"): Promise<UploadedMedia> {
+  if (!ALLOWED_TYPES.includes(file.type)) throw new Error("Unsupported file type. Use JPG, PNG, WebP, AVIF, GIF or SVG.");
+  if (file.size > MAX_BYTES) throw new Error("File is larger than 10 MB.");
+
   const signed = await request<{
     timestamp: number;
     signature: string;
     apiKey: string;
     cloudName: string;
     folder: string;
+    allowedFormats?: string;
   }>("/media/sign", { method: "POST", body: JSON.stringify({ folder }) });
 
   const formData = new FormData();
@@ -26,6 +35,7 @@ export async function uploadImageToCloudinary(file: File, folder = "agency-websi
   formData.append("timestamp", String(signed.timestamp));
   formData.append("signature", signed.signature);
   formData.append("folder", signed.folder);
+  if (signed.allowedFormats) formData.append("allowed_formats", signed.allowedFormats);
 
   const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${signed.cloudName}/auto/upload`, {
     method: "POST",

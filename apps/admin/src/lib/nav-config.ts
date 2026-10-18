@@ -41,6 +41,8 @@ import {
   FileBarChart2,
   Megaphone,
   AppWindow,
+  Images,
+  Palette,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -116,6 +118,7 @@ export const adminNavGroups: AdminNavGroup[] = [
     label: "Content",
     icon: Layers,
     items: [
+      { label: "Media Library", href: "/media", icon: Images, resource: "media" },
       { label: "Home Page", href: "/home", icon: Home, resource: "home" },
       { label: "About Page", href: "/about", icon: Compass, resource: "about" },
       { label: "Services", href: "/services", icon: Briefcase, resource: "services" },
@@ -146,12 +149,13 @@ export const adminNavGroups: AdminNavGroup[] = [
     label: "Site",
     icon: Globe,
     items: [
+      { label: "Site Settings", href: "/site-settings", icon: Palette, resource: "settings" },
       { label: "Navigation", href: "/navigation", icon: Compass, resource: "navigation" },
       { label: "Footer", href: "/footer", icon: PanelBottom, resource: "navigation" },
       { label: "Announcement Bar", href: "/announcement-bar", icon: Megaphone, resource: "settings" },
       { label: "SEO", href: "/seo", icon: SearchCheck, resource: "seo" },
       { label: "Integrations", href: "/integrations", icon: Plug, resource: "settings" },
-      { label: "Messages", href: "/analytics", icon: Mail, resource: "settings" },
+      { label: "Messages", href: "/analytics", icon: Mail, resource: "leads" },
       { label: "Settings", href: "/settings", icon: Settings, resource: "settings" },
       { label: "Privacy Policy", href: "/privacy-policy", icon: ShieldCheck, resource: "legal" },
       { label: "Terms & Conditions", href: "/terms", icon: Scale, resource: "legal" },

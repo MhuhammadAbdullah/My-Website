@@ -9,6 +9,8 @@ interface NavItem {
   href: string;
   location: "HEADER" | "FOOTER";
   order: number;
+  visible: boolean;
+  openInNewTab: boolean;
 }
 
 const client = createResourceClient<NavItem>("/navigation");
@@ -28,8 +30,10 @@ export default function FooterPage() {
         { key: "label", label: "Label", type: "text", required: true },
         { key: "href", label: "URL", type: "text", required: true },
         { key: "order", label: "Sort order", type: "number" },
+        { key: "visible", label: "Show in the footer", type: "checkbox" },
+        { key: "openInNewTab", label: "Open in a new tab", type: "checkbox" },
       ]}
-      defaultValues={{ label: "", href: "/", location: "FOOTER", order: 0 }}
+      defaultValues={{ label: "", href: "/", location: "FOOTER", order: 0, visible: true, openInNewTab: false }}
     />
   );
 }

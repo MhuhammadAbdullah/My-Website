@@ -1,0 +1,194 @@
+/*
+  "Noir Lime" — dark theme, scoped to <html data-theme="noir"> so the admin
+  panel (which shares globals.css) stays light.
+
+  Everything here only re-points tokens that globals.css already defines, so
+  deleting this file (and the data-theme attribute) restores the old look.
+  The old light scale is *inverted* (neutral-50 -> darkest surface,
+  neutral-900 -> lightest; 950 stays a dark surface for legacy dark cards) so pages that haven't been redesigned yet keep
+  the same foreground/background relationships and stay readable.
+*/
+
+:root[data-theme="noir"] {
+  color-scheme: dark;
+
+  /* Accent: one runtime variable, switched via data-accent (Site Settings). */
+  --accent: #c8f25a;
+  --on-accent: #0b0b0c;
+
+  /* ---- Spec palette ---- */
+  --color-background: #0b0b0c;
+  --color-surface: #151517;
+  --color-surface-2: #1c1c1f;
+  --color-border-strong: #3a3a3f;
+  --color-heading: #f2f2ee;
+  --color-body: #a3a3a0;
+
+  /* ---- Inverted neutral scale (500 = muted text, 400 kept >= AA on #0b0b0c; 950 stays a dark surface) ---- */
+  --color-neutral-50: #151517;
+  --color-neutral-100: #1c1c1f;
+  --color-neutral-200: #26262a;
+  --color-neutral-300: #3a3a3f;
+  --color-neutral-400: #8c8c89;
+  --color-neutral-500: #a3a3a0;
+  --color-neutral-600: #b8b8b4;
+  --color-neutral-700: #cfcfca;
+  --color-neutral-800: #e3e3df;
+  --color-neutral-900: #f2f2ee;
+  --color-neutral-950: #1c1c1f; /* legacy "dark card" blocks stay dark surfaces */
+
+  /* ---- Accent scale derived from --accent ---- */
+  --color-accent-50: color-mix(in oklab, var(--accent) 9%, #0b0b0c);
+  --color-accent-100: color-mix(in oklab, var(--accent) 16%, #0b0b0c);
+  --color-accent-200: color-mix(in oklab, var(--accent) 30%, #0b0b0c);
+  --color-accent-300: color-mix(in oklab, var(--accent) 75%, white);
+  --color-accent-400: color-mix(in oklab, var(--accent) 90%, white);
+  --color-accent-500: var(--accent);
+  --color-accent-600: var(--accent);
+  --color-accent-700: color-mix(in oklab, var(--accent) 80%, white);
+  /* 800/900 are used as *text* on the tinted 50/100 backgrounds, so on dark they must be light */
+  --color-accent-800: color-mix(in oklab, var(--accent) 70%, white);
+  --color-accent-900: color-mix(in oklab, var(--accent) 55%, white);
+  --color-accent-950: color-mix(in oklab, var(--accent) 12%, #0b0b0c);
+
+  /* ---- Status colours re-tuned for dark surfaces ---- */
+  --color-success-50: oklch(28% 0.05 155);
+  --color-success-500: oklch(72% 0.14 155);
+  --color-success-700: oklch(82% 0.12 155);
+  --color-warning-50: oklch(30% 0.05 80);
+  --color-warning-500: oklch(80% 0.14 80);
+  --color-warning-700: oklch(86% 0.12 80);
+  --color-error-50: oklch(28% 0.07 25);
+  --color-error-500: oklch(70% 0.17 25);
+  --color-error-700: oklch(80% 0.13 25);
+
+  /* ---- "on" colours ---- */
+  --color-btn-primary: var(--accent);
+  --color-btn-primary-hover: color-mix(in oklab, var(--accent) 88%, white);
+  --color-on-btn-primary: #0b0b0c;
+  --color-on-accent: #0b0b0c;
+
+  /* ---- Typography ---- */
+  --font-heading: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  /* Syne is a wide face, so minimums are conservative to keep long words inside 360px. */
+  --text-hero: clamp(2.75rem, 0.9rem + 9vw, 9.25rem); /* hero only, up to ~148px */
+  --text-display: clamp(2.5rem, 1rem + 6.4vw, 6rem);
+  --text-h1: clamp(2.25rem, 1.2rem + 4vw, 4.5rem);
+  --text-h2: clamp(1.75rem, 1.2rem + 2.4vw, 3.5rem); /* section titles, ~56px */
+  --text-h3: clamp(1.375rem, 1.2rem + 0.9vw, 2.125rem);
+  --text-h4: clamp(1.125rem, 1.05rem + 0.35vw, 1.375rem);
+
+  /* ---- Shape, layout, motion ---- */
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 1.75rem;
+  --layout-max: 1320px;
+  --layout-pad: 2rem;
+  --spacing-section: clamp(4.5rem, 3rem + 5vw, 7rem); /* ~112px */
+
+  --shadow-soft-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-soft-md: 0 6px 16px rgb(0 0 0 / 0.4);
+  --shadow-soft-lg: 0 20px 44px rgb(0 0 0 / 0.5);
+  --shadow-soft-xl: 0 32px 72px rgb(0 0 0 / 0.55);
+}
+
+:root[data-theme="noir"][data-accent="orange"] { --accent: #ff7a3d; }
+:root[data-theme="noir"][data-accent="blue"] { --accent: #7aa2ff; }
+:root[data-theme="noir"][data-accent="yellow"] { --accent: #f5d547; }
+
+:root[data-theme="noir"] body {
+  background-color: var(--color-background);
+}
+
+/* Headings: Syne 800, tight leading/tracking. */
+:root[data-theme="noir"] :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+  overflow-wrap: anywhere;
+}
+:root[data-theme="noir"] :is(h1, h2) {
+  line-height: 0.92;
+}
+
+/* The `**word**` emphasis helper becomes an accent-coloured word, not italic serif. */
+:root[data-theme="noir"] [data-serif-emphasis] {
+  font-family: inherit;
+  font-style: normal;
+  font-weight: inherit;
+  color: var(--accent);
+}
+
+/* Eyebrow labels. */
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+}
+
+/* Pill buttons: 16px 26px, weight 700. */
+:root[data-theme="noir"] [data-slot="button"] {
+  font-weight: 700;
+}
+:root[data-theme="noir"] [data-slot="button"][data-size="md"] {
+  height: auto;
+  padding: 0.75rem 1.4rem;
+  font-size: 0.9375rem;
+}
+:root[data-theme="noir"] [data-slot="button"][data-size="lg"] {
+  height: auto;
+  padding: 0.85rem 1.6rem;
+}
+:root[data-theme="noir"] [data-slot="button"][data-variant="secondary"],
+:root[data-theme="noir"] [data-slot="button"][data-variant="outline"] {
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-heading);
+}
+:root[data-theme="noir"] [data-slot="button"][data-variant="secondary"]:hover,
+:root[data-theme="noir"] [data-slot="button"][data-variant="outline"]:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Focus rings: always visible on dark. */
+:root[data-theme="noir"] :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+:root[data-theme="noir"] .glass {
+  background: rgb(21 21 23 / 0.78);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.45);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-theme="noir"] .glass {
+    background: rgb(21 21 23 / 0.97);
+  }
+}
+
+:root[data-theme="noir"] .shimmer::after {
+  background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent);
+}
+
+:root[data-theme="noir"] ::selection {
+  background: var(--accent);
+  color: #0b0b0c;
+}
+
+/* Scroll-reveal helper (the shared <Reveal> also honours reduced motion). */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="noir"] * {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Legacy code blocks: neutral-50 text on a (now dark) neutral-950 block. */
+:root[data-theme="noir"] .rich-text pre {
+  color: var(--color-neutral-800);
+}

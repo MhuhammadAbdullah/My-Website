@@ -1,4 +1,4 @@
-import { prisma } from "@agency/database";
+import { getBrandIdentity } from "./brand.js";
 
 // Wraps a transactional email's body in a consistent branded header/footer
 // instead of every send hand-rolling its own <table> boilerplate (the one
@@ -7,8 +7,7 @@ import { prisma } from "@agency/database";
 // Marketplace needs). Brand name is read from the same SiteSetting the rest
 // of the app uses, so a rebrand doesn't require touching email code.
 export async function renderEmailShell(opts: { title: string; bodyHtml: string; preheader?: string }): Promise<string> {
-  const companyNameSetting = await prisma.siteSetting.findUnique({ where: { key: "company_name" } });
-  const brandName = typeof companyNameSetting?.value === "string" ? companyNameSetting.value : "MAB Digital";
+  const brandName = (await getBrandIdentity()).name;
 
   return `
 <!doctype html>
@@ -36,7 +35,7 @@ export async function renderEmailShell(opts: { title: string; bodyHtml: string; 
             </tr>
             <tr>
               <td style="padding:16px 28px;border-top:1px solid #e4e4e7;font-size:12px;color:#71717a;">
-                Sent by ${brandName}. If you weren't expecting this email, you can ignore it.
+                ${brandName ? `Sent by ${brandName}. ` : ""}If you weren't expecting this email, you can ignore it.
               </td>
             </tr>
           </table>

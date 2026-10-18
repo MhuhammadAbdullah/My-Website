@@ -7,13 +7,22 @@ import {
 import { env } from "../env.js";
 import { transporter } from "./mail-transport.js";
 import { renderEmailShell, emailButton } from "./email-shell.js";
+import { getBrandIdentity, formatFromHeader } from "./brand.js";
 
 export type { EmailTemplateKey } from "@agency/database";
 
+// Admin alert recipients: the notification addresses managed in Admin > Site
+// Settings (private -- never served by the public settings endpoint) win, so
+// the admin can change them without a deploy; then the env default, then the
+// public contact email as a last resort. Comma-joined, as nodemailer's `to`
+// accepts.
 export async function getAdminRecipient(): Promise<string | undefined> {
+  const rows = await prisma.siteSetting.findMany({ where: { key: { in: ["notifications", "contact_email"] } } });
+  const notifications = rows.find((r) => r.key === "notifications")?.value as { emails?: string[] } | undefined;
+  if (notifications?.emails?.length) return notifications.emails.join(", ");
   if (env.ADMIN_NOTIFICATION_EMAIL) return env.ADMIN_NOTIFICATION_EMAIL;
-  const setting = await prisma.siteSetting.findUnique({ where: { key: "contact_email" } });
-  return typeof setting?.value === "string" ? setting.value : undefined;
+  const contact = rows.find((r) => r.key === "contact_email")?.value;
+  return typeof contact === "string" && contact ? contact : undefined;
 }
 
 // Creates any template rows missing from the DB (new keys added in code
@@ -53,7 +62,8 @@ async function send(to: string, subject: string, bodyHtml: string) {
   }
   try {
     const html = await renderEmailShell({ title: subject, bodyHtml });
-    await transporter.sendMail({ from: env.SMTP_FROM || env.SMTP_USER, to, subject, html });
+    const { senderName } = await getBrandIdentity();
+    await transporter.sendMail({ from: formatFromHeader(senderName) ?? env.SMTP_FROM ?? env.SMTP_USER, to, subject, html });
     console.log(`Sent "${subject}" to ${to}`);
   } catch (error) {
     console.error(`Failed to send "${subject}" to ${to}:`, error);

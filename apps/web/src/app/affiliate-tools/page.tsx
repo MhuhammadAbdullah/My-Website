@@ -9,13 +9,14 @@ import { AffiliateFilters } from "@/components/affiliate/affiliate-filters";
 import { AffiliateToolCard } from "@/components/affiliate/affiliate-tool-card";
 import { AffiliatePagination } from "@/components/affiliate/affiliate-pagination";
 import { buildPageMetadata } from "@/lib/seo";
+import { getBrandName } from "@/lib/branding";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getPageSeo("affiliate-tools").catch(() => null);
+  const [seo, brand] = await Promise.all([getPageSeo("affiliate-tools").catch(() => null), getBrandName()]);
   return buildPageMetadata({
     seo,
     fallbackTitle: "Affiliate Tools",
-    fallbackDescription: "The hosting, domain, email, design, and productivity tools MAB Digital actually uses and recommends.",
+    fallbackDescription: `The hosting, domain, email, design, and productivity tools ${brand || "we"} actually use and recommend.`,
   });
 }
 

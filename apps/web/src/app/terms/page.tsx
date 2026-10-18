@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { Container, Section, Heading, Breadcrumb, RichText } from "@agency/ui";
 import { getTermsContent } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
+import { getBrandName } from "@/lib/branding";
 
 export async function generateMetadata(): Promise<Metadata> {
   const content = await getTermsContent().catch(() => null);
   const seo = content?.seo;
   if (!seo) {
-    return { title: "Terms of Service", description: "The terms that govern use of the MAB Digital website and services." };
+    const brand = await getBrandName();
+    return { title: "Terms of Service", description: `The terms that govern use of the ${brand ? `${brand} ` : ""}website and services.` };
   }
 
   return {

@@ -45,7 +45,7 @@ export function PricingGrid({ plans }: { plans: PricingPlanRead[] }) {
             {plan.features.map((feature) => (
               <li key={feature} className="flex items-start gap-2 text-body-sm">
                 <Check className={cn("mt-0.5 size-4 shrink-0", plan.isFeatured ? "text-accent-400" : "text-accent-500")} />
-                <span className={plan.isFeatured ? "text-neutral-300" : "text-body"}>{feature}</span>
+                <span className={plan.isFeatured ? "text-neutral-400" : "text-body"}>{feature}</span>
               </li>
             ))}
           </ul>

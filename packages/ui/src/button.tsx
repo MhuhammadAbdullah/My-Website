@@ -9,9 +9,9 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-heading text-white hover:bg-neutral-800 shadow-soft-sm",
+          "bg-btn-primary text-on-btn-primary hover:bg-btn-primary-hover shadow-soft-sm",
         accent:
-          "bg-accent-500 text-white hover:bg-accent-600 shadow-soft-sm",
+          "bg-accent-500 text-on-accent hover:bg-accent-600 shadow-soft-sm",
         secondary:
           "bg-neutral-100 text-heading hover:bg-neutral-200",
         outline:
@@ -25,7 +25,7 @@ export const buttonVariants = cva(
         // text-[length:var(--text-body)] (not text-body) deliberately: the
         // bare `text-body` class collides with the --color-body token of the
         // same name, so tailwind-merge treats it as a text-color utility and
-        // silently drops the variant's text-white/text-heading in favor of it.
+        // silently drops the variant's text-on-*/text-heading in favor of it.
         lg: "h-13 px-8 text-[length:var(--text-body)]",
         icon: "size-10",
       },
@@ -41,17 +41,41 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  /** Appends the arrow glyph used on primary CTA labels (also works with `asChild` on a single element child). */
+  withArrow?: boolean;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, withArrow = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
         ref={ref}
+        data-slot="button"
+        data-variant={variant ?? "primary"}
+        data-size={size ?? "md"}
         className={cn(buttonVariants({ variant, size, className }))}
         {...props}
-      />
+      >
+        {asChild ? (
+          withArrow && React.isValidElement<{ children?: React.ReactNode }>(children) ? (
+            React.cloneElement(
+              children,
+              undefined,
+              <>
+                {children.props.children} <span aria-hidden>&rarr;</span>
+              </>,
+            )
+          ) : (
+            children
+          )
+        ) : (
+          <>
+            {children}
+            {withArrow && <span aria-hidden>&rarr;</span>}
+          </>
+        )}
+      </Comp>
     );
   },
 );

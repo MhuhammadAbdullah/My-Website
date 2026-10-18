@@ -43,3 +43,6 @@ test-results/
 # misc
 *.tsbuildinfo
 .vercel/
+
+# visual-check screenshots (scripts/visual-check.mjs)
+.screenshots/

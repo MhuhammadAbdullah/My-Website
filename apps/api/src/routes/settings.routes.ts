@@ -12,6 +12,17 @@ import {
   influencerInsightsGuideSchema,
   influencerCommissionNoticeSchema,
   announcementBarSchema,
+  themeSchema,
+  headerSettingsSchema,
+  footerColumnsSchema,
+  legalLinksSchema,
+  seoDefaultsSchema,
+  organizationSchema,
+  businessHoursSchema,
+  timezoneSchema,
+  whatsappNumberSchema,
+  notificationsSchema,
+  PRIVATE_SETTING_KEYS,
 } from "@agency/types";
 import { z } from "zod";
 import { isGoogleMapsUrl, extractGoogleMapsEmbedSrc } from "@agency/utils";
@@ -55,14 +66,41 @@ const settingValidators: Record<string, (value: unknown) => Prisma.InputJsonValu
   influencer_insights_guide: (value) => influencerInsightsGuideSchema.parse(value),
   influencer_commission_notice: (value) => influencerCommissionNoticeSchema.parse(value),
   announcement_bar: (value) => announcementBarSchema.parse(value),
+  // Noir Lime site settings
+  theme: (value) => themeSchema.parse(value),
+  header: (value) => headerSettingsSchema.parse(value),
+  footer_columns: (value) => footerColumnsSchema.parse(value),
+  legal_links: (value) => legalLinksSchema.parse(value),
+  seo_defaults: (value) => seoDefaultsSchema.parse(value),
+  organization: (value) => organizationSchema.parse(value),
+  business_schedule: (value) => businessHoursSchema.parse(value),
+  timezone: (value) => timezoneSchema.parse(value),
+  whatsapp_number: (value) => whatsappNumberSchema.parse(value ?? ""),
+  whatsapp_message: (value) => z.string().trim().max(300).parse(value ?? ""),
+  contact_email: (value) => z.union([z.literal(""), z.string().trim().email()]).parse(value ?? ""),
+  // Private -- see PRIVATE_SETTING_KEYS; withheld from the public GET below.
+  notifications: (value) => notificationsSchema.parse(value),
 };
+
+const PRIVATE_KEYS = new Set<string>(PRIVATE_SETTING_KEYS);
 
 settingsRouter.get(
   "/",
   asyncHandler(async (_req, res) => {
     const rows = await prisma.siteSetting.findMany();
-    const settings = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+    // Public endpoint: private keys (e.g. notification recipients) never leave via it.
+    const settings = Object.fromEntries(rows.filter((r) => !PRIVATE_KEYS.has(r.key)).map((r) => [r.key, r.value]));
     res.json({ settings });
+  }),
+);
+
+settingsRouter.get(
+  "/private",
+  requireAuth,
+  requirePermission("settings", "view"),
+  asyncHandler(async (_req, res) => {
+    const rows = await prisma.siteSetting.findMany({ where: { key: { in: [...PRIVATE_KEYS] } } });
+    res.json({ settings: Object.fromEntries(rows.map((r) => [r.key, r.value])) });
   }),
 );
 

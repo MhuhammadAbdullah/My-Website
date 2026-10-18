@@ -16,10 +16,12 @@ export { cloudinary };
 // documents (CNIC/passport scans), which must never be reachable by a
 // guessable public URL. See signPrivateMediaUrl below for how those get
 // viewed afterwards.
-export function signCloudinaryUpload(folder: string, options: { authenticated?: boolean } = {}) {
+export function signCloudinaryUpload(folder: string, options: { authenticated?: boolean; allowedFormats?: string } = {}) {
   const timestamp = Math.round(Date.now() / 1000);
   const paramsToSign: Record<string, string | number> = { timestamp, folder };
   if (options.authenticated) paramsToSign.type = "authenticated";
+  // Signed, so a client cannot upload a format the server did not allow.
+  if (options.allowedFormats) paramsToSign.allowed_formats = options.allowedFormats;
   const signature = cloudinary.utils.api_sign_request(paramsToSign, env.CLOUDINARY_API_SECRET);
 
   return {
@@ -29,6 +31,7 @@ export function signCloudinaryUpload(folder: string, options: { authenticated?: 
     apiKey: env.CLOUDINARY_API_KEY,
     cloudName: env.CLOUDINARY_CLOUD_NAME,
     ...(options.authenticated ? { type: "authenticated" as const } : {}),
+    ...(options.allowedFormats ? { allowedFormats: options.allowedFormats } : {}),
   };
 }
 

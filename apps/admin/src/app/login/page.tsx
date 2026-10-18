@@ -8,10 +8,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, type SignInInput } from "@agency/types";
 import { Button, Input, Label, FieldError, Heading, toast } from "@agency/ui";
 import { authClient } from "@/lib/auth-client";
+import { request } from "@/lib/api";
+import type { SiteSettings } from "@/lib/types";
 
 function LoginPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [brandName, setBrandName] = React.useState("");
+
+  // Brand comes from Site Settings (public endpoint); nothing is hardcoded.
+  React.useEffect(() => {
+    request<{ settings: SiteSettings }>("/settings")
+      .then((r) => setBrandName(r.settings.branding?.brandName || r.settings.company_name || ""))
+      .catch(() => undefined);
+  }, []);
 
   const {
     register,
@@ -35,7 +45,7 @@ function LoginPageInner() {
         <Heading level={2} className="text-center">
           Admin sign in
         </Heading>
-        <p className="mt-1 text-center text-body-sm text-neutral-500">MAB Digital control panel</p>
+        <p className="mt-1 text-center text-body-sm text-neutral-500">{brandName ? `${brandName} control panel` : "Control panel"}</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5" noValidate>
           <div>

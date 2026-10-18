@@ -30,6 +30,8 @@ const envSchema = z.object({
   SMTP_PASSWORD: str(z.string()).optional(),
   SMTP_FROM: str(z.string()).optional(),
   ADMIN_NOTIFICATION_EMAIL: str(z.string()).optional(),
+  // Cloudflare Turnstile SECRET key (server-side only; the public site key lives in Site Settings > Integrations).
+  TURNSTILE_SECRET_KEY: str(z.string()).optional(),
   // Public URL of apps/web -- used to build links in transactional emails
   // (e.g. "log in to your dashboard: <WEB_APP_URL>/influencer/login"). The
   // API has no other way to know the frontend's origin.

@@ -10,12 +10,14 @@ import { CtaSection } from "@/components/marketing/cta-section";
 import { PageHeading } from "@/components/marketing/page-heading";
 import { cloudinaryTransform } from "@/lib/cloudinary";
 import { Technologies } from "@/components/home/technologies";
+import { getBrandName } from "@/lib/branding";
 
 export async function generateMetadata(): Promise<Metadata> {
   const about = await getAboutContent().catch(() => null);
   const seo = about?.seo;
   if (!seo) {
-    return { title: "About", description: "The story, mission, values, and team behind MAB Digital." };
+    const brand = await getBrandName();
+    return { title: "About", description: `The story, mission, values, and team behind ${brand || "us"}.` };
   }
 
   return {
@@ -79,7 +81,7 @@ export default async function AboutPage() {
             <Heading level={3} className="text-white">
               {about.philosophyLabel ?? "Philosophy"}
             </Heading>
-            <p className="mt-2 text-body-sm text-neutral-300">{about.philosophy}</p>
+            <p className="mt-2 text-body-sm text-neutral-400">{about.philosophy}</p>
           </div>
         </Container>
       </Section>

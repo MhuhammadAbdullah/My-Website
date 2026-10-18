@@ -41,3 +41,8 @@ export function buildPageMetadata({
     },
   };
 }
+
+/** JSON-LD for a <script> tag: `<` is escaped so a stray "</script>" in admin-entered text cannot break out. */
+export function toJsonLd(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, String.fromCharCode(92) + "u003c");
+}
