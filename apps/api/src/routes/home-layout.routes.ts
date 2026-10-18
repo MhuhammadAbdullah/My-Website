@@ -54,12 +54,13 @@ const saveSchema = z.object({
     .max(40),
 });
 
-async function store(sections: { id?: string; type: string; visible: boolean; content: unknown }[]) {
+async function store(sections: { id?: string; type?: string; visible?: boolean; content?: unknown }[]) {
   const validated: Stored[] = sections.map((s, index) => {
     try {
-      return { id: s.id ?? randomUUID(), type: s.type, visible: s.visible, content: validateSectionContent(s.type, s.content).content };
+      const type = s.type as string;
+      return { id: s.id ?? randomUUID(), type, visible: s.visible ?? true, content: validateSectionContent(type, s.content).content };
     } catch (error) {
-      const label = getSectionType(s.type)?.label ?? s.type;
+      const label = getSectionType(s.type as string)?.label ?? s.type;
       if (error instanceof z.ZodError) {
         const first = error.issues[0];
         throw new ApiError(422, `Section ${index + 1} (${label}): ${first?.path.join(".") || "content"} — ${first?.message ?? "invalid"}`);

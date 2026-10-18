@@ -66,7 +66,17 @@ mediaRouter.post(
       await destroyCloudinaryAsset(data.publicId, "image");
       throw error;
     }
-    const item = await prisma.media.create({ data });
+    const item = await prisma.media.create({
+      data: {
+        publicId: data.publicId,
+        url: data.url,
+        width: data.width ?? null,
+        height: data.height ?? null,
+        format: data.format,
+        bytes: data.bytes ?? null,
+        altText: data.altText ?? null,
+      },
+    });
     res.status(201).json({ item });
   }),
 );
