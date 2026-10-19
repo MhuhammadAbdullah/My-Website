@@ -664,7 +664,7 @@ export const sectionInputSchema = z.object({
   type: z.string().min(1).max(64),
   visible: z.boolean().default(true),
   // Validated against the registry for `type` in the API (content shape depends on the type).
-  content: z.record(z.unknown()),
+  content: z.record(z.string(), z.unknown()),
 });
 export type SectionInput = z.infer<typeof sectionInputSchema>;
 
@@ -719,7 +719,7 @@ export const COLLECTION_DATA_SCHEMAS: Partial<Record<CollectionKey, z.ZodTypeAny
 
 export const collectionItemInputSchema = z.object({
   title: z.string().trim().min(1).max(160),
-  data: z.record(z.unknown()).default({}),
+  data: z.record(z.string(), z.unknown()).prefault({}),
   visible: z.boolean().default(true),
 });
 

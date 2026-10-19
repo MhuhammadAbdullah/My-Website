@@ -16,7 +16,7 @@ export function notFoundHandler(req: Request, res: Response) {
 }
 
 function summarizeZodError(error: ZodError): string {
-  const { fieldErrors, formErrors } = error.flatten();
+  const { fieldErrors, formErrors } = error.flatten() as { fieldErrors: Record<string, string[] | undefined>; formErrors: string[] };
   const fieldMessages = Object.entries(fieldErrors)
     .filter(([, messages]) => messages && messages.length > 0)
     .map(([field, messages]) => `${field}: ${messages![0]}`);

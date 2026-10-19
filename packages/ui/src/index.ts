@@ -31,3 +31,4 @@ export * from "./container";
 export * from "./social-icons";
 export * from "./rich-text-editor";
 export * from "./rich-text";
+export * from "./pwa";

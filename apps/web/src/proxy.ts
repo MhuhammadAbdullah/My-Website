@@ -10,7 +10,7 @@ import { getSessionCookie } from "better-auth/cookies";
 // response, transient 5xx) into "not authenticated", forcing a redirect to
 // login even though the session cookie/token was still perfectly valid.
 // Middleware can't be fooled by a flaky backend since it never talks to one.
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
 
   if (!sessionCookie) {

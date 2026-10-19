@@ -3,12 +3,9 @@
 import * as React from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
-import Link from "@tiptap/extension-link";
-import Table from "@tiptap/extension-table";
-import TableRow from "@tiptap/extension-table-row";
-import TableCell from "@tiptap/extension-table-cell";
-import TableHeader from "@tiptap/extension-table-header";
+import { Underline } from "@tiptap/extension-underline";
+import { Link } from "@tiptap/extension-link";
+import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
 import ImageExtension from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 import TaskList from "@tiptap/extension-task-list";
@@ -60,7 +57,8 @@ export function RichTextEditor({ value, onChange, placeholder, onImageUpload, cl
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
-      StarterKit.configure({ heading: { levels: [1, 2, 3, 4, 5, 6] } }),
+      // v3's StarterKit already bundles Link and Underline; they are configured separately below.
+      StarterKit.configure({ heading: { levels: [1, 2, 3, 4, 5, 6] }, link: false, underline: false }),
       Underline,
       Link.configure({ openOnClick: false, autolink: true, HTMLAttributes: { rel: "noopener noreferrer nofollow" } }),
       ImageExtension.configure({ HTMLAttributes: { class: "rounded-lg" } }),
@@ -85,7 +83,7 @@ export function RichTextEditor({ value, onChange, placeholder, onImageUpload, cl
   // content, or loading a different record into the same mounted form.
   React.useEffect(() => {
     if (!editor) return;
-    if (value !== editor.getHTML()) editor.commands.setContent(value, false);
+    if (value !== editor.getHTML()) editor.commands.setContent(value, { emitUpdate: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, value]);
 

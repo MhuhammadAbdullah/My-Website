@@ -33,15 +33,15 @@
   "dependencies": {
     "@agency/database": "workspace:*",
     "@better-auth/infra": "^0.4.20",
-    "better-auth": "^1.1.0"
+    "better-auth": "^1.7.10"
   },
   "peerDependencies": {
     "react": "^19.0.0"
   },
   "devDependencies": {
     "@agency/config": "workspace:*",
-    "@types/node": "^22.10.0",
-    "@types/react": "^19.0.0",
-    "typescript": "^5.7.0"
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "typescript": "^6.0.3"
   }
 }

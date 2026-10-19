@@ -357,7 +357,7 @@ function PlatformPanel({ platform }: { platform: InfluencerPlatformRead }) {
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
                 <XAxis type="number" fontSize={11} tickLine={false} axisLine={false} tickFormatter={formatCompactNumber} />
                 <YAxis type="category" dataKey="name" fontSize={11} tickLine={false} axisLine={false} width={120} />
-                <Tooltip formatter={(v: number) => formatCompactNumber(v)} />
+                <Tooltip formatter={(v) => formatCompactNumber(Number(v))} />
                 <Bar dataKey="value" fill={PALETTE[1]} radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -371,7 +371,7 @@ function PlatformPanel({ platform }: { platform: InfluencerPlatformRead }) {
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
             <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} />
             <YAxis fontSize={11} tickLine={false} axisLine={false} width={40} tickFormatter={formatCompactNumber} />
-            <Tooltip formatter={(v: number) => formatCompactNumber(v)} />
+            <Tooltip formatter={(v) => formatCompactNumber(Number(v))} />
             <Bar dataKey="value" fill={PALETTE[2]} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
@@ -388,7 +388,7 @@ function PlatformPanel({ platform }: { platform: InfluencerPlatformRead }) {
                     <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: number) => `${v}%`} />
+                <Tooltip formatter={(v) => `${v}%`} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
               </PieChart>
             </ResponsiveContainer>
@@ -400,7 +400,7 @@ function PlatformPanel({ platform }: { platform: InfluencerPlatformRead }) {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                 <XAxis dataKey="group" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis fontSize={11} tickLine={false} axisLine={false} width={36} />
-                <Tooltip formatter={(v: number) => `${v}%`} />
+                <Tooltip formatter={(v) => `${v}%`} />
                 <Bar dataKey="value" fill={PALETTE[3]} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

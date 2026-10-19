@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type * as React from "react";
 import { ACCENT_OPTIONS } from "@agency/types";
-import { Toaster } from "@agency/ui";
+import { PwaInstallPrompt, PwaRegister, Toaster } from "@agency/ui";
 import { manrope, syne, playfairDisplay, ibmPlexMono } from "@/lib/fonts";
 import { getNav, getSettings, getActivePopups } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
@@ -14,6 +14,7 @@ import { renderRawHtml } from "@/lib/raw-html-to-elements";
 import { extractGoogleSiteVerificationCode } from "@/lib/seo-verification";
 import { getInfluencerFlags } from "@/lib/influencer-flags";
 import { AuthModalProvider } from "@/components/influencer/auth-modal-provider";
+import { APP_BG_DARK, APP_BG_LIGHT } from "@/lib/pwa";
 import "./globals.css";
 
 // Everything here is read from Site Settings (Admin > Site Settings / Settings)
@@ -35,7 +36,12 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
     title: { default: defaultTitle, template: titleTemplate.includes("%s") ? titleTemplate : "%s" },
     ...(description ? { description } : {}),
-    ...(favicon ? { icons: { icon: favicon } } : {}),
+    // PWA: manifest is app/manifest.ts; iPhone/iPad read the apple-touch icon and these meta tags.
+    applicationName: brandName || undefined,
+    appleWebApp: { capable: true, title: brandName || undefined, statusBarStyle: "default" },
+    formatDetection: { telephone: false },
+    other: { "apple-mobile-web-app-capable": "yes" },
+    icons: { ...(favicon ? { icon: favicon } : {}), apple: [{ url: "/pwa-icon/180", sizes: "180x180", type: "image/png" }] },
     openGraph: {
       type: "website",
       siteName: brandName || undefined,
@@ -48,6 +54,15 @@ export async function generateMetadata(): Promise<Metadata> {
     ...(googleVerification ? { verification: { google: googleVerification } } : {}),
   };
 }
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: APP_BG_LIGHT },
+    { media: "(prefers-color-scheme: dark)", color: APP_BG_DARK },
+  ],
+};
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const [headerNav, footerNav, settings, influencerFlags, popups] = await Promise.all([
@@ -117,6 +132,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </SiteChrome>
         </AuthModalProvider>
         <Toaster />
+        <PwaRegister enabled={process.env.NODE_ENV === "production"} />
+        {settings.theme?.installPrompt !== false && <PwaInstallPrompt appName={branding.name} iconUrl="/pwa-icon/192" />}
         {renderRawHtml(integrations?.footerScript, "footer-script")}
       </body>
     </html>
