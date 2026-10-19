@@ -183,8 +183,8 @@ export function WorkExplorer({ projects, featured, labels, pageSize }: { project
     <div>
       <FeaturedSlider items={featured} labels={labels} />
 
-      <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
-        <div role="group" aria-label="Filter projects" className="flex flex-wrap gap-2">
+      <div className="mt-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div role="group" aria-label="Filter projects" className="flex min-w-0 gap-2 overflow-x-auto overscroll-x-contain scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {[["", projects.length] as const, ...categories].map(([c, n]) => (
             <button
               key={c || "all"}
@@ -194,13 +194,13 @@ export function WorkExplorer({ projects, featured, labels, pageSize }: { project
                 setCategory(c);
                 reset();
               }}
-              className={cn("rounded-full border px-4 py-1.5 text-body-sm font-bold transition-colors", category === c ? "border-transparent bg-accent-500 text-on-accent" : "border-neutral-300 text-heading hover:border-accent-500")}
+              className={cn("shrink-0 whitespace-nowrap rounded-full border px-4 py-1.5 text-body-sm font-bold transition-colors", category === c ? "border-transparent bg-accent-500 text-on-accent" : "border-neutral-300 text-heading hover:border-accent-500")}
             >
               {c || labels.all} <span className={cn("ml-1 font-normal", category === c ? "text-on-accent" : "text-neutral-400")}>{n}</span>
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <label className="relative">
             <span className="sr-only">{labels.searchPlaceholder}</span>
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-400" aria-hidden />
@@ -217,7 +217,7 @@ export function WorkExplorer({ projects, featured, labels, pageSize }: { project
           </label>
           <div role="group" aria-label="View" className="flex rounded-full border border-neutral-300 p-0.5">
             {(["grid", "list"] as const).map((v) => (
-              <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} className={cn("rounded-full px-3 py-1 text-label font-bold transition-colors", view === v ? "bg-[#f2f2ee] text-[#0b0b0c]" : "text-neutral-500 hover:text-heading")}>
+              <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} className={cn("rounded-full px-3 py-1 text-label font-bold transition-colors", view === v ? "bg-accent-500 text-on-accent" : "text-neutral-500 hover:text-heading")}>
                 {labels[v]}
               </button>
             ))}

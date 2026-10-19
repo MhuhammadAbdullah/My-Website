@@ -43,8 +43,8 @@ export function ServicesExplorer({ services, labels }: { services: ExplorerServi
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-4 border-y border-neutral-200 py-5">
-        <div role="group" aria-label="Filter services" className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-4 border-y border-neutral-200 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div role="group" aria-label="Filter services" className="flex min-w-0 gap-2 overflow-x-auto overscroll-x-contain scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {["", ...categories].map((c) => (
             <button
               key={c || "all"}
@@ -52,7 +52,7 @@ export function ServicesExplorer({ services, labels }: { services: ExplorerServi
               aria-pressed={filter === c}
               onClick={() => setFilter(c)}
               className={cn(
-                "rounded-full border px-4 py-1.5 text-body-sm font-bold transition-colors",
+                "shrink-0 whitespace-nowrap rounded-full border px-4 py-1.5 text-body-sm font-bold transition-colors",
                 filter === c ? "border-transparent bg-accent-500 text-on-accent" : "border-neutral-300 text-heading hover:border-accent-500",
               )}
             >
@@ -61,7 +61,7 @@ export function ServicesExplorer({ services, labels }: { services: ExplorerServi
           ))}
         </div>
         {rates.length > 1 && (
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             <span className="text-body-sm text-neutral-500">{labels.pricesIn}</span>
             <div role="group" aria-label={labels.pricesIn} className="flex rounded-full border border-neutral-300 p-0.5">
               {rates.map((r) => (
@@ -70,7 +70,7 @@ export function ServicesExplorer({ services, labels }: { services: ExplorerServi
                   type="button"
                   aria-pressed={selected === r.code}
                   onClick={() => select(r.code)}
-                  className={cn("rounded-full px-3 py-1 text-label font-bold transition-colors", selected === r.code ? "bg-[#f2f2ee] text-[#0b0b0c]" : "text-neutral-500 hover:text-heading")}
+                  className={cn("rounded-full px-3 py-1 text-label font-bold transition-colors", selected === r.code ? "bg-accent-500 text-on-accent" : "text-neutral-500 hover:text-heading")}
                 >
                   {r.code}
                 </button>
