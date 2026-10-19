@@ -2,10 +2,25 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@agency/database";
 
-const trustedOrigins = (process.env.AUTH_TRUSTED_ORIGINS ?? "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+// AUTH_TRUSTED_ORIGINS is a comma-separated list of origins. Entries pasted from a browser address bar
+// ("https://admin.example.com/login", trailing slash, upper case) are reduced to the bare origin, because an
+// origin check compares scheme + host + port only. Wildcard patterns ("https://*.example.com") are kept as typed.
+function parseOrigins(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      if (entry.includes("*")) return entry.replace(/\/+$/, "");
+      try {
+        return new URL(entry).origin;
+      } catch {
+        return entry;
+      }
+    });
+}
+
+const trustedOrigins = parseOrigins(process.env.AUTH_TRUSTED_ORIGINS);
 
 // A second, fully separate Better Auth instance for the Influencer
 // Marketplace's self-registering vendors -- deliberately NOT the same

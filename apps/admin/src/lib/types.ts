@@ -25,7 +25,7 @@ export interface SiteSettings {
     copyrightText?: string;
     emailSenderName?: string;
   };
-  theme?: { accent: "lime" | "orange" | "blue" | "yellow" | "custom"; customColor?: string; mode?: "dark" | "light" };
+  theme?: { accent: "lime" | "orange" | "blue" | "yellow" | "custom"; customColor?: string; mode?: "dark" | "light"; installPrompt?: boolean };
   header?: { ctaVisible: boolean; ctaLabel: string; ctaHref: string; ctaNewTab: boolean };
   footer_columns?: { title: string; links: { label: string; href: string; newTab: boolean }[] }[];
   legal_links?: { label: string; href: string; newTab: boolean }[];

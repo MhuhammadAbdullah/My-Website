@@ -53,9 +53,20 @@ const app = express();
 
 app.set("trust proxy", 1);
 app.use(helmet());
-app.use(compression());
+app.use(compression() as unknown as RequestHandler); // @types/compression targets @types/express 5; the rest of the API still uses the 4.x types
 
-const allowedOrigins = env.AUTH_TRUSTED_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean);
+// Same normalisation as packages/auth: "https://admin.example.com/login" -> "https://admin.example.com"
+const allowedOrigins = env.AUTH_TRUSTED_ORIGINS.split(",")
+  .map((o) => o.trim())
+  .filter(Boolean)
+  .map((o) => {
+    if (o.includes("*")) return o.replace(/\/+$/, "");
+    try {
+      return new URL(o).origin;
+    } catch {
+      return o;
+    }
+  });
 // Reflecting any origin (the old fallback) combined with credentials: true
 // would let any website make authenticated, cookie-bearing requests to this
 // API the moment AUTH_TRUSTED_ORIGINS is ever left unset in production --
@@ -105,11 +116,11 @@ for (const base of ["/api/v1/auth", "/api/v1/influencer-auth"]) {
 }
 
 // Better Auth needs the raw request before the JSON body parser touches it.
-app.all("/api/v1/auth/*", toNodeHandler(auth));
+app.all("/api/v1/auth/*splat", toNodeHandler(auth));
 // Separate principal/session space for Influencer Marketplace vendors --
 // see packages/auth/src/influencer-server.ts for why this isn't the same
 // Better Auth instance as staff `auth` above.
-app.all("/api/v1/influencer-auth/*", toNodeHandler(influencerAuth));
+app.all("/api/v1/influencer-auth/*splat", toNodeHandler(influencerAuth));
 
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));

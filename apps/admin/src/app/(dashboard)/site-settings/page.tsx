@@ -43,9 +43,9 @@ async function saveSetting(key: string, value: unknown) {
   await request(`/settings/${key}`, { method: "PUT", body: JSON.stringify({ value }) });
 }
 
-function zodMessage(error: { issues: { path: (string | number)[]; message: string }[] }) {
+function zodMessage(error: { issues: { path: PropertyKey[]; message: string }[] }) {
   const i = error.issues[0]!;
-  return `${i.path.join(" › ") || "Value"}: ${i.message}`;
+  return `${i.path.map(String).join(" › ") || "Value"}: ${i.message}`;
 }
 
 function SaveBar({ saving, onSave, disabled }: { saving: boolean; onSave: () => void; disabled?: boolean }) {
@@ -64,10 +64,11 @@ function ThemeTab({ settings }: { settings: SiteSettings }) {
   const [accent, setAccent] = React.useState<AccentId | "custom">(settings.theme?.accent ?? "lime");
   const [customColor, setCustomColor] = React.useState<string>(settings.theme?.customColor ?? "#8be9c0");
   const [mode, setMode] = React.useState<"dark" | "light">(settings.theme?.mode ?? "dark");
+  const [installPrompt, setInstallPrompt] = React.useState<boolean>(settings.theme?.installPrompt ?? true);
   const [saving, setSaving] = React.useState(false);
 
   async function save() {
-    const parsed = themeSchema.safeParse({ accent, mode, ...(accent === "custom" ? { customColor } : {}) });
+    const parsed = themeSchema.safeParse({ accent, mode, installPrompt, ...(accent === "custom" ? { customColor } : {}) });
     if (!parsed.success) return toast.error(zodMessage(parsed.error));
     setSaving(true);
     try {
@@ -162,6 +163,15 @@ function ThemeTab({ settings }: { settings: SiteSettings }) {
             {m}
           </button>
         ))}
+      </div>
+      <div className="mt-8 flex items-start gap-3 rounded-2xl border border-neutral-200 p-4">
+        <Switch checked={installPrompt} onCheckedChange={setInstallPrompt} aria-label="Show the install app prompt" />
+        <div>
+          <p className="text-body-sm font-medium text-heading">“Install app” prompt</p>
+          <p className="text-body-sm text-neutral-500">
+            The website works as an installable app (Android, iPhone/iPad, Windows/Mac). When on, visitors see a small banner offering to install it. The app itself stays installable from the browser menu even when this is off.
+          </p>
+        </div>
       </div>
       <SaveBar saving={saving} onSave={save} />
     </div>

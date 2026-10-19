@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Linkedin } from "lucide-react";
-import { Breadcrumb, Container, Heading, Reveal, cn } from "@agency/ui";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { Breadcrumb, Container, Heading, Reveal, SocialIcon, cn } from "@agency/ui";
 import { aboutPageSchema } from "@agency/types";
 import { getAboutContent, getAboutTeamData, getSettings, getTechnologies } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
@@ -188,7 +188,7 @@ export default async function AboutPage() {
                       </div>
                       {linkedin && (
                         <a href={linkedin} target="_blank" rel="noreferrer" aria-label={`${m.name} on LinkedIn`} className="flex size-9 items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:border-accent-500 hover:text-heading">
-                          <Linkedin className="size-4" />
+                          <SocialIcon platform="linkedin" className="size-4" />
                         </a>
                       )}
                     </div>

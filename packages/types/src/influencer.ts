@@ -239,7 +239,7 @@ export const influencerAudienceInsightSchema = z.object({
   genderMalePercent: z.coerce.number().min(0).max(100).default(0),
   genderFemalePercent: z.coerce.number().min(0).max(100).default(0),
   genderOtherPercent: z.coerce.number().min(0).max(100).default(0),
-  ageGroups: z.record(z.string(), z.coerce.number().min(0).max(100)).default({}),
+  ageGroups: z.record(z.string(), z.coerce.number().min(0).max(100)).prefault({}),
 });
 export type InfluencerAudienceInsightInput = z.infer<typeof influencerAudienceInsightSchema>;
 

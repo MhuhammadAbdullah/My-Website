@@ -50,7 +50,7 @@ homeLayoutRouter.get(
 
 const saveSchema = z.object({
   sections: z
-    .array(z.object({ id: z.string().max(64).optional(), type: z.string().min(1).max(64), visible: z.boolean().default(true), content: z.record(z.unknown()) }))
+    .array(z.object({ id: z.string().max(64).optional(), type: z.string().min(1).max(64), visible: z.boolean().default(true), content: z.record(z.string(), z.unknown()) }))
     .max(40),
 });
 

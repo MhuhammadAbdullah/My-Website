@@ -60,7 +60,7 @@ function ChartCard({ title, loading, empty, children }: { title: string; loading
 }
 
 export function DashboardCharts({ data, loading, currency }: { data: ChartsResponse | null; loading: boolean; currency: string }) {
-  const tooltipFormatter = (value: number) => formatMoney(value, currency, { maximumFractionDigits: 0 });
+  const tooltipFormatter = (value: unknown) => formatMoney(Number(value), currency, { maximumFractionDigits: 0 });
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">

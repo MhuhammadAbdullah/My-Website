@@ -262,6 +262,8 @@ export const themeSchema = z
       .optional(),
     // The look first-time visitors get; they can switch with the sun/moon button in the header.
     mode: z.enum(["dark", "light"]).default("dark"),
+    // Show the "Install app" banner (Android/desktop install prompt, iPhone "Add to Home Screen" guide).
+    installPrompt: z.boolean().default(true),
   })
   .superRefine((v, ctx) => {
     if (v.accent !== "custom") return;
@@ -391,7 +393,7 @@ export const reviewsMarqueeSchema = z
     speed: z.number().int().min(10).max(200).default(50),
     pauseOnHover: z.boolean().default(true),
   })
-  .default({});
+  .prefault({});
 export type ReviewsMarquee = z.infer<typeof reviewsMarqueeSchema>;
 
 // Labels of the "Write a review" block (used for reviews of our service on the Services page).
@@ -412,7 +414,7 @@ export const serviceReviewsSchema = z
     showMore: text(40, "Show more reviews"),
     marquee: reviewsMarqueeSchema,
   })
-  .default({});
+  .prefault({});
 
 export const servicesPageSchema = z.object({
   reviews: serviceReviewsSchema,
@@ -428,7 +430,7 @@ export const servicesPageSchema = z.object({
       timeline: text(30, "Timeline"),
       onRequest: text(30, "On request"),
     })
-    .default({}),
+    .prefault({}),
   // How many units of each currency equal one unit of your reference currency (e.g. USD 1, PKR 280).
   // Two or more rows turn on the "Prices in" switcher; a price is converted from its own currency.
   currencies: z.array(z.object({ code: z.string().trim().toUpperCase().regex(/^[A-Z]{3}$/, "Use a 3-letter code, e.g. USD"), rate: z.number().positive() })).max(6).default([]),
@@ -441,7 +443,7 @@ export const servicesPageSchema = z.object({
         .max(4)
         .default([]),
     })
-    .default({}),
+    .prefault({}),
   estimate: z
     .object({
       heading: text(120),
@@ -449,9 +451,9 @@ export const servicesPageSchema = z.object({
       cardLabel: text(60),
       note: text(300),
       emptyText: text(120),
-      button: z.object({ label: text(40), href: linkHrefSchema.default("/contact") }).default({}),
+      button: z.object({ label: text(40), href: linkHrefSchema.default("/contact") }).prefault({}),
     })
-    .default({}),
+    .prefault({}),
 });
 export type ServicesPageSettings = z.infer<typeof servicesPageSchema>;
 
@@ -473,7 +475,7 @@ export const portfolioPageSchema = z.object({
       industriesServed: text(40, "Industries served"),
       noResults: text(120, "No projects match your filters yet."),
     })
-    .default({}),
+    .prefault({}),
   pageSize: z.number().int().min(3).max(24).default(7),
   // The single project (case study) page.
   detail: z
@@ -505,15 +507,15 @@ export const portfolioPageSchema = z.object({
           { title: "The hard part", lead: "", sections: "Challenges, Solutions" },
         ]),
       ctaHeading: text(160, "Want results like these for **your** product?"),
-      ctaButton: z.object({ label: text(40, "Start a project"), href: linkHrefSchema.default("/contact") }).default({}),
+      ctaButton: z.object({ label: text(40, "Start a project"), href: linkHrefSchema.default("/contact") }).prefault({}),
     })
-    .default({}),
+    .prefault({}),
   cta: z
     .object({
       heading: text(120),
-      button: z.object({ label: text(40), href: linkHrefSchema.default("/contact") }).default({}),
+      button: z.object({ label: text(40), href: linkHrefSchema.default("/contact") }).prefault({}),
     })
-    .default({}),
+    .prefault({}),
 });
 export type PortfolioPageSettings = z.infer<typeof portfolioPageSchema>;
 
@@ -535,7 +537,7 @@ export const aboutPageSchema = z.object({
       vision: text(160, "Quality, creativity and technology within reach of every business."),
       philosophy: text(160, "Purpose first. Then pixels."),
     })
-    .default({}),
+    .prefault({}),
   timelineSubtitle: text(160, "Milestones from our first idea to the partnerships we build today."),
   teamSubtitle: text(160, "Small team. Senior hands on every project."),
   careers: z
@@ -550,13 +552,13 @@ export const aboutPageSchema = z.object({
           { title: "[Open role]", meta: "Karachi · Internship", href: "/contact" },
         ]),
     })
-    .default({}),
+    .prefault({}),
   cta: z
     .object({
       heading: text(160, "Let's build something **inevitable.**"),
-      button: z.object({ label: text(40, "Start a project"), href: linkHrefSchema.default("/contact") }).default({}),
+      button: z.object({ label: text(40, "Start a project"), href: linkHrefSchema.default("/contact") }).prefault({}),
     })
-    .default({}),
+    .prefault({}),
 });
 export type AboutPageSettings = z.infer<typeof aboutPageSchema>;
 
@@ -575,7 +577,7 @@ export const affiliatePageSchema = z.object({
       pros: z.array(text(120)).max(6).default(["Fast NVMe storage, daily backups", "AI ecommerce website builder"]),
       con: text(120, "[One honest drawback]"),
     })
-    .default({}),
+    .prefault({}),
   labels: z
     .object({
       all: text(30, "All"),
@@ -587,7 +589,7 @@ export const affiliatePageSchema = z.object({
       copied: text(30, "Copied!"),
       noResults: text(120, "No tools match your filters yet."),
     })
-    .default({}),
+    .prefault({}),
   compare: z
     .object({
       heading: text(120, "Which hosting plan?"),
@@ -612,7 +614,7 @@ export const affiliatePageSchema = z.object({
           { feature: "Best for", values: ["Small business sites", "Agencies & stores"] },
         ]),
     })
-    .default({}),
+    .prefault({}),
   newsletter: z
     .object({
       heading: text(80, "Get new deals first"),
@@ -622,20 +624,20 @@ export const affiliatePageSchema = z.object({
       success: text(120, "Thanks — you're on the list."),
       error: text(120, "Please enter a valid email."),
     })
-    .default({}),
+    .prefault({}),
   setup: z
     .object({
       heading: text(120, "Bought hosting? **We'll set it up.**"),
       text: text(240, "Domain, email, WordPress install, SSL and speed setup — done for you, so you can start selling sooner."),
-      button: z.object({ label: text(60, "Book setup — from [PRICE]"), href: linkHrefSchema.default("/contact") }).default({}),
+      button: z.object({ label: text(60, "Book setup — from [PRICE]"), href: linkHrefSchema.default("/contact") }).prefault({}),
     })
-    .default({}),
+    .prefault({}),
 });
 export type AffiliatePageSettings = z.infer<typeof affiliatePageSchema>;
 
 // Contact page: studio status, the four channel cards, the "Start a project" steps, studio card and FAQ heading.
 // One SiteSetting blob (`contact_page`), edited in Admin > Contact > Page Sections.
-const channelText = (tag: string, sub: string) => z.object({ tag: text(30, tag), title: text(60), sub: text(80, sub) }).default({});
+const channelText = (tag: string, sub: string) => z.object({ tag: text(30, tag), title: text(60), sub: text(80, sub) }).prefault({});
 export const contactPageSchema = z.object({
   status: z
     .object({
@@ -643,7 +645,7 @@ export const contactPageSchema = z.object({
       hours: text(80, "Mon–Fri, 9:00 AM – 6:00 PM (PKT)"),
       reply: text(80, "Typical reply: within 1 business day"),
     })
-    .default({}),
+    .prefault({}),
   channels: z
     .object({
       email: channelText("Email", "For briefs & proposals"),
@@ -651,9 +653,9 @@ export const contactPageSchema = z.object({
       call: channelText("Call", "20 min · free · video"),
       influencers: z
         .object({ tag: text(30, "Influencers"), title: text(60, "Creator bookings"), sub: text(80, "Go to Influencer Marketplace"), href: linkHrefSchema.default("/influencers") })
-        .default({}),
+        .prefault({}),
     })
-    .default({}),
+    .prefault({}),
   form: z
     .object({
       heading: text(60, "Start a project"),
@@ -675,7 +677,7 @@ export const contactPageSchema = z.object({
       submit: text(30, "Send message"),
       success: text(120, "Message sent — we'll reply within one business day."),
     })
-    .default({}),
+    .prefault({}),
   studio: z
     .object({
       tag: text(30, "The studio"),
@@ -683,7 +685,7 @@ export const contactPageSchema = z.object({
       directions: text(40, "Get directions"),
       mapLink: text(300),
     })
-    .default({}),
+    .prefault({}),
   faqHeading: text(80, "Before you write"),
 });
 export type ContactPageSettings = z.infer<typeof contactPageSchema>;
@@ -691,14 +693,14 @@ export type ContactPageSettings = z.infer<typeof contactPageSchema>;
 // Influencer Marketplace page: hero buttons and steps, small labels, and the two closing cards.
 // One SiteSetting blob (`influencers_page`), edited in Admin > Influencer Marketplace > Settings.
 export const influencersPageSchema = z.object({
-  toggle: z.object({ brand: text(30, "I'm a brand"), creator: text(30, "I'm a creator") }).default({}),
+  toggle: z.object({ brand: text(30, "I'm a brand"), creator: text(30, "I'm a creator") }).prefault({}),
   buttons: z
     .object({
       browse: text(40, "Browse creators"),
       brief: text(40, "Post a campaign brief"),
       briefHref: linkHrefSchema.default("/contact?type=Influencer%20campaign"),
     })
-    .default({}),
+    .prefault({}),
   steps: z
     .array(z.object({ title: text(40), text: text(120) }))
     .max(4)
@@ -727,7 +729,7 @@ export const influencersPageSchema = z.object({
       requestQuotes: text(40, "Request quotes"),
       noResults: text(120, "No creators match your filters yet."),
     })
-    .default({}),
+    .prefault({}),
   profile: z
     .object({
       available: text(200, "Available for bookings"),
@@ -776,15 +778,15 @@ export const influencersPageSchema = z.object({
       moreCreators: text(200, "More {category} creators"),
       viewAll: text(200, "View all"),
     })
-    .default({}),
+    .prefault({}),
   briefCard: z
     .object({
       tag: text(30, "For brands"),
       heading: text(120, "Don't want to browse? Post a brief."),
       text: text(240, "Tell us your goal, budget and niche — we'll send a shortlist of matched creators within [X] days."),
-      button: z.object({ label: text(40, "Post a campaign brief"), href: linkHrefSchema.default("/contact?type=Influencer%20campaign") }).default({}),
+      button: z.object({ label: text(40, "Post a campaign brief"), href: linkHrefSchema.default("/contact?type=Influencer%20campaign") }).prefault({}),
     })
-    .default({}),
+    .prefault({}),
   creatorCard: z
     .object({
       tag: text(30, "For creators"),
@@ -792,6 +794,6 @@ export const influencersPageSchema = z.object({
       text: text(240, "Create a free profile, set your rates and get discovered by brands looking for creators like you."),
       button: text(40, "Become an influencer"),
     })
-    .default({}),
+    .prefault({}),
 });
 export type InfluencersPageSettings = z.infer<typeof influencersPageSchema>;

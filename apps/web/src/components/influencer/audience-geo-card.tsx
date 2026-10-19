@@ -58,7 +58,7 @@ export function AudienceGeoCard({
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
                 <XAxis type="number" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis type="category" dataKey="name" fontSize={11} tickLine={false} axisLine={false} width={90} />
-                <Tooltip formatter={(v: number) => `${v}%`} />
+                <Tooltip formatter={(v) => `${v}%`} />
                 <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
