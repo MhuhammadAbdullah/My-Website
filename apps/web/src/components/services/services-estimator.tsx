@@ -65,7 +65,7 @@ export function ServicesEstimator({ services, heading, intro, cardLabel, note, e
                   onClick={() => toggle(s.id)}
                   className={cn(
                     "flex h-full w-full items-start justify-between gap-2 rounded-xl border px-3 py-3 text-left text-label font-semibold transition-colors",
-                    on ? "border-transparent bg-[#f2f2ee] text-[#0b0b0c]" : "border-neutral-300 text-heading hover:border-accent-500",
+                    on ? "border-transparent bg-accent-500 text-on-accent" : "border-neutral-300 text-heading hover:border-accent-500",
                   )}
                 >
                   <span>{s.name}</span>
