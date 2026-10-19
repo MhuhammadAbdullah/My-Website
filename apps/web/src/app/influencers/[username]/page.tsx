@@ -326,8 +326,3 @@ export default async function InfluencerDetailPage({ params }: { params: Promise
     </>
   );
 }
-
-export async function generateStaticParams() {
-  const { items } = await getInfluencers({ limit: 100 }).catch(() => ({ items: [] }) as never);
-  return items.map((i) => ({ username: i.username }));
-}

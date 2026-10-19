@@ -286,8 +286,3 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     </>
   );
 }
-
-export async function generateStaticParams() {
-  const { items } = await getProjects({ pageSize: 100 }).catch(() => ({ items: [] }) as never);
-  return items.map((p) => ({ slug: p.slug }));
-}

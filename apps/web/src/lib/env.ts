@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  NEXT_PUBLIC_API_URL: z.string().url().default("http://localhost:4000"),
+  // a trailing slash in the hosting dashboard value would produce "//api/v1/..." request URLs
+  NEXT_PUBLIC_API_URL: z.string().url().default("http://localhost:4000").transform((v) => v.replace(/\/+$/, "")),
   NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
 });
 

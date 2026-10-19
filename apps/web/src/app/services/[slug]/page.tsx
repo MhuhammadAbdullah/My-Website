@@ -185,8 +185,3 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
     </>
   );
 }
-
-export async function generateStaticParams() {
-  const services = await getServices().catch(() => []);
-  return services.map((s) => ({ slug: s.slug }));
-}
