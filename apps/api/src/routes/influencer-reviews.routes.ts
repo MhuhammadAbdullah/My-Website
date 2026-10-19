@@ -1,10 +1,12 @@
 import { Router } from "express";
+import { rateLimit } from "express-rate-limit";
 import { z } from "zod";
 import { prisma, type Prisma } from "@agency/database";
 import { influencerReviewSchema } from "@agency/types";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireAuth, requirePermission } from "../middleware/require-auth.js";
 import { ApiError } from "../middleware/error-handler.js";
+import { env } from "../env.js";
 import { parseListQuery, paginationMeta, searchFilter, exactFilter } from "../lib/list-query.js";
 
 // Admin-authored testimonials for an influencer's public profile -- no
@@ -234,6 +236,71 @@ influencerReviewsRouter.get(
       prisma.influencerReview.count({ where }),
     ]);
     res.json({ items, ...paginationMeta(total, page, limit) });
+  }),
+);
+
+// Public "Write a review" form on a creator's page. Goes live immediately; staff only control
+// visibility afterwards (Publish / Unpublish in the Reviews list). `message` is an object so a rate-limit hit still comes
+// back as JSON for the client.
+const publicReviewLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 4,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many reviews submitted. Please try again later." },
+});
+
+const publicReviewSchema = z.object({
+  authorName: z.string().trim().min(2, "Please enter your name").max(100),
+  authorCompany: z.string().trim().max(150).optional().or(z.literal("")),
+  rating: z.coerce.number().int().min(1, "Please pick a rating").max(5),
+  comment: z.string().trim().min(10, "Please write at least a few words").max(1000),
+  website: z.string().optional(), // honeypot: real visitors never fill it
+  // brand / company logo, uploaded by the browser straight to Cloudinary with a signature from /testimonials/public/sign
+  logo: z
+    .object({
+      publicId: z.string().max(300),
+      url: z.string().url().max(600),
+      bytes: z.number().int().max(3_000_000).nullable().optional(),
+    })
+    .optional(),
+});
+
+influencerReviewsRouter.post(
+  "/public/:username",
+  publicReviewLimiter,
+  asyncHandler(async (req, res) => {
+    const data = publicReviewSchema.parse(req.body);
+    if (data.website) return res.status(201).json({ ok: true }); // bots: pretend it worked
+    const profile = await prisma.influencerProfile.findFirst({
+      where: { username: String(req.params.username), publicStatus: "PUBLISHED" },
+      select: { influencerId: true },
+    });
+    if (!profile) throw new ApiError(404, "Creator not found");
+
+    // Only a file that really sits in our own Cloudinary review-logos folder is accepted.
+    let logoUrl: string | null = null;
+    if (data.logo) {
+      const prefix = `https://res.cloudinary.com/${env.CLOUDINARY_CLOUD_NAME}/image/upload/`;
+      if (!data.logo.url.startsWith(prefix) || !data.logo.publicId.startsWith("agency-website/review-logos/") || !data.logo.url.includes(data.logo.publicId)) {
+        throw new ApiError(400, "That logo file is not valid. Please upload it again.");
+      }
+      logoUrl = data.logo.url;
+    }
+
+    await prisma.influencerReview.create({
+      data: {
+        influencerId: profile.influencerId,
+        authorName: data.authorName,
+        authorCompany: data.authorCompany || null,
+        rating: data.rating,
+        comment: data.comment,
+        logoUrl,
+        status: "PUBLISHED",
+      },
+    });
+    await recomputeRating(profile.influencerId);
+    res.status(201).json({ ok: true });
   }),
 );
 

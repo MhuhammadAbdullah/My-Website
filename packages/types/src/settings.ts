@@ -240,9 +240,37 @@ export const ACCENT_HEX: Record<AccentId, string> = {
   yellow: "#F5D547",
 };
 
-export const themeSchema = z.object({
-  accent: z.enum(ACCENT_OPTIONS).default("lime"),
-});
+// Text on the accent colour is always near-black, so a custom colour must be light/medium enough to read it.
+// WCAG contrast of a #rrggbb colour against the site's near-black (#0b0b0c).
+export function accentContrast(hex: string): number {
+  const channel = (i: number) => {
+    const v = parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  const lum = 0.2126 * channel(0) + 0.7152 * channel(1) + 0.0722 * channel(2);
+  return (lum + 0.05) / (0.0036 + 0.05);
+}
+export const CUSTOM_ACCENT_MIN_CONTRAST = 4.5;
+
+export const themeSchema = z
+  .object({
+    accent: z.enum([...ACCENT_OPTIONS, "custom"]).default("lime"),
+    // Used when accent is "custom": any #rrggbb colour the owner picks.
+    customColor: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/, "Enter the colour as #RRGGBB")
+      .optional(),
+    // The look first-time visitors get; they can switch with the sun/moon button in the header.
+    mode: z.enum(["dark", "light"]).default("dark"),
+  })
+  .superRefine((v, ctx) => {
+    if (v.accent !== "custom") return;
+    if (!v.customColor) {
+      ctx.addIssue({ code: "custom", path: ["customColor"], message: "Pick a custom colour first" });
+    } else if (accentContrast(v.customColor) < CUSTOM_ACCENT_MIN_CONTRAST) {
+      ctx.addIssue({ code: "custom", path: ["customColor"], message: "That colour is too dark: the dark text on buttons would be hard to read. Pick a lighter shade." });
+    }
+  });
 export type ThemeInput = z.infer<typeof themeSchema>;
 
 export const headerSettingsSchema = z.object({
@@ -350,3 +378,420 @@ export const notificationsSchema = z.object({
   emails: z.array(z.string().trim().email()).max(10).default([]),
 });
 export type NotificationsInput = z.infer<typeof notificationsSchema>;
+
+// Services page: everything below the hero that is not a service itself. One
+// SiteSetting blob (`services_page`), edited in Admin > Services > Page Sections.
+const text = (max: number, fallback = "") => z.string().trim().max(max).default(fallback);
+
+// Reviews slider (infinite marquee) -- shared by the Services page and the creator profile page.
+export const reviewsMarqueeSchema = z
+  .object({
+    enabled: z.boolean().default(true),
+    // seconds for the track to travel one loop (higher = slower)
+    speed: z.number().int().min(10).max(200).default(50),
+    pauseOnHover: z.boolean().default(true),
+  })
+  .default({});
+export type ReviewsMarquee = z.infer<typeof reviewsMarqueeSchema>;
+
+// Labels of the "Write a review" block (used for reviews of our service on the Services page).
+export const serviceReviewsSchema = z
+  .object({
+    heading: text(80, "What clients say about us"),
+    empty: text(200, "No reviews yet — be the first to share your experience."),
+    reviewsCount: text(40, "{n} reviews"),
+    write: text(40, "Write a review"),
+    formTitle: text(80, "Review our service"),
+    formIntro: text(200, "Worked with us? Tell us how it went. Your review goes live right away."),
+    yourRating: text(40, "Your rating"),
+    yourName: text(40, "Your name"),
+    yourCompany: text(40, "Company (optional)"),
+    yourReview: text(40, "Your review"),
+    submit: text(40, "Submit review"),
+    thanks: text(200, "Thank you! Your review is now live."),
+    showMore: text(40, "Show more reviews"),
+    marquee: reviewsMarqueeSchema,
+  })
+  .default({});
+
+export const servicesPageSchema = z.object({
+  reviews: serviceReviewsSchema,
+  labels: z
+    .object({
+      all: text(30, "All"),
+      pricesIn: text(30, "Prices in"),
+      from: text(20, "From"),
+      perMonth: text(10, "/mo"),
+      getQuote: text(40, "Get a quote"),
+      details: text(40, "Service details"),
+      whatYouGet: text(40, "What you get"),
+      timeline: text(30, "Timeline"),
+      onRequest: text(30, "On request"),
+    })
+    .default({}),
+  // How many units of each currency equal one unit of your reference currency (e.g. USD 1, PKR 280).
+  // Two or more rows turn on the "Prices in" switcher; a price is converted from its own currency.
+  currencies: z.array(z.object({ code: z.string().trim().toUpperCase().regex(/^[A-Z]{3}$/, "Use a 3-letter code, e.g. USD"), rate: z.number().positive() })).max(6).default([]),
+  engagement: z
+    .object({
+      heading: text(120),
+      intro: text(300),
+      models: z
+        .array(z.object({ label: text(40), title: text(100), description: text(300), highlighted: z.boolean().default(false) }))
+        .max(4)
+        .default([]),
+    })
+    .default({}),
+  estimate: z
+    .object({
+      heading: text(120),
+      intro: text(300),
+      cardLabel: text(60),
+      note: text(300),
+      emptyText: text(120),
+      button: z.object({ label: text(40), href: linkHrefSchema.default("/contact") }).default({}),
+    })
+    .default({}),
+});
+export type ServicesPageSettings = z.infer<typeof servicesPageSchema>;
+
+// Portfolio (Work) page: labels, the closing call-to-action and the grid step.
+// One SiteSetting blob (`portfolio_page`), edited in Admin > Portfolio > Page Sections.
+export const portfolioPageSchema = z.object({
+  labels: z
+    .object({
+      featured: text(30, "Featured"),
+      all: text(30, "All"),
+      searchPlaceholder: text(40, "Search projects"),
+      grid: text(20, "Grid"),
+      list: text(20, "List"),
+      loadMore: text(40, "Load more projects"),
+      // {shown} and {total} are replaced with numbers
+      showing: text(60, "Showing {shown} of {total}"),
+      readCaseStudy: text(40, "Read case study"),
+      projectsShipped: text(40, "Projects shipped"),
+      industriesServed: text(40, "Industries served"),
+      noResults: text(120, "No projects match your filters yet."),
+    })
+    .default({}),
+  pageSize: z.number().int().min(3).max(24).default(7),
+  // The single project (case study) page.
+  detail: z
+    .object({
+      visitSite: text(40, "Visit live site"),
+      viewCode: text(40, "View code"),
+      readStory: text(40, "Read the story"),
+      client: text(30, "Client"),
+      industry: text(30, "Industry"),
+      timeline: text(30, "Timeline"),
+      stack: text(30, "Stack"),
+      numbersTitle: text(80, "The numbers after launch"),
+      chapters: text(30, "Chapters"),
+      beforeAfter: text(60, "Before → After"),
+      beforeAfterHint: text(120, "Drag the slider to compare the old site with the rebuild."),
+      compare: text(30, "Compare"),
+      before: text(20, "Before"),
+      after: text(20, "After"),
+      screens: text(40, "Screens"),
+      nextProject: text(40, "Next project"),
+      // Chapters group the project's sections (matched by title, comma separated) into the story blocks.
+      chapterGroups: z
+        .array(z.object({ title: text(60), lead: text(300), sections: text(300) }))
+        .max(12)
+        .default([
+          { title: "The brief", lead: "", sections: "Overview, Client Problem" },
+          { title: "The approach", lead: "", sections: "Research, Strategy, Planning" },
+          { title: "The build", lead: "", sections: "Wireframes, Design, Development" },
+          { title: "The hard part", lead: "", sections: "Challenges, Solutions" },
+        ]),
+      ctaHeading: text(160, "Want results like these for **your** product?"),
+      ctaButton: z.object({ label: text(40, "Start a project"), href: linkHrefSchema.default("/contact") }).default({}),
+    })
+    .default({}),
+  cta: z
+    .object({
+      heading: text(120),
+      button: z.object({ label: text(40), href: linkHrefSchema.default("/contact") }).default({}),
+    })
+    .default({}),
+});
+export type PortfolioPageSettings = z.infer<typeof portfolioPageSchema>;
+
+// About page: everything around the story/team/values/timeline records (those stay in their own admin tabs).
+// One SiteSetting blob (`about_page`), edited in Admin > About > Page Sections.
+export const aboutPageSchema = z.object({
+  stats: z
+    .array(z.object({ value: text(20), label: text(60) }))
+    .max(6)
+    .default([
+      { value: "3+", label: "Years in business" },
+      { value: "10+", label: "Projects shipped" },
+      { value: "85%", label: "Client retention" },
+      { value: "3", label: "Core team members" },
+    ]),
+  tabHeadings: z
+    .object({
+      mission: text(160, "Help businesses grow through thoughtful digital solutions."),
+      vision: text(160, "Quality, creativity and technology within reach of every business."),
+      philosophy: text(160, "Purpose first. Then pixels."),
+    })
+    .default({}),
+  timelineSubtitle: text(160, "Milestones from our first idea to the partnerships we build today."),
+  teamSubtitle: text(160, "Small team. Senior hands on every project."),
+  careers: z
+    .object({
+      heading: text(80, "Join the team"),
+      text: text(200, "We're always looking for people who care about craft."),
+      roles: z
+        .array(z.object({ title: text(100), meta: text(60), href: linkHrefSchema.default("/contact") }))
+        .max(12)
+        .default([
+          { title: "[Open role — e.g. Frontend Developer]", meta: "Remote · Full-time", href: "/contact" },
+          { title: "[Open role]", meta: "Karachi · Internship", href: "/contact" },
+        ]),
+    })
+    .default({}),
+  cta: z
+    .object({
+      heading: text(160, "Let's build something **inevitable.**"),
+      button: z.object({ label: text(40, "Start a project"), href: linkHrefSchema.default("/contact") }).default({}),
+    })
+    .default({}),
+});
+export type AboutPageSettings = z.infer<typeof aboutPageSchema>;
+
+// Affiliate Tools page: editor's pick, filters/labels, comparison table, newsletter and setup blocks.
+// One SiteSetting blob (`affiliate_page`), edited in Admin > Affiliate Tools > Page Sections.
+export const affiliatePageSchema = z.object({
+  pick: z
+    .object({
+      toolSlug: text(120),
+      tag: text(40, "Editor's pick"),
+      buttonLabel: text(60),
+      compareLabel: text(40, "Compare plans"),
+      ratingLabel: text(30, "Our rating"),
+      rating: text(10, "X.X"),
+      ratingMax: text(10, "5"),
+      pros: z.array(text(120)).max(6).default(["Fast NVMe storage, daily backups", "AI ecommerce website builder"]),
+      con: text(120, "[One honest drawback]"),
+    })
+    .default({}),
+  labels: z
+    .object({
+      all: text(30, "All"),
+      searchPlaceholder: text(40, "Search tools"),
+      featuredOnly: text(40, "Featured only"),
+      showing: text(60, "Showing {shown} of {total} tools"),
+      why: text(40, "Why we use it:"),
+      copyCode: text(40, "Copy code:"),
+      copied: text(30, "Copied!"),
+      noResults: text(120, "No tools match your filters yet."),
+    })
+    .default({}),
+  compare: z
+    .object({
+      heading: text(120, "Which hosting plan?"),
+      featureLabel: text(30, "Feature"),
+      columns: z
+        .array(z.object({ name: text(40), highlight: z.boolean().default(false) }))
+        .max(4)
+        .default([
+          { name: "Premium", highlight: false },
+          { name: "Business", highlight: true },
+        ]),
+      rows: z
+        .array(z.object({ feature: text(60), values: z.array(text(80)).max(4).default([]) }))
+        .max(20)
+        .default([
+          { feature: "Websites", values: ["3", "50"] },
+          { feature: "Storage", values: ["20 GB SSD", "50 GB NVMe"] },
+          { feature: "Free mailboxes / site", values: ["2 (1 year)", "5 (1 year)"] },
+          { feature: "Web apps", values: ["—", "5"] },
+          { feature: "Website builder", values: ["AI website builder", "AI ecommerce builder"] },
+          { feature: "Backups", values: ["[CHECK]", "Daily & on-demand"] },
+          { feature: "Best for", values: ["Small business sites", "Agencies & stores"] },
+        ]),
+    })
+    .default({}),
+  newsletter: z
+    .object({
+      heading: text(80, "Get new deals first"),
+      text: text(200, "One email when we add a tool or a partner drops a new discount. No spam."),
+      placeholder: text(40, "you@company.com"),
+      button: text(30, "Notify me"),
+      success: text(120, "Thanks — you're on the list."),
+      error: text(120, "Please enter a valid email."),
+    })
+    .default({}),
+  setup: z
+    .object({
+      heading: text(120, "Bought hosting? **We'll set it up.**"),
+      text: text(240, "Domain, email, WordPress install, SSL and speed setup — done for you, so you can start selling sooner."),
+      button: z.object({ label: text(60, "Book setup — from [PRICE]"), href: linkHrefSchema.default("/contact") }).default({}),
+    })
+    .default({}),
+});
+export type AffiliatePageSettings = z.infer<typeof affiliatePageSchema>;
+
+// Contact page: studio status, the four channel cards, the "Start a project" steps, studio card and FAQ heading.
+// One SiteSetting blob (`contact_page`), edited in Admin > Contact > Page Sections.
+const channelText = (tag: string, sub: string) => z.object({ tag: text(30, tag), title: text(60), sub: text(80, sub) }).default({});
+export const contactPageSchema = z.object({
+  status: z
+    .object({
+      text: text(60, "Studio is open now"),
+      hours: text(80, "Mon–Fri, 9:00 AM – 6:00 PM (PKT)"),
+      reply: text(80, "Typical reply: within 1 business day"),
+    })
+    .default({}),
+  channels: z
+    .object({
+      email: channelText("Email", "For briefs & proposals"),
+      whatsapp: channelText("WhatsApp", "Quick questions, fastest reply"),
+      call: channelText("Call", "20 min · free · video"),
+      influencers: z
+        .object({ tag: text(30, "Influencers"), title: text(60, "Creator bookings"), sub: text(80, "Go to Influencer Marketplace"), href: linkHrefSchema.default("/influencers") })
+        .default({}),
+    })
+    .default({}),
+  form: z
+    .object({
+      heading: text(60, "Start a project"),
+      intro: text(200, "Three quick steps. The more you share, the sharper our first reply."),
+      steps: z.array(text(40)).max(3).default(["Project type", "Budget & timeline", "Your details"]),
+      typeQuestion: text(80, "What do you need?"),
+      types: z
+        .array(text(40))
+        .max(16)
+        .default(["Website design", "WordPress / Elementor", "Shopify store", "Web app (Next.js)", "SEO", "Video production", "Branding", "Influencer campaign"]),
+      budgetQuestion: text(80, "What is your budget?"),
+      budgets: z.array(text(40)).max(8).default(["Under $500", "$500 – $1,500", "$1,500 – $5,000", "$5,000+"]),
+      timelineQuestion: text(80, "When do you need it?"),
+      timelines: z.array(text(40)).max(8).default(["As soon as possible", "1–2 months", "Flexible"]),
+      detailsQuestion: text(80, "Tell us about you"),
+      pickOne: text(80, "Please pick at least one option."),
+      next: text(30, "Continue"),
+      back: text(30, "Back"),
+      submit: text(30, "Send message"),
+      success: text(120, "Message sent — we'll reply within one business day."),
+    })
+    .default({}),
+  studio: z
+    .object({
+      tag: text(30, "The studio"),
+      note: text(80, "Visits by appointment only"),
+      directions: text(40, "Get directions"),
+      mapLink: text(300),
+    })
+    .default({}),
+  faqHeading: text(80, "Before you write"),
+});
+export type ContactPageSettings = z.infer<typeof contactPageSchema>;
+
+// Influencer Marketplace page: hero buttons and steps, small labels, and the two closing cards.
+// One SiteSetting blob (`influencers_page`), edited in Admin > Influencer Marketplace > Settings.
+export const influencersPageSchema = z.object({
+  toggle: z.object({ brand: text(30, "I'm a brand"), creator: text(30, "I'm a creator") }).default({}),
+  buttons: z
+    .object({
+      browse: text(40, "Browse creators"),
+      brief: text(40, "Post a campaign brief"),
+      briefHref: linkHrefSchema.default("/contact?type=Influencer%20campaign"),
+    })
+    .default({}),
+  steps: z
+    .array(z.object({ title: text(40), text: text(120) }))
+    .max(4)
+    .default([
+      { title: "Discover", text: "Filter by niche, city, followers and engagement." },
+      { title: "Shortlist", text: "Save creators and request quotes in one go." },
+      { title: "Launch", text: "We manage contracts, content and reporting." },
+    ]),
+  pageSize: z.number().int().min(4).max(24).default(8),
+  reviewsMarquee: reviewsMarqueeSchema,
+  labels: z
+    .object({
+      searchPlaceholder: text(60, "Search by name, niche or city"),
+      sort: text(20, "Sort:"),
+      filters: text(20, "Filters"),
+      viewProfile: text(30, "View profile"),
+      shortlist: text(30, "+ Shortlist"),
+      shortlisted: text(30, "✓ Shortlisted"),
+      followers: text(20, "Followers"),
+      engagement: text(20, "Engagement"),
+      from: text(20, "From"),
+      newCreator: text(20, "New"),
+      loadMore: text(40, "Load more creators"),
+      // {n} becomes the number of saved creators
+      shortlistBar: text(80, "{n} creator(s) in your shortlist"),
+      requestQuotes: text(40, "Request quotes"),
+      noResults: text(120, "No creators match your filters yet."),
+    })
+    .default({}),
+  profile: z
+    .object({
+      available: text(200, "Available for bookings"),
+      unavailable: text(200, "Fully booked"),
+      verified: text(200, "Verified"),
+      newCreator: text(200, "New creator"),
+      reviewsCount: text(200, "{n} reviews"),
+      totalFollowers: text(200, "Total followers"),
+      avgEngagement: text(200, "Avg. engagement"),
+      avgReach: text(200, "Avg. content reach"),
+      languages: text(200, "Languages"),
+      analytics: text(200, "Audience & analytics"),
+      followersEngagement: text(200, "Followers · Engagement"),
+      engagementRate: text(200, "Engagement rate"),
+      reach: text(200, "Reach"),
+      accountReach: text(200, "Account reach"),
+      contentReach: text(200, "Avg. content reach"),
+      gender: text(200, "Gender"),
+      female: text(200, "Female"),
+      male: text(200, "Male"),
+      age: text(200, "Age"),
+      topLocations: text(200, "Top locations"),
+      country: text(200, "Country"),
+      city: text(200, "City"),
+      source: text(200, "Source: platform insights shared by creator."),
+      rateCard: text(200, "Rate card"),
+      yourBooking: text(200, "Your booking"),
+      items: text(200, "{n} item(s)"),
+      custom: text(200, "Custom"),
+      quoteNote: text(200, "Final quote confirmed by our team within 24 hours. No payment until you approve."),
+      bookButton: text(200, "Book {name}"),
+      brandWork: text(200, "Previous brand work"),
+      collaborations: text(200, "Previous collaborations"),
+      reviews: text(200, "Brand reviews"),
+      noReviews: text(200, "No reviews yet — be the first to share your experience."),
+      writeReview: text(200, "Write a review"),
+      reviewFormTitle: text(200, "Review {name}"),
+      reviewFormIntro: text(200, "Worked with this creator? Share how it went. Your review goes live right away."),
+      yourRating: text(200, "Your rating"),
+      yourName: text(200, "Your name"),
+      yourCompany: text(200, "Company (optional)"),
+      yourReview: text(200, "Your review"),
+      submitReview: text(200, "Submit review"),
+      reviewThanks: text(200, "Thank you! Your review is now live."),
+      showMore: text(200, "Show more reviews"),
+      moreCreators: text(200, "More {category} creators"),
+      viewAll: text(200, "View all"),
+    })
+    .default({}),
+  briefCard: z
+    .object({
+      tag: text(30, "For brands"),
+      heading: text(120, "Don't want to browse? Post a brief."),
+      text: text(240, "Tell us your goal, budget and niche — we'll send a shortlist of matched creators within [X] days."),
+      button: z.object({ label: text(40, "Post a campaign brief"), href: linkHrefSchema.default("/contact?type=Influencer%20campaign") }).default({}),
+    })
+    .default({}),
+  creatorCard: z
+    .object({
+      tag: text(30, "For creators"),
+      heading: text(120, "Get paid brand deals."),
+      text: text(240, "Create a free profile, set your rates and get discovered by brands looking for creators like you."),
+      button: text(40, "Become an influencer"),
+    })
+    .default({}),
+});
+export type InfluencersPageSettings = z.infer<typeof influencersPageSchema>;

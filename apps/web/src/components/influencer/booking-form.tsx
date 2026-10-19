@@ -50,13 +50,16 @@ export function BookingForm({
   username,
   pricingCards,
   bare = false,
+  initial,
 }: {
   username: string;
   pricingCards: InfluencerPricingCardRead[];
   /** Drop the outer border/padding — used when the form is already inside a Dialog. */
   bare?: boolean;
+  /** Pre-filled values, e.g. the package picked on the rate card. */
+  initial?: Partial<BookingSubmissionInput>;
 }) {
-  const [form, setForm] = React.useState<BookingSubmissionInput>(EMPTY_FORM);
+  const [form, setForm] = React.useState<BookingSubmissionInput>({ ...EMPTY_FORM, ...initial });
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [submitting, setSubmitting] = React.useState(false);
   const [bookingNumber, setBookingNumber] = React.useState<string | null>(null);

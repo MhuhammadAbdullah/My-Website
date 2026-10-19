@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ArrowLeft, Plus, Star, Trash2 } from "lucide-react";
 import {
   Badge,
+  Switch,
   Button,
   Checkbox,
   Dialog,
@@ -50,7 +51,11 @@ interface ReviewItem {
   createdAt: string;
 }
 
-const statusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED"].map((v) => ({ value: v, label: v.charAt(0) + v.slice(1).toLowerCase() }));
+const statusOptions = [
+  { value: "PUBLISHED", label: "Visible on the site" },
+  { value: "DRAFT", label: "Hidden" },
+  { value: "ARCHIVED", label: "Hidden (archived)" },
+];
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -113,7 +118,7 @@ export default function InfluencerReviewDetailPage() {
           status: item.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED",
         }),
       });
-      toast.success(item.status === "PUBLISHED" ? "Review unpublished" : "Review published");
+      toast.success(item.status === "PUBLISHED" ? "Review hidden from the site" : "Review is now visible on the site");
       reloadAll();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
@@ -125,7 +130,7 @@ export default function InfluencerReviewDetailPage() {
   function handleDelete(item: ReviewItem) {
     confirmDelete({
       title: `Delete this review by "${item.authorName}"?`,
-      description: `Removes the review immediately (if it was Published, it disappears from the public profile right away). The influencer's average rating and review count will be recalculated without it.\n\nThis action cannot be undone.`,
+      description: `Removes the review for good (if it was visible, it disappears from the public profile). To just hide it, use the Show on site switch instead. The influencer's average rating and review count will be recalculated without it.\n\nThis action cannot be undone.`,
       onConfirm: async () => {
         await request(`/influencer-reviews/${item.id}`, { method: "DELETE" });
         toast.success("Review deleted, rating recalculated");
@@ -207,7 +212,7 @@ export default function InfluencerReviewDetailPage() {
               <p className="text-h2 font-semibold text-heading">{summary.averageRating.toFixed(1)}</p>
               <Stars rating={Math.round(summary.averageRating)} />
               <p className="mt-1 text-label text-neutral-400">
-                {summary.totalReviews} review{summary.totalReviews === 1 ? "" : "s"} · {summary.publishedReviews} published
+                {summary.totalReviews} review{summary.totalReviews === 1 ? "" : "s"} · {summary.publishedReviews} visible · {summary.totalReviews - summary.publishedReviews} hidden
               </p>
             </div>
 
@@ -276,9 +281,7 @@ export default function InfluencerReviewDetailPage() {
                             {r.authorName}
                             {r.authorCompany ? <span className="font-normal text-neutral-400">, {r.authorCompany}</span> : null}
                           </p>
-                          <Badge variant={r.status === "PUBLISHED" ? "success" : r.status === "DRAFT" ? "warning" : "neutral"}>
-                            {r.status}
-                          </Badge>
+                          <Badge variant={r.status === "PUBLISHED" ? "success" : "neutral"}>{r.status === "PUBLISHED" ? "Visible" : "Hidden"}</Badge>
                         </div>
                         <div className="mt-1 flex items-center gap-2">
                           <Stars rating={r.rating} />
@@ -287,14 +290,15 @@ export default function InfluencerReviewDetailPage() {
                       </div>
                     </div>
                     <div className="flex shrink-0 gap-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={togglingId === r.id}
-                        onClick={() => handleTogglePublish(r)}
-                      >
-                        {r.status === "PUBLISHED" ? "Unpublish" : "Publish"}
-                      </Button>
+                      <label className="mr-2 flex items-center gap-2 text-body-sm text-neutral-500">
+                        <Switch
+                          checked={r.status === "PUBLISHED"}
+                          disabled={togglingId === r.id}
+                          onCheckedChange={() => handleTogglePublish(r)}
+                          aria-label={`Show review by ${r.authorName} on the site`}
+                        />
+                        Show on site
+                      </label>
                       <Button variant="outline" size="sm" onClick={() => setDialogItem(r)}>
                         Edit
                       </Button>

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Search } from "lucide-react";
 import { cn } from "./lib/cn";
 import { fieldBaseClass } from "./input";
 
@@ -38,6 +38,8 @@ export function Combobox({
   const [query, setQuery] = React.useState("");
   const [highlightedIndex, setHighlightedIndex] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const listRef = React.useRef<HTMLDivElement>(null);
+  const listId = React.useId();
 
   const selected = React.useMemo(() => options.find((o) => o.value === value), [options, value]);
 
@@ -52,7 +54,21 @@ export function Combobox({
 
   React.useEffect(() => {
     setHighlightedIndex(0);
-  }, [query, open]);
+  }, [query]);
+
+  // keep the keyboard-highlighted row visible while arrowing through a long list
+  React.useEffect(() => {
+    if (!open) return;
+    listRef.current?.querySelector<HTMLElement>(`[data-index="${highlightedIndex}"]`)?.scrollIntoView({ block: "nearest" });
+  }, [highlightedIndex, open]);
+
+  // open on the selected row so the current choice is in view
+  React.useEffect(() => {
+    if (!open) return;
+    const i = options.findIndex((o) => o.value === value);
+    if (i >= 0) setHighlightedIndex(i);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   function selectOption(option: ComboboxOption) {
     onValueChange(option.value);
@@ -67,6 +83,12 @@ export function Combobox({
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setHighlightedIndex((i) => Math.max(i - 1, 0));
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      setHighlightedIndex(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      setHighlightedIndex(Math.max(0, filtered.length - 1));
     } else if (event.key === "Enter") {
       event.preventDefault();
       const option = filtered[highlightedIndex];
@@ -87,6 +109,10 @@ export function Combobox({
       <PopoverPrimitive.Trigger asChild>
         <button
           type="button"
+          role="combobox"
+          aria-expanded={open}
+          aria-haspopup="listbox"
+          aria-controls={open ? listId : undefined}
           className={cn(
             fieldBaseClass,
             "flex items-center justify-between gap-2 text-left",
@@ -100,30 +126,33 @@ export function Combobox({
               <span className="ml-1.5 text-neutral-400">{selected.secondary}</span>
             ) : null}
           </span>
-          <ChevronDown className="size-4 shrink-0 text-neutral-400" />
+          <ChevronDown className={cn("size-4 shrink-0 text-neutral-400 transition-transform", open && "rotate-180")} />
         </button>
       </PopoverPrimitive.Trigger>
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content
           align="start"
           sideOffset={4}
-          className="z-50 w-[--radix-popover-trigger-width] overflow-hidden rounded-xl border border-neutral-200 bg-background shadow-soft-lg"
+          className="z-50 w-(--radix-popover-trigger-width) min-w-[14rem] overflow-hidden rounded-xl border border-neutral-200 bg-surface shadow-soft-lg"
           onOpenAutoFocus={(event) => {
             event.preventDefault();
             inputRef.current?.focus();
           }}
         >
-          <div className="border-b border-neutral-200 p-1.5">
+          <div className="flex items-center gap-2 border-b border-neutral-200 px-3 py-1.5">
+            <Search className="size-4 shrink-0 text-neutral-400" aria-hidden />
             <input
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={searchPlaceholder}
-              className="w-full rounded-lg border-none bg-transparent px-2.5 py-1.5 text-body-sm text-heading placeholder:text-neutral-400 focus:outline-none"
+              aria-label={searchPlaceholder}
+              autoComplete="off"
+              className="w-full border-none bg-transparent py-1.5 text-body-sm text-heading placeholder:text-neutral-400 focus:outline-none focus-visible:!outline-none"
             />
           </div>
-          <div className="max-h-64 overflow-y-auto p-1.5">
+          <div ref={listRef} id={listId} role="listbox" className="max-h-64 overflow-y-auto overscroll-contain p-1.5">
             {filtered.length === 0 ? (
               <p className="px-3 py-2 text-body-sm text-neutral-400">{emptyText}</p>
             ) : (
@@ -131,22 +160,20 @@ export function Combobox({
                 <button
                   key={option.value}
                   type="button"
+                  role="option"
+                  aria-selected={option.value === value}
+                  data-index={index}
                   onClick={() => selectOption(option)}
                   onMouseEnter={() => setHighlightedIndex(index)}
                   className={cn(
-                    "flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-lg py-2 pl-8 pr-3 text-left text-body-sm outline-none",
+                    "flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-body-sm outline-none",
                     index === highlightedIndex && "bg-neutral-100",
+                    option.value === value && "font-semibold text-heading",
                   )}
                 >
-                  <span className="relative flex-1 truncate">
-                    <span className="absolute -left-6 flex size-4 items-center justify-center">
-                      {option.value === value ? <Check className="size-4" /> : null}
-                    </span>
-                    {option.label}
-                  </span>
-                  {option.secondary ? (
-                    <span className="shrink-0 text-neutral-400">{option.secondary}</span>
-                  ) : null}
+                  <span className="flex-1 truncate">{option.label}</span>
+                  {option.secondary ? <span className="shrink-0 text-neutral-400">{option.secondary}</span> : null}
+                  {option.value === value ? <Check className="size-4 shrink-0 text-accent-500" aria-hidden /> : null}
                 </button>
               ))
             )}

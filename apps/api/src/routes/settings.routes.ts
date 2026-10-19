@@ -22,12 +22,18 @@ import {
   timezoneSchema,
   whatsappNumberSchema,
   notificationsSchema,
+  servicesPageSchema,
+  portfolioPageSchema,
+  aboutPageSchema,
+  affiliatePageSchema,
+  contactPageSchema,
+  influencersPageSchema,
   PRIVATE_SETTING_KEYS,
 } from "@agency/types";
 import { z } from "zod";
 import { isGoogleMapsUrl, extractGoogleMapsEmbedSrc } from "@agency/utils";
 import { asyncHandler } from "../middleware/async-handler.js";
-import { requireAuth, requirePermission } from "../middleware/require-auth.js";
+import { requireAnyPermission, requireAuth, requirePermission } from "../middleware/require-auth.js";
 import { ApiError } from "../middleware/error-handler.js";
 
 export const settingsRouter = Router();
@@ -80,6 +86,12 @@ const settingValidators: Record<string, (value: unknown) => Prisma.InputJsonValu
   contact_email: (value) => z.union([z.literal(""), z.string().trim().email()]).parse(value ?? ""),
   // Private -- see PRIVATE_SETTING_KEYS; withheld from the public GET below.
   notifications: (value) => notificationsSchema.parse(value),
+  services_page: (value) => servicesPageSchema.parse(value),
+  portfolio_page: (value) => portfolioPageSchema.parse(value),
+  about_page: (value) => aboutPageSchema.parse(value),
+  affiliate_page: (value) => affiliatePageSchema.parse(value),
+  contact_page: (value) => contactPageSchema.parse(value),
+  influencers_page: (value) => influencersPageSchema.parse(value),
 };
 
 const PRIVATE_KEYS = new Set<string>(PRIVATE_SETTING_KEYS);
@@ -101,6 +113,73 @@ settingsRouter.get(
   asyncHandler(async (_req, res) => {
     const rows = await prisma.siteSetting.findMany({ where: { key: { in: [...PRIVATE_KEYS] } } });
     res.json({ settings: Object.fromEntries(rows.map((r) => [r.key, r.value])) });
+  }),
+);
+
+// The Services page extras are page content, so anyone who can edit services may save them.
+settingsRouter.put(
+  "/services_page",
+  requireAuth,
+  requireAnyPermission(["settings", "update"], ["services", "update"]),
+  asyncHandler(async (req, res) => {
+    const value = servicesPageSchema.parse(req.body.value);
+    const item = await prisma.siteSetting.upsert({ where: { key: "services_page" }, update: { value }, create: { key: "services_page", value } });
+    res.json({ item });
+  }),
+);
+
+settingsRouter.put(
+  "/about_page",
+  requireAuth,
+  requireAnyPermission(["settings", "update"], ["home", "update"]),
+  asyncHandler(async (req, res) => {
+    const value = aboutPageSchema.parse(req.body.value);
+    const item = await prisma.siteSetting.upsert({ where: { key: "about_page" }, update: { value }, create: { key: "about_page", value } });
+    res.json({ item });
+  }),
+);
+
+settingsRouter.put(
+  "/affiliate_page",
+  requireAuth,
+  requireAnyPermission(["settings", "update"], ["affiliate", "update"]),
+  asyncHandler(async (req, res) => {
+    const value = affiliatePageSchema.parse(req.body.value);
+    const item = await prisma.siteSetting.upsert({ where: { key: "affiliate_page" }, update: { value }, create: { key: "affiliate_page", value } });
+    res.json({ item });
+  }),
+);
+
+settingsRouter.put(
+  "/contact_page",
+  requireAuth,
+  requireAnyPermission(["settings", "update"], ["contact", "update"]),
+  asyncHandler(async (req, res) => {
+    const value = contactPageSchema.parse(req.body.value);
+    const item = await prisma.siteSetting.upsert({ where: { key: "contact_page" }, update: { value }, create: { key: "contact_page", value } });
+    res.json({ item });
+  }),
+);
+
+settingsRouter.put(
+  "/influencers_page",
+  requireAuth,
+  requireAnyPermission(["settings", "update"], ["influencerSettings", "update"]),
+  asyncHandler(async (req, res) => {
+    const value = influencersPageSchema.parse(req.body.value);
+    const item = await prisma.siteSetting.upsert({ where: { key: "influencers_page" }, update: { value }, create: { key: "influencers_page", value } });
+    res.json({ item });
+  }),
+);
+
+settingsRouter.put(
+  "/portfolio_page",
+  requireAuth,
+  requireAnyPermission(["settings", "update"], ["projects", "update"]),
+  asyncHandler(async (req, res) => {
+    const value = portfolioPageSchema.parse(req.body.value);
+    const item = await prisma.siteSetting.upsert({ where: { key: "portfolio_page" }, update: { value }, create: { key: "portfolio_page", value } });
+    res.json({ item });
   }),
 );
 

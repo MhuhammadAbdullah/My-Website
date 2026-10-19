@@ -186,6 +186,8 @@ export interface InfluencerCollaborationRead {
 
 export interface InfluencerReviewRead {
   id: string;
+  /** brand / company logo, when the reviewer added one */
+  logoUrl?: string | null;
   authorName: string;
   authorCompany: string | null;
   rating: number;

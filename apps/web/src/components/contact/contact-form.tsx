@@ -4,7 +4,7 @@ import * as React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { contactSubmissionSchema, type ContactSubmissionInput } from "@agency/types";
-import { COUNTRIES } from "@agency/utils";
+import { CountrySelect } from "@/components/country-select";
 import {
   Button,
   Input,
@@ -78,18 +78,7 @@ export function ContactForm() {
             control={control}
             name="country"
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger id="country" aria-invalid={!!errors.country}>
-                  <SelectValue placeholder="Select your country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {COUNTRIES.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CountrySelect value={field.value} onChange={field.onChange} />
             )}
           />
           <FieldError>{errors.country?.message}</FieldError>

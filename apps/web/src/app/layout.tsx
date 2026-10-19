@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type * as React from "react";
 import { ACCENT_OPTIONS } from "@agency/types";
 import { Toaster } from "@agency/ui";
 import { manrope, syne, playfairDisplay, ibmPlexMono } from "@/lib/fonts";
@@ -58,7 +59,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   ]);
 
   const branding = resolveBranding(settings, "");
-  const accent = settings.theme?.accent && (ACCENT_OPTIONS as readonly string[]).includes(settings.theme.accent) ? settings.theme.accent : "lime";
+  // A custom colour (picked in Admin > Site Settings > Theme) overrides the preset through the --accent variable.
+  const customColor = settings.theme?.accent === "custom" && settings.theme.customColor && /^#[0-9a-fA-F]{6}$/.test(settings.theme.customColor) ? settings.theme.customColor : null;
+  const accent = customColor ? "custom" : settings.theme?.accent && (ACCENT_OPTIONS as readonly string[]).includes(settings.theme.accent) ? settings.theme.accent : "lime";
+
+  const defaultMode = settings.theme?.mode === "light" ? "light" : "dark";
 
   const org = settings.organization;
   const sameAs = Object.values(settings.socials ?? {}).filter(Boolean);
@@ -91,8 +96,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       lang="en"
       data-theme="noir"
       data-accent={accent}
+      style={customColor ? ({ ["--accent"]: customColor } as React.CSSProperties) : undefined}
+      data-mode={defaultMode}
+      suppressHydrationWarning
       className={`${manrope.variable} ${syne.variable} ${playfairDisplay.variable} ${ibmPlexMono.variable}`}
     >
+      <head>
+        {/* Apply the visitor's saved light/dark choice before first paint (no flash). */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var m=localStorage.getItem("site-mode");if(m==="light"||m==="dark")document.documentElement.dataset.mode=m}catch(e){}` }} />
+      </head>
       <body>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(organizationJsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(websiteJsonLd) }} />

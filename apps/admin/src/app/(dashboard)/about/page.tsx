@@ -6,6 +6,7 @@ import { request, createResourceClient } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { ResourceManager } from "@/components/resource-manager/resource-manager";
 import { AboutSeoForm } from "@/components/about/about-seo-form";
+import { AboutPageSettingsForm } from "@/components/about-page-settings-form";
 
 interface AboutContent {
   story: string;
@@ -197,6 +198,7 @@ export default function AboutContentPage() {
           <TabsTrigger value="values">Core Values</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
           <TabsTrigger value="certifications">Certifications</TabsTrigger>
+          <TabsTrigger value="sections">Page Sections</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
         </TabsList>
         <TabsContent value="story">
@@ -258,6 +260,12 @@ export default function AboutContentPage() {
             defaultValues={{ name: "", issuer: "", year: "", description: "", imageId: null, imageUrl: null, url: "", order: 0 }}
             toFormValues={(item) => ({ ...item, imageUrl: item.image?.url ?? null })}
           />
+        </TabsContent>
+        <TabsContent value="sections">
+          <Heading level={2}>About Page Sections</Heading>
+          <div className="mt-6">
+            <AboutPageSettingsForm />
+          </div>
         </TabsContent>
         <TabsContent value="seo">
           <AboutSeoForm />

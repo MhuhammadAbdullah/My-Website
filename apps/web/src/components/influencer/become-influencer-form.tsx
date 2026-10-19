@@ -27,7 +27,7 @@ import {
   Textarea,
   toast,
 } from "@agency/ui";
-import { COUNTRIES } from "@agency/utils";
+import { CountrySelect } from "@/components/country-select";
 import {
   influencerApplicationSchema,
   INFLUENCER_SOCIAL_PLATFORMS,
@@ -247,18 +247,7 @@ export function BecomeInfluencerForm({
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <Label>Country</Label>
-              <Select value={form.countryCode ?? ""} onValueChange={(v) => set("countryCode", v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {COUNTRIES.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CountrySelect value={form.countryCode ?? ""} onChange={(v) => set("countryCode", v)} placeholder="Select country" />
             </div>
             <div>
               <Label>City</Label>

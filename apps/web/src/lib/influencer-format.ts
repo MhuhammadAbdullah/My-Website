@@ -134,3 +134,9 @@ export function timeAgo(iso: string): string {
   if (days < 7) return `${days}d ago`;
   return new Date(iso).toLocaleDateString();
 }
+
+// "{n} reviews" with the number filled in; "1 reviews" becomes "1 review"
+export function countText(template: string, n: number): string {
+  const text = template.replace("{n}", String(n));
+  return n === 1 ? text.replace(/reviews\b/i, (m) => m.slice(0, -1)) : text;
+}

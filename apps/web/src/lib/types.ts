@@ -71,6 +71,10 @@ export interface ServiceListItem {
   heroMedia: MediaRead | null;
   // A service shows pricing if and only if this has at least one entry.
   pricingPlans: PricingPlanRead[];
+  // scalar columns the list endpoint already returns
+  description?: string;
+  benefits?: string[];
+  timeline?: string;
   updatedAt?: string;
 }
 
@@ -119,6 +123,8 @@ export interface ProjectListItem {
   isFeatured: boolean;
   category: { id: string; name: string; slug: string } | null;
   gallery: ProjectImageRead[];
+  // scalar column the list endpoint already returns
+  results?: { label: string; value: string }[];
   updatedAt?: string;
 }
 
@@ -135,6 +141,9 @@ export interface ProjectDetail extends ProjectListItem {
   results: { label: string; value: string }[];
   liveUrl: string | null;
   githubUrl: string | null;
+  // scalar columns the detail endpoint already returns
+  timelineStart?: string | null;
+  timelineEnd?: string | null;
   videoUrl: string | null;
   techStack: TechnologyRead[];
   testimonials: TestimonialRead[];
@@ -158,6 +167,7 @@ export interface AffiliateToolRead {
   description: string;
   benefits: string[];
   specialOffer: string | null;
+  disclosureNote?: string | null;
   ctaLabel: string;
   ctaUrl: string;
   isFeatured: boolean;
@@ -330,7 +340,7 @@ export interface SiteSettings {
     copyrightText?: string;
     emailSenderName?: string;
   };
-  theme?: { accent: "lime" | "orange" | "blue" | "yellow" };
+  theme?: { accent: "lime" | "orange" | "blue" | "yellow" | "custom"; customColor?: string; mode?: "dark" | "light" };
   header?: { ctaVisible: boolean; ctaLabel: string; ctaHref: string; ctaNewTab: boolean };
   footer_columns?: { title: string; links: { label: string; href: string; newTab: boolean }[] }[];
   legal_links?: { label: string; href: string; newTab: boolean }[];
@@ -338,6 +348,12 @@ export interface SiteSettings {
   organization?: { legalName: string; description: string; foundingDate: string; areaServed: string };
   business_schedule?: Record<string, { closed: boolean; open: string; close: string }>;
   timezone?: string;
+  services_page?: import("@agency/types").ServicesPageSettings;
+  portfolio_page?: import("@agency/types").PortfolioPageSettings;
+  about_page?: import("@agency/types").AboutPageSettings;
+  affiliate_page?: import("@agency/types").AffiliatePageSettings;
+  contact_page?: import("@agency/types").ContactPageSettings;
+  influencers_page?: import("@agency/types").InfluencersPageSettings;
   whatsapp_message?: string;
   tech_stack_display?: "TAGS" | "MARQUEE";
   default_cta?: DefaultCtaRead;

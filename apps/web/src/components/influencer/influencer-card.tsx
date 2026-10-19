@@ -1,6 +1,7 @@
 import Image from "next/image";
+import { VerifiedBadge } from "@/components/influencer/verified-badge";
 import Link from "next/link";
-import { BadgeCheck, MapPin, Star, TrendingUp, Users } from "lucide-react";
+import { MapPin, Star, TrendingUp, Users } from "lucide-react";
 import { Card, Badge, cn } from "@agency/ui";
 import { formatCurrency } from "@agency/utils";
 import type { InfluencerCardRead } from "@/lib/influencer-types";
@@ -70,7 +71,7 @@ export function InfluencerCard({ influencer }: { influencer: InfluencerCardRead 
             <div className="min-w-0">
               <h3 className="flex items-center gap-1.5 truncate text-h4 font-semibold text-heading">
                 {influencer.name}
-                {influencer.isVerified && <BadgeCheck className="size-4 shrink-0 text-accent-500" />}
+                {influencer.isVerified && <VerifiedBadge className="size-5" />}
               </h3>
               <p className="truncate text-body-sm text-neutral-400">@{influencer.username}</p>
             </div>

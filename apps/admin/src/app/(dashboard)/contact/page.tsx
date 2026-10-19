@@ -1,11 +1,17 @@
 "use client";
 
-import { Heading } from "@agency/ui";
+import { Heading, Tabs, TabsContent, TabsList, TabsTrigger } from "@agency/ui";
 import { PageHeroContentForm } from "@/components/page-hero-content-form";
+import { ContactPageSettingsForm } from "@/components/contact-page-settings-form";
 
 export default function ContactPage() {
   return (
-    <div>
+    <Tabs defaultValue="content">
+      <TabsList>
+        <TabsTrigger value="content">Page Content</TabsTrigger>
+        <TabsTrigger value="sections">Page Sections</TabsTrigger>
+      </TabsList>
+      <TabsContent value="content">
       <Heading level={2}>Contact Page</Heading>
       <p className="mt-1 text-body-sm text-neutral-500">
         The hero heading, paragraph, and button labels at the top of the public Contact page. Contact details
@@ -25,6 +31,13 @@ export default function ContactPage() {
           successMessage="Contact page content updated"
         />
       </div>
-    </div>
+      </TabsContent>
+      <TabsContent value="sections">
+        <Heading level={2}>Contact Page Sections</Heading>
+        <div className="mt-6">
+          <ContactPageSettingsForm />
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 }

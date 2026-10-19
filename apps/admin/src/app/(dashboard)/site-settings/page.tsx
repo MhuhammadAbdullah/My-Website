@@ -20,6 +20,8 @@ import {
 import {
   ACCENT_HEX,
   ACCENT_OPTIONS,
+  CUSTOM_ACCENT_MIN_CONTRAST,
+  accentContrast,
   footerColumnsSchema,
   headerSettingsSchema,
   legalLinksSchema,
@@ -56,17 +58,21 @@ function SaveBar({ saving, onSave, disabled }: { saving: boolean; onSave: () => 
 
 // ------------------------------------------------------------------- Theme
 
+const isHex = (v: string) => /^#[0-9a-fA-F]{6}$/.test(v);
+
 function ThemeTab({ settings }: { settings: SiteSettings }) {
-  const [accent, setAccent] = React.useState<AccentId>(settings.theme?.accent ?? "lime");
+  const [accent, setAccent] = React.useState<AccentId | "custom">(settings.theme?.accent ?? "lime");
+  const [customColor, setCustomColor] = React.useState<string>(settings.theme?.customColor ?? "#8be9c0");
+  const [mode, setMode] = React.useState<"dark" | "light">(settings.theme?.mode ?? "dark");
   const [saving, setSaving] = React.useState(false);
 
   async function save() {
-    const parsed = themeSchema.safeParse({ accent });
+    const parsed = themeSchema.safeParse({ accent, mode, ...(accent === "custom" ? { customColor } : {}) });
     if (!parsed.success) return toast.error(zodMessage(parsed.error));
     setSaving(true);
     try {
       await saveSetting("theme", parsed.data);
-      toast.success("Accent colour saved — the whole site updates within a few minutes");
+      toast.success("Theme saved — the whole site updates within a few minutes");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Save failed");
     } finally {
@@ -93,7 +99,70 @@ function ThemeTab({ settings }: { settings: SiteSettings }) {
           </button>
         ))}
       </div>
-      <p className="mt-4 text-body-sm text-neutral-500">Text on the accent colour is always near-black for contrast.</p>
+
+      <div className={`mt-4 rounded-2xl border p-4 ${accent === "custom" ? "border-heading ring-2 ring-heading/20" : "border-neutral-200"}`}>
+        <div className="flex flex-wrap items-center gap-4">
+          <button type="button" role="radio" aria-checked={accent === "custom"} onClick={() => setAccent("custom")} className="flex items-center gap-3 text-left">
+            <span className="size-12 rounded-full border border-black/10" style={{ backgroundColor: isHex(customColor) ? customColor : "#ffffff" }} />
+            <span>
+              <span className="block text-body-sm font-medium text-heading">Custom colour</span>
+              <span className="block text-label text-neutral-500">Pick any colour you like</span>
+            </span>
+          </button>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              aria-label="Pick a custom colour"
+              value={isHex(customColor) ? customColor : "#8be9c0"}
+              onChange={(e) => {
+                setCustomColor(e.target.value);
+                setAccent("custom");
+              }}
+              className="h-11 w-14 cursor-pointer rounded-lg border border-neutral-200 bg-background p-1"
+            />
+            <input
+              value={customColor}
+              onChange={(e) => {
+                setCustomColor(e.target.value.trim());
+                setAccent("custom");
+              }}
+              placeholder="#RRGGBB"
+              maxLength={7}
+              aria-label="Custom colour hex code"
+              className="h-11 w-28 rounded-xl border border-neutral-200 bg-background px-3 font-mono text-body-sm text-heading"
+            />
+          </div>
+        </div>
+        {accent === "custom" && isHex(customColor) && (
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <span className="rounded-full px-5 py-2 text-body-sm font-bold" style={{ backgroundColor: customColor, color: "#0b0b0c" }}>
+              Button preview
+            </span>
+            {accentContrast(customColor) < CUSTOM_ACCENT_MIN_CONTRAST ? (
+              <span className="text-body-sm text-error-500">Too dark: the dark text on buttons would be hard to read. Pick a lighter shade.</span>
+            ) : (
+              <span className="text-body-sm text-success-700">Readable — dark text on this colour has good contrast.</span>
+            )}
+          </div>
+        )}
+      </div>
+      <p className="mt-4 text-body-sm text-neutral-500">Text on the accent colour is always near-black for contrast, so custom colours must be light or medium (dark colours are rejected).</p>
+      <p className="mt-8 text-body-sm font-medium text-heading">Default look</p>
+      <p className="text-body-sm text-neutral-500">What first-time visitors see. Everyone can switch with the sun/moon button in the site header, and their choice is remembered.</p>
+      <div role="radiogroup" aria-label="Default look" className="mt-3 grid max-w-xs grid-cols-2 gap-3">
+        {(["dark", "light"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            role="radio"
+            aria-checked={mode === m}
+            onClick={() => setMode(m)}
+            className={`rounded-2xl border p-4 text-body-sm font-medium capitalize text-heading ${mode === m ? "border-heading ring-2 ring-heading/20" : "border-neutral-200 hover:border-neutral-400"}`}
+          >
+            {m}
+          </button>
+        ))}
+      </div>
       <SaveBar saving={saving} onSave={save} />
     </div>
   );

@@ -107,7 +107,7 @@ export function usePaginatedList<T>({
   const reload = React.useCallback(() => {
     setLoading(true);
     setError(null);
-    request<{ items: T[] } & PaginationMeta>(`${endpoint}?${queryString}`)
+    request<{ items: T[] } & PaginationMeta>(`${endpoint}${endpoint.includes("?") ? "&" : "?"}${queryString}`)
       .then((res) => {
         setData(res.items);
         setMeta({
