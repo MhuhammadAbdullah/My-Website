@@ -43,7 +43,7 @@ export function SiteFooter({
           <div className="max-w-sm">
             {branding.footerLogoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- arbitrary Cloudinary URL, not a static asset
-              <img src={branding.footerLogoUrl} alt={branding.name} className="h-10 w-auto object-contain" />
+              <img src={branding.footerLogoUrl} alt={branding.name} className="brand-logo h-10 w-auto object-contain" />
             ) : (
               branding.name && <p className="font-heading text-h3 font-extrabold tracking-tight text-heading">{branding.name}</p>
             )}
@@ -71,7 +71,7 @@ export function SiteFooter({
             <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-3">
               {columns.map((col) => (
                 <div key={col.title}>
-                  <p className="eyebrow">{col.title}</p>
+                  <p className="eyebrow !text-[1rem] !font-extrabold !tracking-[0.1em] !text-heading">{col.title}</p>
                   <ul className="mt-4 space-y-3 text-body-sm">
                     {col.links
                       .filter((l) => l.label && l.href)

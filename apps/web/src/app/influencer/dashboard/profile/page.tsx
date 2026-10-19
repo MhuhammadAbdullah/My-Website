@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Badge, Button, Heading, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Skeleton, Textarea, toast } from "@agency/ui";
-import { COUNTRIES } from "@agency/utils";
+import { CountrySelect } from "@/components/country-select";
 import { influencerSelfProfileSchema, type InfluencerSelfProfileInput } from "@agency/types";
 import { getInfluencerCategories, getInfluencerMe, signProfileMediaUpload, updateInfluencerProfile } from "@/lib/influencer-api";
 import { ImageUploader } from "@/components/influencer/media-uploaders";
@@ -105,18 +105,7 @@ export default function InfluencerProfilePage() {
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <Label>Country</Label>
-            <Select value={form.countryCode ?? ""} onValueChange={(v) => set("countryCode", v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select country" />
-              </SelectTrigger>
-              <SelectContent>
-                {COUNTRIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CountrySelect value={form.countryCode ?? ""} onChange={(v) => set("countryCode", v)} placeholder="Select country" />
           </div>
           <div>
             <Label>City</Label>

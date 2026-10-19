@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { InfluencersPageSettingsForm } from "@/components/influencers-page-settings-form";
 import {
   Accordion,
   AccordionContent,
@@ -215,6 +216,14 @@ export default function InfluencerSettingsPage() {
               ]}
               successMessage="Marketplace page content updated"
             />
+          </section>
+
+          <section className="space-y-4">
+            <div>
+              <p className="font-medium text-heading">Marketplace page sections</p>
+              <p className="mb-2 text-body-sm text-neutral-500">Hero buttons and steps, labels, and the two closing cards on the public marketplace page.</p>
+            </div>
+            <InfluencersPageSettingsForm />
           </section>
 
           <section className="space-y-4 rounded-2xl border border-neutral-200 p-5">

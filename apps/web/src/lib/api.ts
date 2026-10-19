@@ -95,7 +95,7 @@ export const getProjectCategories = () =>
   apiFetch<{ items: { id: string; name: string; slug: string }[] }>("/categories/projects").then((r) => r.items);
 
 export const getTestimonials = () =>
-  apiFetch<{ items: TestimonialRead[] }>("/testimonials").then((r) => r.items);
+  apiFetch<{ items: TestimonialRead[] }>("/testimonials", { next: { revalidate: 15 } }).then((r) => r.items);
 
 export const getFaqs = (context?: string) =>
   apiFetch<{ items: FaqRead[] }>("/faqs").then((r) =>
@@ -240,7 +240,7 @@ export const getInfluencers = (params: InfluencerListParams = {}) => {
 };
 
 export const getInfluencer = (username: string) =>
-  apiFetch<{ item: InfluencerDetailRead }>(`/influencers/${username}`).then((r) => r.item);
+  apiFetch<{ item: InfluencerDetailRead }>(`/influencers/${username}`, { next: { revalidate: 15 } }).then((r) => r.item);
 
 export async function submitContactForm(data: {
   name: string;

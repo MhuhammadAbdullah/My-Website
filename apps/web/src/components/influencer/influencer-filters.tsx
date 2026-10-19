@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { ArrowUpDown, Search, SlidersHorizontal } from "lucide-react";
 import {
   Badge,
   Button,
@@ -20,7 +20,7 @@ import {
   cn,
 } from "@agency/ui";
 import { INFLUENCER_SOCIAL_PLATFORMS } from "@agency/types";
-import { COUNTRIES } from "@agency/utils";
+import { CountrySelect } from "@/components/country-select";
 import type { InfluencerCategoryRead } from "@/lib/influencer-types";
 import { platformLabel } from "@/lib/influencer-format";
 
@@ -45,7 +45,13 @@ const EXTRA_FILTER_KEYS = [
   "availability",
 ];
 
-export function InfluencerFilters({ categories }: { categories: InfluencerCategoryRead[] }) {
+export function InfluencerFilters({
+  categories,
+  labels = { searchPlaceholder: "Search by name, niche or city", sort: "Sort:", filters: "Filters", all: "All" },
+}: {
+  categories: InfluencerCategoryRead[];
+  labels?: { searchPlaceholder: string; sort: string; filters: string; all: string };
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -98,11 +104,11 @@ export function InfluencerFilters({ categories }: { categories: InfluencerCatego
           type="button"
           onClick={() => updateParams({ category: null })}
           className={cn(
-            "shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-body-sm font-medium transition-colors",
-            !activeCategory ? "bg-btn-primary text-on-btn-primary" : "bg-neutral-100 text-body hover:bg-neutral-200",
+            "shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-label font-medium transition-colors sm:px-4 sm:py-2 sm:text-body-sm",
+            !activeCategory ? "border border-accent-500 bg-accent-500 text-on-accent" : "border border-neutral-200 text-heading hover:border-accent-500",
           )}
         >
-          All
+          {labels.all}
         </button>
         {categories.map((category) => (
           <button
@@ -110,8 +116,8 @@ export function InfluencerFilters({ categories }: { categories: InfluencerCatego
             type="button"
             onClick={() => updateParams({ category: category.slug })}
             className={cn(
-              "shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-body-sm font-medium transition-colors",
-              activeCategory === category.slug ? "bg-btn-primary text-on-btn-primary" : "bg-neutral-100 text-body hover:bg-neutral-200",
+              "shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-label font-medium transition-colors sm:px-4 sm:py-2 sm:text-body-sm",
+              activeCategory === category.slug ? "border border-accent-500 bg-accent-500 text-on-accent" : "border border-neutral-200 text-heading hover:border-accent-500",
             )}
           >
             {category.name}
@@ -119,10 +125,10 @@ export function InfluencerFilters({ categories }: { categories: InfluencerCatego
         ))}
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-neutral-400" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search influencers…" className="pl-10" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={labels.searchPlaceholder} className="rounded-full pl-10 max-sm:text-body-sm" />
         </div>
 
         <Select value={sortKey || "top"} onValueChange={(v) => {
@@ -130,8 +136,12 @@ export function InfluencerFilters({ categories }: { categories: InfluencerCatego
           const [sortBy, sortOrder] = v.split(":");
           updateParams({ sortBy: sortBy ?? null, sortOrder: sortOrder ?? null });
         }}>
-          <SelectTrigger className="w-full sm:w-56">
-            <SelectValue />
+          <SelectTrigger aria-label={labels.sort} title={labels.sort} className="size-11 shrink-0 justify-center whitespace-nowrap rounded-full p-0 max-sm:[&>span:last-child]:hidden sm:h-auto sm:w-60 sm:justify-between sm:px-4">
+            <ArrowUpDown className="size-4 sm:hidden" aria-hidden />
+            <span className="hidden items-center sm:flex">
+              <span className="mr-1 shrink-0 text-neutral-500">{labels.sort}</span>
+              <SelectValue />
+            </span>
           </SelectTrigger>
           <SelectContent>
             {SORT_OPTIONS.map((o) => (
@@ -144,9 +154,9 @@ export function InfluencerFilters({ categories }: { categories: InfluencerCatego
 
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="shrink-0">
-              <SlidersHorizontal /> Filters
-              {activeExtraCount > 0 && <Badge variant="dark">{activeExtraCount}</Badge>}
+            <Button variant="outline" aria-label={labels.filters} title={labels.filters} className="relative shrink-0 max-sm:size-11 max-sm:px-0">
+              <SlidersHorizontal /> <span className="hidden sm:inline">{labels.filters}</span>
+              {activeExtraCount > 0 && <Badge variant="dark" className="max-sm:absolute max-sm:-right-1 max-sm:-top-1">{activeExtraCount}</Badge>}
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-[22rem] p-5">
@@ -170,19 +180,7 @@ export function InfluencerFilters({ categories }: { categories: InfluencerCatego
                 </div>
                 <div>
                   <Label>Country</Label>
-                  <Select value={draft.country || "any"} onValueChange={(v) => setDraft((d) => ({ ...d, country: v === "any" ? "" : v }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Any" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="any">Any country</SelectItem>
-                      {COUNTRIES.map((c) => (
-                        <SelectItem key={c} value={c}>
-                          {c}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <CountrySelect value={draft.country ?? ""} onChange={(v) => setDraft((d) => ({ ...d, country: v }))} anyLabel="Any country" placeholder="Any" />
                 </div>
                 <div>
                   <Label>City</Label>

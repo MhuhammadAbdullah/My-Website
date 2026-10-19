@@ -66,6 +66,7 @@ export interface CloudinarySignature {
   apiKey: string;
   cloudName: string;
   type?: string;
+  allowedFormats?: string;
 }
 
 export interface UploadedRawMedia {
@@ -88,6 +89,24 @@ export function signBookingMediaUpload(sessionId: string) {
   return publicFetch<CloudinarySignature>("/bookings/media/sign", {
     method: "POST",
     body: JSON.stringify({ sessionId }),
+  });
+}
+
+export function submitReview(username: string, data: { authorName: string; authorCompany?: string; rating: number; comment: string; website?: string; logo?: UploadedRawMedia }) {
+  return publicFetch<{ ok: true }>(`/influencer-reviews/public/${username}`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function signReviewLogoUpload() {
+  return publicFetch<CloudinarySignature>("/testimonials/public/sign", { method: "POST", body: JSON.stringify({}) });
+}
+
+export function submitServiceReview(data: { authorName: string; authorCompany?: string; rating: number; comment: string; website?: string; logo?: UploadedRawMedia }) {
+  return publicFetch<{ ok: true }>(`/testimonials/public`, {
+    method: "POST",
+    body: JSON.stringify(data),
   });
 }
 
@@ -125,6 +144,7 @@ function buildCloudinaryFormData(file: File, signed: CloudinarySignature): FormD
   formData.append("signature", signed.signature);
   formData.append("folder", signed.folder);
   if (signed.type) formData.append("type", signed.type);
+  if (signed.allowedFormats) formData.append("allowed_formats", signed.allowedFormats);
   return formData;
 }
 

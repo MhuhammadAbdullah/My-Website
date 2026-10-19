@@ -6,6 +6,7 @@ import { PaginatedResourceManager } from "@/components/resource-manager/paginate
 import { createResourceClient, request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { PageHeroContentForm } from "@/components/page-hero-content-form";
+import { AffiliatePageSettingsForm } from "@/components/affiliate-page-settings-form";
 
 interface AffiliateCategory {
   id: string;
@@ -94,7 +95,8 @@ function AffiliatePageInner() {
         },
         { key: "description", label: "Description", type: "textarea", required: true },
         { key: "benefits", label: "Benefits", type: "tags", placeholder: "Add a benefit…" },
-        { key: "specialOffer", label: "Special offer", type: "text" },
+        { key: "specialOffer", label: "Special offer (add \"code ABC123\" to show a Copy code button)", type: "text" },
+        { key: "disclosureNote", label: "Why we use it (short note shown on the card)", type: "textarea" },
         { key: "ctaUrl", label: "Link URL", type: "url", required: true },
         { key: "status", label: "Status", type: "select", options: statusOptions, required: true },
         { key: "isFeatured", label: "Featured", type: "checkbox" },
@@ -107,6 +109,7 @@ function AffiliatePageInner() {
         description: "",
         benefits: [],
         specialOffer: "",
+        disclosureNote: "",
         ctaUrl: "",
         status: "PUBLISHED",
         isFeatured: false,
@@ -122,6 +125,7 @@ export default function AffiliatePage() {
       <TabsList>
         <TabsTrigger value="list">All Tools</TabsTrigger>
         <TabsTrigger value="content">Page Content</TabsTrigger>
+        <TabsTrigger value="sections">Page Sections</TabsTrigger>
       </TabsList>
       <TabsContent value="list">
         <Suspense fallback={null}>
@@ -142,6 +146,12 @@ export default function AffiliatePage() {
             ]}
             successMessage="Affiliate Tools page content updated"
           />
+        </div>
+      </TabsContent>
+      <TabsContent value="sections">
+        <Heading level={2}>Affiliate Tools Page Sections</Heading>
+        <div className="mt-6">
+          <AffiliatePageSettingsForm />
         </div>
       </TabsContent>
     </Tabs>

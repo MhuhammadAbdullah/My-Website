@@ -25,7 +25,7 @@ export interface SiteSettings {
     copyrightText?: string;
     emailSenderName?: string;
   };
-  theme?: { accent: "lime" | "orange" | "blue" | "yellow" };
+  theme?: { accent: "lime" | "orange" | "blue" | "yellow" | "custom"; customColor?: string; mode?: "dark" | "light" };
   header?: { ctaVisible: boolean; ctaLabel: string; ctaHref: string; ctaNewTab: boolean };
   footer_columns?: { title: string; links: { label: string; href: string; newTab: boolean }[] }[];
   legal_links?: { label: string; href: string; newTab: boolean }[];
@@ -33,6 +33,12 @@ export interface SiteSettings {
   organization?: { legalName: string; description: string; foundingDate: string; areaServed: string };
   business_schedule?: Record<string, { closed: boolean; open: string; close: string }>;
   timezone?: string;
+  services_page?: import("@agency/types").ServicesPageSettings;
+  portfolio_page?: import("@agency/types").PortfolioPageSettings;
+  about_page?: import("@agency/types").AboutPageSettings;
+  affiliate_page?: import("@agency/types").AffiliatePageSettings;
+  contact_page?: import("@agency/types").ContactPageSettings;
+  influencers_page?: import("@agency/types").InfluencersPageSettings;
   whatsapp_message?: string;
   default_cta?: {
     headline: string;

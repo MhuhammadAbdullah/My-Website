@@ -88,7 +88,7 @@ export function SiteChrome({
       </a>
       {hasAnnouncement && <AnnouncementBar settings={settings.announcement_bar} onDismiss={dismissible ? dismiss : undefined} />}
       <SiteHeader navItems={headerNav} branding={branding} header={settings.header} hasAnnouncement={hasAnnouncement} />
-      <main id="main" className={cn(hasAnnouncement ? "pt-40" : "pt-32")}>
+      <main id="main" className={cn(hasAnnouncement ? "pt-36" : "pt-28")}>
         {children}
       </main>
       <SiteFooter navItems={footerNav} settings={settings} branding={branding} />

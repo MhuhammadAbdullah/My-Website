@@ -64,7 +64,11 @@ const sortOptions = [
   { value: "averageRating", label: "Average rating" },
 ];
 
-const statusOptions = ["DRAFT", "PUBLISHED", "ARCHIVED"].map((v) => ({ value: v, label: v.charAt(0) + v.slice(1).toLowerCase() }));
+const statusOptions = [
+  { value: "PUBLISHED", label: "Visible on the site" },
+  { value: "DRAFT", label: "Hidden" },
+  { value: "ARCHIVED", label: "Hidden (archived)" },
+];
 
 function InfluencerReviewsPageInner() {
   const list = usePaginatedList<ReviewSummaryItem>({
@@ -81,8 +85,8 @@ function InfluencerReviewsPageInner() {
         <div>
           <Heading level={2}>Influencer Reviews</Heading>
           <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
-            Testimonials shown at the bottom of each influencer's public profile. One row per influencer — open "View Reviews" to see and
-            manage their individual reviews.
+            Reviews on each creator's public profile. Visitors can write them there and they go live at once — you only choose what stays visible.
+            Open "View Reviews" to show or hide each one.
           </p>
         </div>
         <Button onClick={() => setShowNew(true)}>
@@ -121,7 +125,7 @@ function InfluencerReviewsPageInner() {
                 <TableHead>Total Reviews</TableHead>
                 <TableHead>Average Rating</TableHead>
                 <TableHead>Latest Review</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Visibility</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -155,7 +159,7 @@ function InfluencerReviewsPageInner() {
                   </TableCell>
                   <TableCell>
                     <Badge variant={r.publishedReviews > 0 ? "success" : "neutral"}>
-                      {r.publishedReviews}/{r.totalReviews} published
+                      {r.publishedReviews} visible · {r.totalReviews - r.publishedReviews} hidden
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

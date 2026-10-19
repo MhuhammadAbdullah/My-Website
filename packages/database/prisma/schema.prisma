@@ -1537,6 +1537,8 @@ model InfluencerReview {
   rating        Int
   comment       String
   status        ContentStatus @default(PUBLISHED)
+  // Optional brand/company logo (Cloudinary URL) the reviewer attached.
+  logoUrl       String?
   createdAt     DateTime      @default(now())
 
   influencer Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)

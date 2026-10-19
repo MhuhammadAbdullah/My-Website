@@ -45,6 +45,7 @@ import { GalleryField, VideoField, type GalleryImageItem, type VideoItem } from 
 import { ProjectFinanceDialog } from "@/components/finance/project-finance-dialog";
 import { ProjectSectionsField, newProjectSection, type ProjectSectionForm } from "@/components/portfolio/project-sections-field";
 import { PageHeroContentForm } from "@/components/page-hero-content-form";
+import { PortfolioPageSettingsForm } from "@/components/portfolio-page-settings-form";
 
 interface Category {
   id: string;
@@ -523,6 +524,7 @@ export default function PortfolioPage() {
       <TabsList>
         <TabsTrigger value="list">All Projects</TabsTrigger>
         <TabsTrigger value="content">Page Content</TabsTrigger>
+        <TabsTrigger value="sections">Page Sections</TabsTrigger>
       </TabsList>
       <TabsContent value="list">
         <Suspense fallback={null}>
@@ -542,6 +544,12 @@ export default function PortfolioPage() {
             ]}
             successMessage="Portfolio page content updated"
           />
+        </div>
+      </TabsContent>
+      <TabsContent value="sections">
+        <Heading level={2}>Portfolio Page Sections</Heading>
+        <div className="mt-6">
+          <PortfolioPageSettingsForm />
         </div>
       </TabsContent>
     </Tabs>

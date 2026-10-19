@@ -192,3 +192,171 @@
 :root[data-theme="noir"] .rich-text pre {
   color: var(--color-neutral-800);
 }
+
+/* ------------------------------------------------------------------ light mode
+   Same theme with the original (non-inverted) neutral scale. Toggled by
+   <html data-mode="light"> (header sun/moon button, default set in Site Settings).
+   Accent *fills* keep the lime with near-black text; accent *text* uses a darker
+   shade of the same hue so it stays readable on a light page. */
+:root[data-theme="noir"][data-mode="light"] {
+  color-scheme: light;
+  --accent-ink: color-mix(in oklab, var(--accent) 48%, #0b0b0c);
+
+  --color-background: #f6f6f2;
+  --color-surface: #ffffff;
+  --color-surface-2: #efefe9;
+  --color-border-strong: #cfcfc8;
+  --color-heading: #0b0b0c;
+  --color-body: #4d4d48;
+
+  --color-neutral-50: #ffffff;
+  --color-neutral-100: #efefe9;
+  --color-neutral-200: #e2e2db;
+  --color-neutral-300: #cfcfc8;
+  --color-neutral-400: #75756f;
+  --color-neutral-500: #55554f;
+  --color-neutral-600: #44443f;
+  --color-neutral-700: #2e2e2b;
+  --color-neutral-800: #1c1c1a;
+  --color-neutral-900: #0b0b0c;
+  --color-neutral-950: #151517;
+
+  --color-accent-50: color-mix(in oklab, var(--accent) 14%, white);
+  --color-accent-100: color-mix(in oklab, var(--accent) 26%, white);
+  --color-accent-200: color-mix(in oklab, var(--accent) 45%, white);
+  --color-accent-700: color-mix(in oklab, var(--accent) 55%, #0b0b0c);
+  --color-accent-800: color-mix(in oklab, var(--accent) 40%, #0b0b0c);
+  --color-accent-900: color-mix(in oklab, var(--accent) 30%, #0b0b0c);
+
+  --color-success-50: oklch(95% 0.05 155);
+  --color-success-500: oklch(55% 0.14 155);
+  --color-success-700: oklch(42% 0.12 155);
+  --color-warning-50: oklch(96% 0.05 80);
+  --color-warning-500: oklch(68% 0.14 80);
+  --color-warning-700: oklch(48% 0.12 80);
+  --color-error-50: oklch(96% 0.04 25);
+  --color-error-500: oklch(58% 0.19 25);
+  --color-error-700: oklch(45% 0.16 25);
+
+  --shadow-soft-sm: 0 1px 2px rgb(0 0 0 / 0.06);
+  --shadow-soft-md: 0 6px 16px rgb(0 0 0 / 0.08);
+  --shadow-soft-lg: 0 20px 44px rgb(0 0 0 / 0.1);
+  --shadow-soft-xl: 0 32px 72px rgb(0 0 0 / 0.12);
+
+  /* pills that are light-on-dark in dark mode flip to dark-on-light */
+  --inv-bg: #0b0b0c;
+  --inv-fg: #f2f2ee;
+}
+
+/* accent used as text colour (numbers, links, labels) */
+:root[data-theme="noir"][data-mode="light"] :is(.text-accent-500, .text-accent-600) {
+  color: var(--accent-ink);
+}
+/* ...but not inside blocks that stay dark in light mode */
+:root[data-theme="noir"][data-mode="light"] :is([class*="bg-[#0b0b0c]"], .bg-neutral-950) :is(.text-accent-500, .text-accent-600) {
+  color: var(--accent);
+}
+:root[data-theme="noir"][data-mode="light"] [data-serif-emphasis] {
+  color: var(--accent-ink);
+}
+:root[data-theme="noir"][data-mode="light"] .bg-accent-500 [data-serif-emphasis] {
+  color: inherit;
+}
+
+:root[data-theme="noir"][data-mode="light"] .glass {
+  background: rgb(255 255 255 / 0.82);
+  border: 1px solid rgb(0 0 0 / 0.08);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.12);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-theme="noir"][data-mode="light"] .glass {
+    background: rgb(255 255 255 / 0.97);
+  }
+}
+:root[data-theme="noir"][data-mode="light"] .shimmer::after {
+  background-image: linear-gradient(90deg, transparent, rgb(0 0 0 / 0.05), transparent);
+}
+
+/* Google Maps embed in the dark look (light mode shows it as-is). */
+:root[data-theme="noir"]:not([data-mode="light"]) .map-dark {
+  filter: invert(0.92) hue-rotate(180deg) saturate(0.6) brightness(0.9);
+}
+
+/* The logo files are light-on-transparent: in light mode they are shown as a dark silhouette. */
+:root[data-theme="noir"][data-mode="light"] .brand-logo {
+  filter: brightness(0);
+}
+
+/* Phones: slimmer page gutters so content and cards get more width. */
+@media (max-width: 640px) {
+  :root[data-theme="noir"] {
+    --layout-pad: 1rem;
+  }
+}
+
+/* Entrance animations (creator profile): staggered with --d, switched off for reduced motion. */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes img-in {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d, 0s);
+}
+.img-in {
+  animation: img-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fade-up,
+  .img-in {
+    animation: none;
+  }
+}
+
+/* Mobile menu drawer (slides in from the left over a dimmed page). */
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes drawer-out {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+@keyframes overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

@@ -43,6 +43,7 @@ import { useAsyncData } from "@/lib/use-resource";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { PageHeroContentForm } from "@/components/page-hero-content-form";
+import { ServicesPageSettingsForm } from "@/components/services-page-settings-form";
 
 const billingTypeOptions = [
   { value: "ONE_TIME", label: "One-time" },
@@ -754,6 +755,7 @@ export default function ServicesPage() {
       <TabsList>
         <TabsTrigger value="list">All Services</TabsTrigger>
         <TabsTrigger value="content">Page Content</TabsTrigger>
+        <TabsTrigger value="sections">Page Sections</TabsTrigger>
       </TabsList>
       <TabsContent value="list">
         <Suspense fallback={null}>
@@ -773,6 +775,12 @@ export default function ServicesPage() {
             ]}
             successMessage="Services page content updated"
           />
+        </div>
+      </TabsContent>
+      <TabsContent value="sections">
+        <Heading level={2}>Services Page Sections</Heading>
+        <div className="mt-6">
+          <ServicesPageSettingsForm />
         </div>
       </TabsContent>
     </Tabs>

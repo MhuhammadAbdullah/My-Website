@@ -185,6 +185,43 @@ async function seedSettings() {
 
 // The homepage layout lives in the `home_sections` setting (managed in Admin > Home Page).
 // Created once from the site's existing content; never overwritten afterwards.
+async function seedServicesPage() {
+  await ensureSetting("services_page", {
+    labels: { all: "All", pricesIn: "Prices in", from: "From", perMonth: "/mo", getQuote: "Get a quote", details: "Service details", whatYouGet: "What you get", timeline: "Timeline", onRequest: "On request" },
+    // Placeholder rates -- set your own in Admin > Services > Page Sections.
+    currencies: [{ code: "USD", rate: 1 }, { code: "PKR", rate: 280 }, { code: "SAR", rate: 3.75 }],
+    engagement: {
+      heading: "Ways to work with us",
+      intro: "Choose the model that fits your stage. You can switch as you grow.",
+      models: [
+        { label: "Fixed project", title: "One clear scope, one price", description: "Best for new websites, stores and redesigns with a defined finish line.", highlighted: false },
+        { label: "Monthly retainer", title: "Ongoing growth, every month", description: "Best for SEO, marketing, maintenance and continuous improvements.", highlighted: true },
+        { label: "Dedicated team", title: "Your extended product team", description: "Best for web apps and products that ship new features continuously.", highlighted: false },
+      ],
+    },
+    estimate: {
+      heading: "Estimate your project",
+      intro: "Select what you need — we'll confirm the final quote on a free call.",
+      cardLabel: "Estimated starting budget",
+      note: "{count} service(s) selected · one-time + monthly items combined. Final pricing depends on scope.",
+      emptyText: "Select services",
+      button: { label: "Send this estimate", href: "/contact" },
+    },
+  });
+}
+
+async function seedPortfolioPage() {
+  await ensureSetting("portfolio_page", {
+    labels: {
+      featured: "Featured", all: "All", searchPlaceholder: "Search projects", grid: "Grid", list: "List", loadMore: "Load more projects",
+      showing: "Showing {shown} of {total}", readCaseStudy: "Read case study", projectsShipped: "Projects shipped", industriesServed: "Industries served",
+      noResults: "No projects match your filters yet.",
+    },
+    pageSize: 7,
+    cta: { heading: "Your project could be **next.**", button: { label: "Start a project", href: "/contact" } },
+  });
+}
+
 async function seedHomeSections() {
   if (await prisma.siteSetting.findUnique({ where: { key: "home_sections" } })) return log("setting 'home_sections' exists -- left untouched");
   const built = await buildHomeSections(prisma);
@@ -195,6 +232,8 @@ async function main() {
   await syncRbac();
   await seedSettings();
   await seedHomeSections();
+  await seedServicesPage();
+  await seedPortfolioPage();
   log("done");
 }
 
