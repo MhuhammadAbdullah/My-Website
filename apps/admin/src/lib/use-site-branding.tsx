@@ -14,6 +14,21 @@ interface SiteBrandingValue {
 // (or if it never does) the UI shows the neutral word "Admin".
 const DEFAULT_BRAND_NAME = "";
 
+const ACCENTS = ["lime", "orange", "blue", "yellow"];
+
+// The admin wears the same accent the owner picked for the site (Site Settings > Theme).
+export function applyAccent(theme: { accent?: string; customColor?: string } | undefined) {
+  const root = document.documentElement;
+  const custom = theme?.accent === "custom" && theme.customColor && /^#[0-9a-fA-F]{6}$/.test(theme.customColor) ? theme.customColor : null;
+  if (custom) {
+    root.dataset.accent = "custom";
+    root.style.setProperty("--accent", custom);
+  } else {
+    root.style.removeProperty("--accent");
+    root.dataset.accent = theme?.accent && ACCENTS.includes(theme.accent) ? theme.accent : "lime";
+  }
+}
+
 const SiteBrandingContext = React.createContext<SiteBrandingValue | null>(null);
 
 // Mirrors use-permissions.tsx's provider pattern: one shared fetch of the
@@ -36,6 +51,7 @@ export function SiteBrandingProvider({ children }: { children: React.ReactNode }
       .then((r) => {
         if (cancelled) return;
         const branding = r.settings.branding;
+        applyAccent(r.settings.theme);
         setValue({
           brandName: branding?.brandName || r.settings.company_name || DEFAULT_BRAND_NAME,
           logoUrl: branding?.displayMode === "LOGO" ? (branding.logoUrl ?? null) : null,

@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Menu } from "lucide-react";
-import { Avatar, AvatarFallback, Button } from "@agency/ui";
+import { Button } from "@agency/ui";
 import { authClient } from "@/lib/auth-client";
-import { getPageTitle } from "@/lib/nav-config";
 import { NotificationBell } from "@/components/notification-bell";
-import { AdminBrandMark } from "@/components/admin-sidebar";
+import { GlobalSearch } from "@/components/global-search";
+import { adminNavGroups, findGroupKeyForPath, getPageTitle } from "@/lib/nav-config";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
   const router = useRouter();
@@ -21,6 +22,7 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const user = mounted ? session?.user : undefined;
+  const name = user?.name ?? "Admin";
 
   async function handleSignOut() {
     await authClient.signOut();
@@ -29,34 +31,39 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
   }
 
   return (
-    <header className="flex items-center justify-between gap-3 border-b border-neutral-200 bg-background px-4 py-4 sm:px-6">
-      <div className="flex min-w-0 items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onMenuClick}
-          aria-label="Open navigation menu"
-          className="size-11 shrink-0 md:hidden"
-        >
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-neutral-200 bg-background/90 px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <Button variant="ghost" size="icon" onClick={onMenuClick} aria-label="Open navigation menu" className="size-10 shrink-0 md:hidden">
           <Menu className="size-5" />
         </Button>
-        <p className="truncate font-heading text-body font-semibold text-heading">{getPageTitle(pathname)}</p>
+        {pathname === "/" ? (
+          <GlobalSearch className="w-full max-w-[22rem]" />
+        ) : (
+          <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 truncate text-[13px] text-neutral-500">
+            <span className="hidden sm:inline">{adminNavGroups.find((g) => g.key === findGroupKeyForPath(pathname))?.label ?? "Admin"}</span>
+            <span className="hidden sm:inline" aria-hidden>
+              /
+            </span>
+            <span className="truncate font-semibold text-heading">{getPageTitle(pathname)}</span>
+          </nav>
+        )}
       </div>
-      <div className="flex shrink-0 items-center gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <ModeToggle />
         <NotificationBell />
-        <div className="flex items-center border-r border-neutral-200 pr-3">
-          <AdminBrandMark className="h-7 max-w-24" />
+        <div className="flex items-center gap-2 rounded-full border border-neutral-200 py-1 pl-1 pr-1 sm:pr-3.5">
+          <span className="flex size-7 items-center justify-center rounded-full bg-heading text-[12px] font-extrabold text-background">{name.charAt(0).toUpperCase()}</span>
+          <span className="hidden max-w-32 truncate text-[13px] font-semibold text-heading sm:block">{name}</span>
         </div>
-        <Avatar className="size-9">
-          <AvatarFallback>{user?.name?.charAt(0) ?? "A"}</AvatarFallback>
-        </Avatar>
-        <div className="hidden text-body-sm sm:block">
-          <p className="max-w-40 truncate font-medium text-heading">{user?.name ?? "Admin"}</p>
-          <p className="max-w-40 truncate text-neutral-400">{user?.email}</p>
-        </div>
-        <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sign out" className="size-11">
-          <LogOut className="size-4" />
-        </Button>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          aria-label="Log out"
+          className="inline-flex h-10 items-center gap-2 rounded-full border border-neutral-200 px-3 text-[13px] font-semibold text-heading transition-colors hover:border-accent-500 hover:text-accent-500 sm:px-4"
+        >
+          <LogOut className="size-3.5 sm:hidden" aria-hidden />
+          <span className="hidden sm:inline">Log out</span>
+        </button>
       </div>
     </header>
   );

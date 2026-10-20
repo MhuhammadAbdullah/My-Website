@@ -1,35 +1,17 @@
 "use client";
 
 import * as React from "react";
-import {
-  Briefcase,
-  FolderKanban,
-  Mail,
-  Quote,
-  DollarSign,
-  Clock,
-  Receipt,
-  CheckCircle2,
-  AlertTriangle,
-  FileText,
-  Wallet,
-  Building2,
-  TrendingUp,
-  BarChart3,
-  UserCheck,
-  Users,
-  CalendarClock,
-  Percent,
-  Banknote,
-} from "lucide-react";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { Badge, Heading, Card, CardContent, CardHeader, CardTitle, Skeleton } from "@agency/ui";
+import Link from "next/link";
+import { ArrowRight, ArrowUpRight, Check, Plus } from "lucide-react";
+import { Bar, BarChart, LabelList, ResponsiveContainer, XAxis } from "recharts";
+import { Skeleton, cn } from "@agency/ui";
+import { DEFAULT_CURRENCY } from "@agency/types";
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { formatMoney } from "@/lib/currency";
-import { DEFAULT_CURRENCY } from "@agency/types";
-import { DateRangeFilter, type DateRangeValue } from "@/components/finance/date-range-filter";
+import { authClient } from "@/lib/auth-client";
 import { DashboardCharts, type ChartsResponse } from "@/components/finance/dashboard-charts";
+import type { DateRangeValue, RangePreset } from "@/components/finance/date-range-filter";
 
 interface InfluencerDashboardStats {
   pendingApplications: number;
@@ -45,24 +27,11 @@ interface InfluencerDashboardStats {
   flags: { marketplaceEnabled: boolean; registrationEnabled: boolean; bookingsEnabled: boolean };
 }
 
-// Brief §29 asks for a 🟢/🟡/🔴 tri-state indicator, but each underlying
-// flag is a plain boolean (no "limited" state the API actually tracks) --
-// mapping straight to Enabled/Disabled rather than fabricating a third
-// state with nothing real behind it.
-function FlagStatus({ label, enabled }: { label: string; enabled: boolean }) {
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3">
-      <span className="text-body-sm font-medium text-heading">{label}</span>
-      <Badge variant={enabled ? "success" : "error"}>{enabled ? "🟢 Enabled" : "🔴 Disabled"}</Badge>
-    </div>
-  );
-}
-
 interface DashboardCounts {
   services: number;
   projects: number;
   testimonials: number;
-  submissions: number;
+  newSubmissions: number;
 }
 
 interface FinanceStats {
@@ -79,261 +48,397 @@ interface FinanceStats {
   defaultCurrency: string;
 }
 
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  loading,
-  tone = "accent",
-}: {
-  label: string;
-  value: string | number;
-  icon: typeof Briefcase;
-  loading: boolean;
-  tone?: "accent" | "success" | "warning" | "error";
-}) {
-  const toneClasses = {
-    accent: "bg-accent-50 text-accent-600",
-    success: "bg-success-50 text-success-600",
-    warning: "bg-warning-50 text-warning-600",
-    error: "bg-error-50 text-error-600",
-  }[tone];
+const RANGES: { value: RangePreset; label: string; long: string }[] = [
+  { value: "today", label: "Today", long: "Today" },
+  { value: "7days", label: "7 days", long: "Last 7 days" },
+  { value: "month", label: "This month", long: "This month" },
+  { value: "3months", label: "3 months", long: "Last 3 months" },
+  { value: "year", label: "Year", long: "This year" },
+];
 
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? "Good morning" : h < 18 ? "Good day" : "Good evening";
+}
+
+function SectionHead({ title, href, linkLabel, right }: { title: string; href?: string; linkLabel?: string; right?: React.ReactNode }) {
   return (
-    <Card>
-      <CardContent className="flex items-center justify-between pt-6">
-        <div>
-          <p className="text-body-sm text-neutral-500">{label}</p>
-          {loading ? <Skeleton className="mt-2 h-8 w-16" /> : <p className="mt-1 text-h4 font-semibold text-heading">{value}</p>}
-        </div>
-        <div className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${toneClasses}`}>
-          <Icon className="size-5" />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex items-end justify-between gap-4">
+      <h2 className="font-heading font-extrabold tracking-tight text-heading" style={{ fontSize: "clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem)", lineHeight: 1 }}>
+        {title}
+      </h2>
+      {right ??
+        (href && (
+          <Link href={href} className="shrink-0 pb-1 text-[13px] font-bold text-accent-500 hover:underline">
+            {linkLabel} →
+          </Link>
+        ))}
+    </div>
   );
 }
 
+function Num({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <p className={cn("font-heading font-extrabold leading-none tracking-tight", className)}>{children}</p>;
+}
+
+function Tile({
+  label,
+  value,
+  loading,
+  href,
+  mark,
+  accent,
+}: {
+  label: string;
+  value: React.ReactNode;
+  loading: boolean;
+  href?: string;
+  mark?: React.ReactNode;
+  accent?: boolean;
+}) {
+  const body = (
+    <>
+      <div className="flex items-start justify-between gap-2">
+        <p className={cn("text-[12px] font-medium", accent ? "text-on-accent/70" : "text-neutral-500")}>{label}</p>
+        {mark}
+      </div>
+      {loading ? <Skeleton className="mt-6 h-8 w-20" /> : <Num className="mt-6 text-[clamp(1.5rem,1.1rem+1.2vw,2.25rem)]">{value}</Num>}
+    </>
+  );
+  const cls = cn(
+    "block rounded-[18px] border p-5 transition-colors",
+    accent ? "border-transparent bg-accent-500 text-on-accent" : "border-neutral-200 bg-neutral-50 text-heading",
+    href && !accent && "hover:border-accent-500",
+  );
+  return href ? (
+    <Link href={href} className={cls}>
+      {body}
+    </Link>
+  ) : (
+    <div className={cls}>{body}</div>
+  );
+}
+
+function Mark({ tone }: { tone: "blue" | "lime" | "red" | "green" | "muted" | "arrow" | "approx" }) {
+  if (tone === "arrow") return <ArrowUpRight className="size-3.5 text-neutral-400" aria-hidden />;
+  if (tone === "green") return <Check className="size-3.5 text-success-500" aria-hidden />;
+  if (tone === "red") return <span className="text-[12px] font-extrabold text-error-500">!</span>;
+  if (tone === "approx") return <span className="text-[12px] text-neutral-400">≈</span>;
+  return <span className={cn("size-2.5 rounded-[3px]", tone === "blue" ? "bg-[#7aa2ff]" : tone === "lime" ? "bg-accent-500" : "bg-neutral-300")} aria-hidden />;
+}
+
+function Switch({ on }: { on: boolean }) {
+  return (
+    <span className={cn("relative inline-block h-6 w-10 shrink-0 rounded-full transition-colors", on ? "bg-accent-500" : "bg-neutral-300")} aria-hidden>
+      <span className={cn("absolute top-0.5 size-5 rounded-full bg-background transition-all", on ? "left-[18px]" : "left-0.5")} />
+    </span>
+  );
+}
+
+function FlagCard({ label, enabled }: { label: string; enabled: boolean }) {
+  return (
+    <Link href="/influencers/settings" className="flex items-center justify-between gap-3 rounded-[18px] border border-neutral-200 bg-neutral-50 px-5 py-4 transition-colors hover:border-accent-500">
+      <span className="text-[14px] font-bold text-heading">{label}</span>
+      <span className="flex items-center gap-3">
+        <span className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-accent-500">{enabled ? "Enabled" : "Disabled"}</span>
+        <Switch on={enabled} />
+      </span>
+    </Link>
+  );
+}
+
+function AttentionCard({ count, title, note, href, loading, lead, clear }: { count: number; title: string; note: string; href: string; loading: boolean; lead: boolean; clear?: string }) {
+  const idle = !loading && count === 0;
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "group flex items-center gap-4 rounded-[18px] border px-5 py-4 transition-colors",
+        lead ? "border-transparent bg-accent-500 text-on-accent" : "border-neutral-200 bg-neutral-50 text-heading hover:border-accent-500",
+      )}
+    >
+      {loading ? (
+        <Skeleton className="h-9 w-8" />
+      ) : (
+        <Num className={cn("text-[2.25rem]", idle && "text-neutral-400")}>{count}</Num>
+      )}
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[14px] font-bold">{title}</span>
+        <span className={cn("block truncate text-[12px]", lead ? "text-on-accent/70" : "text-neutral-500")}>{idle ? (clear ?? "All clear") : note}</span>
+      </span>
+      {idle ? <Check className="size-4 shrink-0 text-neutral-400" aria-hidden /> : <ArrowRight className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden />}
+    </Link>
+  );
+}
+
+const QUICK_ACTIONS = [
+  { label: "New quotation", href: "/finance/quotations/new" },
+  { label: "New invoice", href: "/finance/invoices/new" },
+  { label: "Add project", href: "/portfolio?new=1" },
+  { label: "Add service", href: "/services?new=1" },
+  { label: "Invite client", href: "/finance/clients?new=1" },
+];
+
 export default function DashboardPage() {
+  const { data: session } = authClient.useSession();
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+  const firstName = (mounted ? session?.user?.name : undefined)?.split(" ")[0] ?? "";
+
   const { data, loading } = useAsyncData<DashboardCounts>(async () => {
-    // All four endpoints are paginated now — `total` is the accurate count of
-    // every row regardless of page size, unlike `items.length` (page-sized).
+    // Paginated endpoints: `total` is the row count regardless of page size.
     const [services, projects, testimonials, submissions] = await Promise.all([
       request<{ total: number }>("/services/admin?limit=1"),
       request<{ total: number }>("/projects/admin?limit=1"),
       request<{ total: number }>("/testimonials/admin?limit=1"),
-      request<{ total: number }>("/contact?limit=1"),
+      request<{ total: number }>("/contact?status=NEW&limit=1"),
     ]);
-    return {
-      services: services.total,
-      projects: projects.total,
-      testimonials: testimonials.total,
-      submissions: submissions.total,
-    };
+    return { services: services.total, projects: projects.total, testimonials: testimonials.total, newSubmissions: submissions.total };
   }, []);
 
-  const { data: finance, loading: financeLoading } = useAsyncData<FinanceStats>(
-    () => request<FinanceStats>("/finance/dashboard"),
-    [],
-  );
+  const { data: finance, loading: financeLoading } = useAsyncData<FinanceStats>(() => request<FinanceStats>("/finance/dashboard"), []);
   const currency = finance?.defaultCurrency ?? DEFAULT_CURRENCY;
+  const money = (n: number) => formatMoney(n, currency, { maximumFractionDigits: 0 });
 
-  const { data: influencerStats, loading: influencerStatsLoading } = useAsyncData<InfluencerDashboardStats>(
-    () => request<InfluencerDashboardStats>("/influencer-dashboard/admin/stats"),
-    [],
-  );
+  const { data: inf, loading: infLoading } = useAsyncData<InfluencerDashboardStats>(() => request<InfluencerDashboardStats>("/influencer-dashboard/admin/stats"), []);
 
   const [range, setRange] = React.useState<DateRangeValue>({ preset: "month", from: "", to: "" });
+  const rangeLabel = RANGES.find((r) => r.value === range.preset)?.long ?? "This month";
 
   const { data: charts, loading: chartsLoading } = useAsyncData<ChartsResponse>(() => {
     const params = new URLSearchParams({ range: range.preset });
-    if (range.preset === "custom") {
-      if (range.from) params.set("from", range.from);
-      if (range.to) params.set("to", range.to);
-    }
     return request<ChartsResponse>(`/finance/dashboard/charts?${params.toString()}`);
-  }, [range.preset, range.from, range.to]);
+  }, [range.preset]);
+
+  const attention = [
+    { count: inf?.pendingApplications ?? 0, title: "Influencer applications", note: "Waiting for your review", href: "/influencers/applications", loading: infLoading, clear: "Nothing waiting" },
+    { count: data?.newSubmissions ?? 0, title: "New contact submission", note: "Reply within 1 business day", href: "/analytics", loading: loading, clear: "Inbox is clear" },
+    { count: finance?.overdueInvoices ?? 0, title: "Overdue invoices", note: "Follow up on payment", href: "/finance/invoices?status=OVERDUE", loading: financeLoading, clear: "All clear" },
+  ];
+  const leadIndex = attention.findIndex((a) => !a.loading && a.count > 0);
+
+  const conversion = charts?.conversionRate;
+  const maxCategory = Math.max(1, ...(inf?.topCategories ?? []).map((c) => c.count));
 
   return (
-    <div>
-      <Heading level={2}>Dashboard</Heading>
-      <p className="mt-1 text-body-sm text-neutral-500">A complete overview of the business — content and finance.</p>
+    <div className="mx-auto max-w-[1180px] space-y-14 pb-10">
+      {/* ------------------------------------------------------------ hero */}
+      <section>
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">Overview · {rangeLabel}</p>
+        <h1 className="mt-3 font-heading font-extrabold tracking-tight text-heading" style={{ fontSize: "clamp(2.25rem, 1rem + 4vw, 4.25rem)", lineHeight: 0.95 }}>
+          {greeting()}
+          {firstName && (
+            <>
+              , <span className="text-accent-500">{firstName}.</span>
+            </>
+          )}
+        </h1>
+        <p className="mt-4 text-[14px] text-neutral-500">Content, finance and marketplace in one place.</p>
 
-      <Heading level={3} className="mt-8">
-        Content
-      </Heading>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Services" value={data?.services ?? 0} icon={Briefcase} loading={loading} />
-        <StatCard label="Portfolio projects" value={data?.projects ?? 0} icon={FolderKanban} loading={loading} />
-        <StatCard label="Testimonials" value={data?.testimonials ?? 0} icon={Quote} loading={loading} />
-        <StatCard label="New contact submissions" value={data?.submissions ?? 0} icon={Mail} loading={loading} />
-      </div>
+        <div role="group" aria-label="Date range" className="mt-6 inline-flex max-w-full gap-1 overflow-x-auto rounded-full border border-neutral-200 bg-neutral-50 p-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {RANGES.map((r) => (
+            <button
+              key={r.value}
+              type="button"
+              aria-pressed={range.preset === r.value}
+              onClick={() => setRange({ preset: r.value, from: "", to: "" })}
+              className={cn(
+                "shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12px] font-bold transition-colors",
+                range.preset === r.value ? "bg-accent-500 text-on-accent" : "text-neutral-500 hover:text-heading",
+              )}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
 
-      <Heading level={3} className="mt-10">
-        Finance overview
-      </Heading>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Total revenue"
-          value={formatMoney(finance?.totalRevenue ?? 0, currency, { maximumFractionDigits: 0 })}
-          icon={DollarSign}
-          loading={financeLoading}
-          tone="success"
-        />
-        <StatCard
-          label="Pending revenue"
-          value={formatMoney(finance?.pendingRevenue ?? 0, currency, { maximumFractionDigits: 0 })}
-          icon={Clock}
-          loading={financeLoading}
-          tone="warning"
-        />
-        <StatCard
-          label="Outstanding payments"
-          value={formatMoney(finance?.outstandingPayments ?? 0, currency, { maximumFractionDigits: 0 })}
-          icon={AlertTriangle}
-          loading={financeLoading}
-          tone="error"
-        />
-        <StatCard
-          label="Payments received this month"
-          value={formatMoney(finance?.paymentsThisMonth ?? 0, currency, { maximumFractionDigits: 0 })}
-          icon={TrendingUp}
-          loading={financeLoading}
-          tone="success"
-        />
-        <StatCard label="Total quotations" value={finance?.totalQuotations ?? 0} icon={FileText} loading={financeLoading} />
-        <StatCard label="Total invoices" value={finance?.totalInvoices ?? 0} icon={Receipt} loading={financeLoading} />
-        <StatCard label="Paid invoices" value={finance?.paidInvoices ?? 0} icon={CheckCircle2} loading={financeLoading} tone="success" />
-        <StatCard label="Overdue invoices" value={finance?.overdueInvoices ?? 0} icon={AlertTriangle} loading={financeLoading} tone="error" />
-        <StatCard label="Number of clients" value={finance?.totalClients ?? 0} icon={Building2} loading={financeLoading} />
-        <StatCard
-          label="Average invoice value"
-          value={formatMoney(finance?.averageInvoiceValue ?? 0, currency, { maximumFractionDigits: 0 })}
-          icon={Wallet}
-          loading={financeLoading}
-        />
-      </div>
+        <p className="mt-10 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">Needs your attention</p>
+        <div className="mt-3 grid gap-3 md:grid-cols-3">
+          {attention.map((a, i) => (
+            <AttentionCard key={a.title} {...a} lead={i === leadIndex} />
+          ))}
+        </div>
 
-      <div className="mt-10 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <Heading level={3}>
-          <span className="flex items-center gap-2">
-            <BarChart3 className="size-5 text-neutral-400" /> Finance analytics
-          </span>
-        </Heading>
-        <DateRangeFilter value={range} onChange={setRange} />
-      </div>
-      <div className="mt-4">
+        <div className="mt-4 flex flex-wrap gap-2">
+          {QUICK_ACTIONS.map((q) => (
+            <Link key={q.label} href={q.href} className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-[12px] font-bold text-heading transition-colors hover:border-accent-500 hover:text-accent-500">
+              <Plus className="size-3" aria-hidden /> {q.label}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* --------------------------------------------------------- finance */}
+      <section className="space-y-4">
+        <SectionHead title="Finance" href="/finance/invoices" linkLabel="Open finance" />
+
+        <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
+          <div className="rounded-[24px] bg-accent-500 p-6 text-on-accent sm:p-8">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] opacity-70">Total revenue</p>
+            {financeLoading ? (
+              <Skeleton className="mt-4 h-16 w-64" />
+            ) : (
+              <Num className="mt-4 break-words text-[clamp(2.5rem,1.2rem+4.6vw,5rem)]">{money(finance?.totalRevenue ?? 0)}</Num>
+            )}
+            <p className="mt-3 text-[13px] opacity-80">
+              {(finance?.totalRevenue ?? 0) > 0 ? "Payments received across all invoices." : "Create your first invoice to start tracking revenue."}
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {[
+                { label: "Pending revenue", v: finance?.pendingRevenue ?? 0 },
+                { label: "Outstanding", v: finance?.outstandingPayments ?? 0 },
+                { label: "Received this month", v: finance?.paymentsThisMonth ?? 0 },
+              ].map((s) => (
+                <div key={s.label} className="rounded-[14px] bg-black/10 px-4 py-3">
+                  <p className="text-[11px] font-medium opacity-70">{s.label}</p>
+                  <Num className="mt-1.5 text-[1.25rem]">{financeLoading ? "…" : money(s.v)}</Num>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-between rounded-[24px] border border-neutral-200 bg-neutral-50 p-6">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-neutral-500">Quotation → Invoice</p>
+            {chartsLoading ? <Skeleton className="my-6 h-16 w-40" /> : <Num className="my-6 text-[clamp(2.5rem,1.5rem+3vw,4rem)]">{(conversion?.rate ?? 0).toFixed(1)}%</Num>}
+            <div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-neutral-200">
+                <div className="h-full rounded-full bg-accent-500 transition-[width] duration-700" style={{ width: `${Math.min(100, conversion?.rate ?? 0)}%` }} />
+              </div>
+              <p className="mt-3 text-[12px] text-neutral-500">
+                {conversion?.convertedQuotations ?? 0} of {conversion?.totalQuotations ?? 0} quotations converted
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <Tile label="Total quotations" value={finance?.totalQuotations ?? 0} loading={financeLoading} href="/finance/quotations" mark={<Mark tone="blue" />} />
+          <Tile label="Total invoices" value={finance?.totalInvoices ?? 0} loading={financeLoading} href="/finance/invoices" mark={<Mark tone="blue" />} />
+          <Tile label="Paid invoices" value={finance?.paidInvoices ?? 0} loading={financeLoading} href="/finance/invoices?status=PAID" mark={<Mark tone="green" />} />
+          <Tile label="Overdue invoices" value={finance?.overdueInvoices ?? 0} loading={financeLoading} href="/finance/invoices?status=OVERDUE" mark={<Mark tone="red" />} />
+          <Tile label="Number of clients" value={finance?.totalClients ?? 0} loading={financeLoading} href="/finance/clients" mark={<Mark tone="blue" />} />
+          <Tile label="Average invoice value" value={money(finance?.averageInvoiceValue ?? 0)} loading={financeLoading} mark={<Mark tone="approx" />} />
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------- analytics */}
+      <section className="space-y-4">
+        <SectionHead
+          title="Analytics"
+          right={<span className="pb-1 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">{rangeLabel}</span>}
+        />
         <DashboardCharts data={charts} loading={chartsLoading} currency={currency} />
-      </div>
+      </section>
 
-      <Heading level={3} className="mt-10">
-        Influencer Marketplace
-      </Heading>
+      {/* --------------------------------------------------------- content */}
+      <section className="space-y-4">
+        <SectionHead title="Content" href="/services" linkLabel="Manage content" />
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <Tile label="Services" value={data?.services ?? 0} loading={loading} href="/services" mark={<Mark tone="arrow" />} />
+          <Tile label="Portfolio projects" value={data?.projects ?? 0} loading={loading} href="/portfolio" mark={<Mark tone="arrow" />} />
+          <Tile label="Testimonials" value={data?.testimonials ?? 0} loading={loading} href="/testimonials" mark={<Mark tone="arrow" />} />
+          <Tile label="New contact submissions" value={data?.newSubmissions ?? 0} loading={loading} href="/analytics" mark={<Mark tone="arrow" />} />
+        </div>
+      </section>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <FlagStatus label="Marketplace" enabled={influencerStats?.flags.marketplaceEnabled ?? true} />
-        <FlagStatus label="Registrations" enabled={influencerStats?.flags.registrationEnabled ?? true} />
-        <FlagStatus label="Client bookings" enabled={influencerStats?.flags.bookingsEnabled ?? true} />
-      </div>
+      {/* ----------------------------------------------------- marketplace */}
+      <section className="space-y-4">
+        <SectionHead title="Influencer marketplace" href="/influencers" linkLabel="Open marketplace" />
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Pending applications" value={influencerStats?.pendingApplications ?? 0} icon={UserCheck} loading={influencerStatsLoading} tone="warning" />
-        <StatCard label="Approved influencers" value={influencerStats?.approvedInfluencers ?? 0} icon={Users} loading={influencerStatsLoading} />
-        <StatCard label="Bookings this month" value={influencerStats?.bookingsThisMonth ?? 0} icon={CalendarClock} loading={influencerStatsLoading} />
-        <StatCard
-          label="Marketplace revenue"
-          value={formatMoney(influencerStats?.totalRevenue ?? 0, currency, { maximumFractionDigits: 0 })}
-          icon={DollarSign}
-          loading={influencerStatsLoading}
-          tone="success"
-        />
-        <StatCard
-          label="Commission earned"
-          value={formatMoney(influencerStats?.totalCommission ?? 0, currency, { maximumFractionDigits: 0 })}
-          icon={Percent}
-          loading={influencerStatsLoading}
-          tone="success"
-        />
-        <StatCard
-          label="Pending payouts"
-          value={formatMoney(influencerStats?.pendingPayouts ?? 0, currency, { maximumFractionDigits: 0 })}
-          icon={Banknote}
-          loading={influencerStatsLoading}
-          tone="warning"
-        />
-        <StatCard label="Total bookings" value={influencerStats?.totalBookings ?? 0} icon={CalendarClock} loading={influencerStatsLoading} />
-      </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          <FlagCard label="Marketplace" enabled={inf?.flags.marketplaceEnabled ?? true} />
+          <FlagCard label="Registrations" enabled={inf?.flags.registrationEnabled ?? true} />
+          <FlagCard label="Client bookings" enabled={inf?.flags.bookingsEnabled ?? true} />
+        </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-0">
-            <CardTitle className="text-h5">Top influencers by revenue</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
-            {influencerStatsLoading ? (
-              <Skeleton className="h-48 w-full" />
-            ) : !influencerStats || influencerStats.topInfluencers.length === 0 ? (
-              <p className="py-8 text-center text-body-sm text-neutral-400">No completed bookings yet.</p>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+          <Tile label="Pending applications" value={inf?.pendingApplications ?? 0} loading={infLoading} href="/influencers/applications" accent />
+          <Tile label="Approved influencers" value={inf?.approvedInfluencers ?? 0} loading={infLoading} href="/influencers" />
+          <Tile label="Bookings this month" value={inf?.bookingsThisMonth ?? 0} loading={infLoading} href="/influencers/bookings" />
+          <Tile label="Marketplace revenue" value={money(inf?.totalRevenue ?? 0)} loading={infLoading} href="/influencers/reports" />
+          <Tile label="Commission earned" value={money(inf?.totalCommission ?? 0)} loading={infLoading} href="/influencers/commission" />
+          <Tile label="Pending payouts" value={money(inf?.pendingPayouts ?? 0)} loading={infLoading} href="/influencers/payouts" />
+          <Tile label="Total bookings" value={inf?.totalBookings ?? 0} loading={infLoading} href="/influencers/bookings" />
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <section className="rounded-[18px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
+            <h3 className="font-heading text-[1.0625rem] font-extrabold tracking-tight text-heading">Top influencers by revenue</h3>
+            <div className="mt-5">
+              {infLoading ? (
+                <Skeleton className="h-32 w-full" />
+              ) : !inf || inf.topInfluencers.length === 0 ? (
+                <div className="rounded-[14px] border border-dashed border-neutral-200 px-4 py-8 text-center text-[13px] text-neutral-400">
+                  No completed bookings yet.
+                  {(inf?.pendingApplications ?? 0) > 0 && (
+                    <Link href="/influencers/applications" className="mt-1 block font-bold text-accent-500 hover:underline">
+                      Review {inf?.pendingApplications} pending application{inf?.pendingApplications === 1 ? "" : "s"} →
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <ol className="space-y-3">
+                  {inf.topInfluencers.map((x, i) => (
+                    <li key={x.id} className="flex items-center justify-between gap-3 text-[13px]">
+                      <span className="flex min-w-0 items-center gap-3">
+                        <span className="w-4 text-neutral-400">{i + 1}</span>
+                        <span className="truncate font-semibold text-heading">{x.username ? `@${x.username}` : x.name}</span>
+                      </span>
+                      <span className="shrink-0 font-bold text-heading">{money(x.revenue)}</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-[18px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
+            <h3 className="font-heading text-[1.0625rem] font-extrabold tracking-tight text-heading">Top categories</h3>
+            <div className="mt-5">
+              {infLoading ? (
+                <Skeleton className="h-32 w-full" />
+              ) : !inf || inf.topCategories.length === 0 ? (
+                <p className="rounded-[14px] border border-dashed border-neutral-200 px-4 py-8 text-center text-[13px] text-neutral-400">No categories yet.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {inf.topCategories.map((c) => (
+                    <li key={c.id} className="grid grid-cols-[5.5rem_1fr_6rem] items-center gap-3 text-[12px]">
+                      <span className="truncate font-semibold text-heading">{c.name}</span>
+                      <span className="h-1.5 overflow-hidden rounded-full bg-neutral-200">
+                        <span className="block h-full rounded-full bg-accent-500" style={{ width: `${(c.count / maxCategory) * 100}%` }} />
+                      </span>
+                      <span className="text-right text-neutral-500">
+                        {c.count} influencer{c.count === 1 ? "" : "s"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
+        </div>
+
+        <section className="rounded-[18px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
+          <div className="flex items-baseline justify-between gap-3">
+            <h3 className="font-heading text-[1.0625rem] font-extrabold tracking-tight text-heading">Monthly growth</h3>
+            <span className="text-[11px] text-neutral-400">Completed bookings per month</span>
+          </div>
+          <div className="mt-4 h-56">
+            {infLoading ? (
+              <Skeleton className="h-full w-full" />
             ) : (
-              <div className="space-y-2">
-                {influencerStats.topInfluencers.map((inf) => (
-                  <div key={inf.id} className="flex items-center justify-between text-body-sm">
-                    <span className="text-heading">{inf.username ? `@${inf.username}` : inf.name}</span>
-                    <span className="font-medium text-heading">{formatMoney(inf.revenue, currency, { maximumFractionDigits: 0 })}</span>
-                  </div>
-                ))}
-              </div>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={inf?.monthlyGrowth ?? []} margin={{ top: 18, bottom: 0 }}>
+                  <XAxis dataKey="month" tick={{ fill: "var(--color-neutral-400)", fontSize: 11 }} tickLine={false} axisLine={{ stroke: "var(--color-neutral-200)", strokeDasharray: "3 3" }} />
+                  <Bar dataKey="bookings" name="Completed bookings" fill="var(--accent)" radius={[6, 6, 0, 0]} minPointSize={2}>
+                    <LabelList dataKey="bookings" position="top" fill="var(--color-neutral-500)" fontSize={11} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-0">
-            <CardTitle className="text-h5">Top categories</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
-            {influencerStatsLoading ? (
-              <Skeleton className="h-48 w-full" />
-            ) : !influencerStats || influencerStats.topCategories.length === 0 ? (
-              <p className="py-8 text-center text-body-sm text-neutral-400">No categories yet.</p>
-            ) : (
-              <div className="space-y-2">
-                {influencerStats.topCategories.map((cat) => (
-                  <div key={cat.id} className="flex items-center justify-between text-body-sm">
-                    <span className="text-heading">{cat.name}</span>
-                    <span className="font-medium text-heading">{cat.count} influencer{cat.count === 1 ? "" : "s"}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="mt-4">
-        <Card>
-          <CardHeader className="pb-0">
-            <CardTitle className="text-h5">Monthly growth</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
-            {influencerStatsLoading ? (
-              <Skeleton className="h-64 w-full" />
-            ) : (
-              <div className="h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={influencerStats?.monthlyGrowth ?? []}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                    <XAxis dataKey="month" fontSize={11} tickLine={false} axisLine={false} />
-                    <YAxis fontSize={11} tickLine={false} axisLine={false} width={40} />
-                    <Tooltip />
-                    <Bar dataKey="bookings" name="Completed bookings" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </section>
+      </section>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-export type DateRangePreset = "today" | "week" | "month" | "year" | "custom";
+export type DateRangePreset = "today" | "week" | "7days" | "month" | "3months" | "year" | "custom";
 
 export interface DateRange {
   start: Date;
@@ -101,6 +101,10 @@ export function resolveDateRange(preset: string | undefined, fromStr?: string, t
       return { start: startOfDay(now), end: endOfDay(now) };
     case "week":
       return { start: startOfWeek(now), end: endOfDay(now) };
+    case "7days":
+      return { start: startOfDay(addDays(now, -6)), end: endOfDay(now) };
+    case "3months":
+      return { start: new Date(now.getFullYear(), now.getMonth() - 2, 1), end: endOfDay(now) };
     case "year":
       return { start: startOfYear(now), end: endOfDay(now) };
     case "custom": {

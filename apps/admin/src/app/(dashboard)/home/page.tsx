@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import {
-  Button,
   Heading,
   Input,
   Label,
@@ -12,10 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
   Skeleton,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
   Textarea,
   toast,
 } from "@agency/ui";
@@ -23,6 +18,7 @@ import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { LogoField, type LogoValue } from "@/components/logo-field";
 import { HomeSectionsEditor } from "@/components/home/home-sections-editor";
+import { HomeHeader, PageTabs } from "@/components/home/home-header";
 
 interface MediaRef {
   id: string;
@@ -167,7 +163,7 @@ export default function HomeContentPage() {
   const [form, setForm] = React.useState<HomeContent>(EMPTY_FORM);
   const [keywordsInput, setKeywordsInput] = React.useState("");
   const [saving, setSaving] = React.useState(false);
-  const [tab, setTab] = React.useState("sections");
+  const [tab, setTab] = React.useState<"sections" | "seo">("sections");
 
   React.useEffect(() => {
     if (!content) return;
@@ -234,35 +230,34 @@ export default function HomeContentPage() {
 
   const seo = form.seo ?? EMPTY_SEO;
 
+  const tabs = (
+    <PageTabs
+      tabs={[
+        { value: "sections", label: "Page sections" },
+        { value: "seo", label: "SEO" },
+      ]}
+      value={tab}
+      onChange={setTab}
+    />
+  );
+
+  if (tab === "sections") return <HomeSectionsEditor tabs={tabs} />;
+
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <Heading level={2}>Home Page</Heading>
-          <p className="mt-1 text-body-sm text-neutral-500">Build your homepage from sections and set how it appears in search results.</p>
-        </div>
-        {!["sections", "statistics", "process", "why"].includes(tab) && (
-          <Button onClick={handleSave} disabled={saving}>
+      <HomeHeader
+        title="Home page"
+        description="Build your homepage from sections and set how it appears in search results."
+        tabs={tabs}
+        actions={
+          <button type="button" onClick={handleSave} disabled={saving} className="inline-flex h-10 items-center rounded-full bg-accent-500 px-5 text-[13px] font-bold text-on-accent transition-opacity hover:opacity-90 disabled:opacity-50">
             {saving ? "Saving…" : "Save changes"}
-          </Button>
-        )}
-      </div>
+          </button>
+        }
+      />
 
-      <Tabs value={tab} onValueChange={setTab} className="mt-6">
-        <TabsList>
-          <TabsTrigger value="sections">Page Sections</TabsTrigger>
-          <TabsTrigger value="seo">SEO</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="sections">
-          <HomeSectionsEditor />
-        </TabsContent>
-
-
-
-
-
-        <TabsContent value="seo">
+      <div className="mt-8">
+        <div>
           <div className="grid max-w-3xl gap-6">
             <SectionCard title="Search engine listing">
               <Field label="Meta title" hint={`${seo.metaTitle.length} / 60`}>
@@ -328,8 +323,8 @@ export default function HomeContentPage() {
               />
             </SectionCard>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 }

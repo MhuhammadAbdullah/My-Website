@@ -37,7 +37,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2.5 px-2 py-3">
             <AdminBrandMark />
             <div className="min-w-0">
-              <p className="truncate font-heading text-body font-semibold text-heading">{brandName || "Admin"}</p>
+              <p className="truncate font-heading text-body font-extrabold uppercase tracking-tight text-heading">{brandName || "Admin"}</p>
               <p className="truncate text-body-sm text-neutral-400">Admin panel</p>
             </div>
           </div>
@@ -49,7 +49,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <AdminTopbar onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-x-hidden p-4 sm:p-6">
+        <main className="flex-1 overflow-x-hidden p-4 sm:p-6 lg:px-8">
           <AdminRouteGuard>{children}</AdminRouteGuard>
         </main>
       </div>

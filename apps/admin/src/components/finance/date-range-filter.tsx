@@ -2,7 +2,7 @@
 
 import { Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@agency/ui";
 
-export type RangePreset = "today" | "week" | "month" | "year" | "custom";
+export type RangePreset = "today" | "week" | "7days" | "month" | "3months" | "year" | "custom";
 
 export interface DateRangeValue {
   preset: RangePreset;

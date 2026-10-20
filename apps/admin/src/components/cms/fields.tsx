@@ -127,10 +127,9 @@ function HeadingField({ def, value, onChange, path, errors }: FieldProps<string>
                 onClick={() => toggle(i)}
                 className={
                   i === highlightedIndex
-                    ? "rounded-full px-2.5 py-0.5 text-body-sm font-semibold text-[#0b0b0c] ring-2 ring-offset-1"
-                    : "rounded-full border border-neutral-200 px-2.5 py-0.5 text-body-sm hover:border-neutral-400"
+                    ? "rounded-full border border-accent-500 bg-accent-500 px-3 py-1 text-body-sm font-bold text-on-accent"
+                    : "rounded-full border border-neutral-300 px-3 py-1 text-body-sm text-heading transition-colors hover:border-accent-500"
                 }
-                style={i === highlightedIndex ? { backgroundColor: "#c8f25a" } : undefined}
               >
                 {word}
               </button>
@@ -204,7 +203,7 @@ function SelectField({ def, value, onChange, path, errors }: FieldProps<string>)
 }
 
 function ColorField({ def, value, onChange, path, errors }: FieldProps<string>) {
-  const swatch: Record<string, string> = { accent: "#c8f25a", surface: "#151517", "surface-2": "#1c1c1f", light: "#f2f2ee" };
+  const swatch: Record<string, string> = { accent: "var(--accent)", surface: "#151517", "surface-2": "#1c1c1f", light: "#f2f2ee" };
   return (
     <FieldShell def={def} path={path} errors={errors}>
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={def.label}>
