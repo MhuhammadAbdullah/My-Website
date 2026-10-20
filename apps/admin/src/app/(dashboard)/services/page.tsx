@@ -37,6 +37,7 @@ import {
   toast,
 } from "@agency/ui";
 import { CURRENCY_OPTIONS } from "@agency/types";
+import { useOpenOnNew } from "@/lib/use-open-on-new";
 import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-list-toolbar";
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
@@ -629,6 +630,7 @@ function ServicesPageInner() {
   });
 
   const [editing, setEditing] = React.useState<Service | null | undefined>(undefined);
+  useOpenOnNew(() => setEditing(null));
   const { confirmDelete, ConfirmDialog } = useDeleteConfirmation();
 
   function handleDelete(id: string) {

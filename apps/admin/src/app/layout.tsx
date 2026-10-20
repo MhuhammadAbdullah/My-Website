@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { PwaInstallPrompt, PwaRegister, Toaster } from "@agency/ui";
-import { manrope, playfairDisplay, ibmPlexMono } from "@/lib/fonts";
+import { manrope, syne, playfairDisplay, ibmPlexMono } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,8 +20,12 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, them
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${manrope.variable} ${playfairDisplay.variable} ${ibmPlexMono.variable}`}>
-      <body className="bg-neutral-50">
+    <html lang="en" data-theme="noir" data-accent="lime" data-mode="dark" className={`${manrope.variable} ${syne.variable} ${playfairDisplay.variable} ${ibmPlexMono.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Apply the saved light/dark choice before first paint (no flash). */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var m=localStorage.getItem("admin-mode");if(m==="light"||m==="dark")document.documentElement.dataset.mode=m}catch(e){}` }} />
+      </head>
+      <body className="bg-background">
         {children}
         <Toaster />
         <PwaRegister enabled={process.env.NODE_ENV === "production"} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { applyAccent } from "@/lib/use-site-branding";
 import * as React from "react";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import {
@@ -66,6 +67,13 @@ function ThemeTab({ settings }: { settings: SiteSettings }) {
   const [mode, setMode] = React.useState<"dark" | "light">(settings.theme?.mode ?? "dark");
   const [installPrompt, setInstallPrompt] = React.useState<boolean>(settings.theme?.installPrompt ?? true);
   const [saving, setSaving] = React.useState(false);
+  const savedTheme = React.useRef(settings.theme);
+
+  // Live preview: the admin wears the picked accent straight away; leaving without saving restores the saved one.
+  React.useEffect(() => {
+    if (accent !== "custom" || isHex(customColor)) applyAccent({ accent, customColor });
+  }, [accent, customColor]);
+  React.useEffect(() => () => applyAccent(savedTheme.current), []);
 
   async function save() {
     const parsed = themeSchema.safeParse({ accent, mode, installPrompt, ...(accent === "custom" ? { customColor } : {}) });
@@ -73,6 +81,7 @@ function ThemeTab({ settings }: { settings: SiteSettings }) {
     setSaving(true);
     try {
       await saveSetting("theme", parsed.data);
+      savedTheme.current = parsed.data;
       toast.success("Theme saved — the whole site updates within a few minutes");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Save failed");

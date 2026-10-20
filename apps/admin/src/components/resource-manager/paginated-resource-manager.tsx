@@ -22,6 +22,7 @@ import {
 } from "@agency/ui";
 import { AdminListToolbar, EmptyState, ListSummary, type FilterOption, type SortOption } from "@/components/admin-list-toolbar";
 import { usePaginatedList } from "@/lib/use-paginated-list";
+import { useOpenOnNew } from "@/lib/use-open-on-new";
 import { useDeleteConfirmation } from "@/lib/use-delete-confirmation";
 import { usePermissions } from "@/lib/use-permissions";
 import type { createResourceClient } from "@/lib/api";
@@ -94,6 +95,8 @@ export function PaginatedResourceManager<T extends { id: string }>({
     setValues(defaultValues);
     setDialogOpen(true);
   }
+
+  useOpenOnNew(openCreate);
 
   function openEdit(item: T) {
     setEditing(item);

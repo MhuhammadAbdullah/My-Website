@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import {
   Accordion,
   AccordionItem,
@@ -19,6 +19,7 @@ import {
 } from "@agency/ui";
 import { adminNavGroups, findGroupKeyForPath, type AdminNavGroup } from "@/lib/nav-config";
 import { usePermissions } from "@/lib/use-permissions";
+import { request } from "@/lib/api";
 import { useSiteBranding } from "@/lib/use-site-branding";
 
 // Shared by the desktop sidebar, the mobile Sheet header (admin-shell.tsx),
@@ -44,11 +45,11 @@ export function AdminBrandMark({ className = "h-8 max-w-28" }: { className?: str
   if (logoUrl) {
     return (
       // eslint-disable-next-line @next/next/no-img-element -- arbitrary Cloudinary URL, not a static asset (same reasoning as site-header.tsx)
-      <img src={logoUrl} alt={brandName || "Admin"} className={cn("w-auto shrink-0 object-contain", className)} />
+      <img src={logoUrl} alt={brandName || "Admin"} className={cn("brand-logo w-auto shrink-0 object-contain", className)} />
     );
   }
   return (
-    <div className={cn("flex aspect-square shrink-0 items-center justify-center rounded-lg bg-heading text-body-sm font-bold text-white", className)}>
+    <div className={cn("flex aspect-square shrink-0 items-center justify-center rounded-[10px] bg-accent-500 font-heading text-body-sm font-extrabold text-on-accent", className)}>
       {(brandName || "A").charAt(0).toUpperCase()}
     </div>
   );
@@ -76,6 +77,30 @@ function useVisibleNavGroups(): AdminNavGroup[] {
         .filter((group) => group.items.length > 0),
     [can],
   );
+}
+
+// Sidebar badges: the number of unanswered contact submissions next to "Messages".
+function useNavBadges(): Record<string, number> {
+  const [badges, setBadges] = React.useState<Record<string, number>>({});
+  React.useEffect(() => {
+    let cancelled = false;
+    const load = () =>
+      request<{ total: number }>("/contact?status=NEW&limit=1")
+        .then((r) => !cancelled && setBadges({ "/analytics": r.total }))
+        .catch(() => {});
+    load();
+    const t = setInterval(load, 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, []);
+  return badges;
+}
+
+function NavBadge({ count }: { count: number }) {
+  if (!count) return null;
+  return <span className="ml-auto flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent-500 px-1.5 text-[10px] font-extrabold text-on-accent">{count > 99 ? "99+" : count}</span>;
 }
 
 function SidebarNavSkeleton() {
@@ -173,6 +198,7 @@ export function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNa
   const pathname = usePathname();
   const { loading } = usePermissions();
   const visibleGroups = useVisibleNavGroups();
+  const badges = useNavBadges();
   const [expandedGroup, setExpandedGroup] = React.useState<string>("");
   const firstRun = React.useRef(true);
 
@@ -215,28 +241,31 @@ export function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNa
       {visibleGroups.map((group) => (
         <AccordionItem key={group.key} value={group.key} className="border-b-0">
           <AccordionHeader>
-            <AccordionTriggerPrimitive className="group flex w-full items-center justify-between rounded-lg px-3 py-2 font-mono text-label uppercase tracking-wide text-neutral-400 transition-colors hover:text-heading">
+            <AccordionTriggerPrimitive className="group flex w-full items-center justify-between rounded-lg px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400 transition-colors hover:text-heading">
               {group.label}
-              <ChevronDown className="size-3.5 shrink-0 text-neutral-400 transition-transform duration-300 ease-[var(--ease-premium)] group-data-[state=open]:rotate-180" />
+              <span aria-hidden className="text-sm leading-none">
+                <span className="group-data-[state=open]:hidden">+</span>
+                <span className="hidden group-data-[state=open]:inline">–</span>
+              </span>
             </AccordionTriggerPrimitive>
           </AccordionHeader>
           <AccordionContentPrimitive className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
             <div className="mt-1 space-y-0.5 pb-1">
               {group.items.map((item) => {
                 const active = pathname === item.href;
-                const Icon = item.icon;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={onNavigate}
                     className={cn(
-                      "flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-body-sm font-medium transition-colors",
-                      active ? "bg-neutral-100 text-heading" : "text-body hover:bg-neutral-50 hover:text-heading",
+                      "flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-[13px] font-semibold transition-colors",
+                      active ? "bg-accent-500 text-on-accent" : "text-body hover:bg-neutral-100 hover:text-heading",
                     )}
                   >
-                    <Icon className="size-4 shrink-0" />
+                    <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", active ? "bg-on-accent" : "bg-neutral-400")} />
                     {item.label}
+                    <NavBadge count={badges[item.href] ?? 0} />
                   </Link>
                 );
               })}
@@ -268,8 +297,8 @@ export function AdminSidebar({
         <AdminBrandMark className={collapsed ? "h-7 max-w-10" : "h-8 max-w-28"} />
         {!collapsed && (
           <div className="min-w-0 flex-1">
-            <p className="truncate font-heading text-body font-semibold text-heading">{brandName || "Admin"}</p>
-            <p className="truncate text-body-sm text-neutral-400">Admin panel</p>
+            <p className="truncate font-heading text-body font-extrabold uppercase tracking-tight text-heading">{brandName || "Admin"}</p>
+            <p className="truncate text-label text-neutral-400">Admin panel</p>
           </div>
         )}
         <Button
