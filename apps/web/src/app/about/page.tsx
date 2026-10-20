@@ -77,11 +77,11 @@ export default async function AboutPage() {
               <p className="mt-8 max-w-xl whitespace-pre-line text-body text-neutral-500">{about.story.split("\n\n")[0]}</p>
             </div>
             {founder && (
-              <div>
-                <div className="aspect-[4/3] overflow-hidden rounded-[var(--radius-2xl)] border border-neutral-200 bg-neutral-50 lg:aspect-[4/3.4]">
+              <div className="mx-auto w-full max-w-sm lg:max-w-none">
+                <div className="aspect-[4/4.4] overflow-hidden rounded-[var(--radius-2xl)] border border-neutral-200 bg-neutral-50 lg:aspect-[4/3.6]">
                   {founder.avatar ? (
                     // eslint-disable-next-line @next/next/no-img-element -- Cloudinary URL
-                    <img src={cloudinaryTransform(founder.avatar.url, "f_auto,q_auto,w_704,h_600,c_fill,g_face")} alt={founder.name} className="size-full object-cover" />
+                    <img src={cloudinaryTransform(founder.avatar.url, "f_auto,q_auto,w_704,h_760,c_fill,g_auto")} alt={founder.name} className="size-full object-cover object-top" />
                   ) : (
                     <div className="flex size-full items-center justify-center font-heading text-7xl font-extrabold text-neutral-200">{founder.name.charAt(0)}</div>
                   )}
