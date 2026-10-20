@@ -50,9 +50,9 @@ export function PricingSection({ content }: { content: Content }) {
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <h3 className={cn("font-heading text-h4 font-extrabold", hot ? "text-on-accent" : "text-heading")}>{str(p.title)}</h3>
+                  <h3 className={cn("min-w-0 font-heading text-h4 font-extrabold", hot ? "text-on-accent" : "text-heading")}>{str(p.title)}</h3>
                   {str(p.badge) && (
-                    <span className={cn("rounded-full px-3 py-1 text-label font-extrabold uppercase tracking-wider", hot ? "bg-[#0b0b0c] text-[color:var(--accent)]" : "border border-neutral-300 text-neutral-500")}>
+                    <span className={cn("shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[0.6875rem] font-extrabold uppercase tracking-wide sm:px-3 sm:text-label sm:tracking-wider", hot ? "bg-[#0b0b0c] text-[color:var(--accent)]" : "border border-neutral-300 text-neutral-500")}>
                       {str(p.badge)}
                     </span>
                   )}
