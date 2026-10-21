@@ -24,6 +24,7 @@ export const EMAIL_TEMPLATE_KEYS = [
   "influencer.application_needs_info",
   "influencer.payout_sent",
   "influencer.password_reset",
+  "admin.password_reset",
   "influencer.login_otp",
   "booking.received_client",
   "booking.received_admin_alert",
@@ -46,6 +47,7 @@ export const EMAIL_TEMPLATE_CTA: Partial<Record<EmailTemplateKey, { label: strin
   "influencer.application_approved": { label: "Log in to your dashboard", urlVar: "loginUrl" },
   "influencer.payout_sent": { label: "View payout details", urlVar: "earningsUrl" },
   "influencer.password_reset": { label: "Reset password", urlVar: "resetUrl" },
+  "admin.password_reset": { label: "Reset password", urlVar: "resetUrl" },
   "booking.received_admin_alert": { label: "Review booking", urlVar: "reviewUrl" },
   "booking.assigned_influencer": { label: "Review booking", urlVar: "bookingsUrl" },
 };
@@ -148,6 +150,18 @@ export const EMAIL_TEMPLATE_DEFAULTS: Record<EmailTemplateKey, EmailTemplateDefa
 <p>We've sent your payout <strong>{{payoutNumber}}</strong> for <strong>{{currency}} {{totalAmount}}</strong> via {{method}}. It should reflect on your end shortly.</p>
 {{cta}}`,
     variables: ["name", "payoutNumber", "totalAmount", "currency", "method", "cta"],
+  },
+  "admin.password_reset": {
+    key: "admin.password_reset",
+    name: "Admin password reset",
+    description: "Sent to an admin user who asked to reset their password from the admin sign-in page.",
+    recipientRole: "ADMIN",
+    subject: "Reset your admin password",
+    bodyHtml: `<p>Hi {{name}},</p>
+<p>We received a request to reset your admin panel password. This link expires in 1 hour and can only be used once.</p>
+{{cta}}
+<p>If you didn't request this, you can safely ignore this email — your password won't change.</p>`,
+    variables: ["name", "cta"],
   },
   "influencer.password_reset": {
     key: "influencer.password_reset",

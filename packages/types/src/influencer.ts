@@ -84,7 +84,7 @@ export const PAYOUT_METHOD_LABELS: Record<PayoutMethodTypeId, string> = {
 // "Creator Payout" step), but only offers the 3 methods most of this
 // platform's creators actually use -- the full PAYOUT_METHOD_TYPES set
 // stays reachable from the influencer dashboard post-approval, unchanged.
-export const REGISTRATION_PAYOUT_METHOD_TYPES = ["BANK_ACCOUNT", "JAZZCASH", "EASYPAISA"] as const;
+export const REGISTRATION_PAYOUT_METHOD_TYPES = PAYOUT_METHOD_TYPES;
 export type RegistrationPayoutMethodTypeId = (typeof REGISTRATION_PAYOUT_METHOD_TYPES)[number];
 
 export const IDENTITY_DOCUMENT_TYPES = ["CNIC", "PASSPORT"] as const;
@@ -110,6 +110,11 @@ const walletDetailsSchema = z.object({
   iban: z.string().min(10, "Enter a valid IBAN").max(40),
 });
 
+// "Other" has no known brand, so the name of the bank or wallet is required to know where to send the money.
+const otherWalletDetailsSchema = walletDetailsSchema.extend({
+  bankName: z.string().trim().min(2, "Bank or wallet name is required").max(150),
+});
+
 export const PAYOUT_METHOD_DETAILS_SCHEMA_BY_TYPE = {
   BANK_ACCOUNT: bankAccountDetailsSchema,
   RAAST: walletDetailsSchema,
@@ -117,7 +122,7 @@ export const PAYOUT_METHOD_DETAILS_SCHEMA_BY_TYPE = {
   JAZZCASH: walletDetailsSchema,
   NAYAPAY: walletDetailsSchema,
   SADAPAY: walletDetailsSchema,
-  OTHER_WALLET: walletDetailsSchema,
+  OTHER_WALLET: otherWalletDetailsSchema,
 } as const;
 
 // Per-type field definitions the client form renders from, kept next to the
@@ -140,7 +145,7 @@ export const PAYOUT_METHOD_FIELDS_BY_TYPE: Record<(typeof PAYOUT_METHOD_TYPES)[n
   JAZZCASH: WALLET_FIELDS,
   NAYAPAY: WALLET_FIELDS,
   SADAPAY: WALLET_FIELDS,
-  OTHER_WALLET: WALLET_FIELDS,
+  OTHER_WALLET: [{ key: "bankName", label: "Bank / wallet name" }, ...WALLET_FIELDS],
 };
 
 // The submission schemas below only *validate* `details` -- Zod's
@@ -184,11 +189,7 @@ export function orderedPayoutMethodDetails(
   return [...ordered, ...extras];
 }
 
-export const REGISTRATION_PAYOUT_METHOD_LABELS: Record<RegistrationPayoutMethodTypeId, string> = {
-  BANK_ACCOUNT: "Bank Transfer",
-  JAZZCASH: "JazzCash",
-  EASYPAISA: "EasyPaisa",
-};
+export const REGISTRATION_PAYOUT_METHOD_LABELS: Record<RegistrationPayoutMethodTypeId, string> = PAYOUT_METHOD_LABELS;
 
 // Registration's "Creator Payout" step submission (brief update §5/§6):
 // real account details, not just a method preference -- but held as

@@ -1,45 +1,28 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { LogOut, Menu } from "lucide-react";
-import { Avatar, AvatarFallback, Button } from "@agency/ui";
-import { influencerAuthClient } from "@/lib/influencer-auth-client";
 import { getInfluencerPageTitle } from "@/lib/influencer-nav-config";
+import { ModeToggle } from "@/components/mode-toggle";
 import { InfluencerNotificationBell } from "./notification-bell";
 
-export function InfluencerDashboardTopbar({ name, onMenuClick }: { name: string; onMenuClick: () => void }) {
-  const router = useRouter();
+export function InfluencerDashboardTopbar({ name, onMenuClick, onSignOut }: { name: string; onMenuClick: () => void; onSignOut: () => void }) {
   const pathname = usePathname();
-
-  async function handleSignOut() {
-    await influencerAuthClient.signOut();
-    router.push("/influencers");
-    router.refresh();
-  }
-
   return (
-    <header className="flex items-center justify-between gap-3 border-b border-neutral-200 bg-background px-4 py-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-neutral-200 bg-background/90 px-4 py-3 backdrop-blur-xl sm:px-6">
       <div className="flex min-w-0 items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onMenuClick}
-          aria-label="Open navigation menu"
-          className="size-11 shrink-0 md:hidden"
-        >
-          <Menu className="size-5" />
-        </Button>
-        <p className="truncate font-heading text-body font-semibold text-heading">{getInfluencerPageTitle(pathname)}</p>
+        <button type="button" onClick={onMenuClick} aria-label="Open menu" className="flex size-10 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-heading md:hidden">
+          <Menu className="size-5" aria-hidden />
+        </button>
+        <p className="truncate font-heading text-[1.0625rem] font-extrabold tracking-tight text-heading">{getInfluencerPageTitle(pathname)}</p>
       </div>
-      <div className="flex shrink-0 items-center gap-3">
+      <div className="flex shrink-0 items-center gap-2">
+        <ModeToggle />
         <InfluencerNotificationBell />
-        <Avatar className="size-9">
-          <AvatarFallback>{name.charAt(0).toUpperCase()}</AvatarFallback>
-        </Avatar>
-        <p className="hidden max-w-40 truncate text-body-sm font-medium text-heading sm:block">{name}</p>
-        <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sign out" className="size-11">
-          <LogOut className="size-4" />
-        </Button>
+        <span className="hidden max-w-40 truncate rounded-full border border-neutral-200 py-1.5 pl-3 pr-3.5 text-body-sm font-semibold text-heading sm:block">{name}</span>
+        <button type="button" onClick={onSignOut} aria-label="Sign out" title="Sign out" className="flex size-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:border-accent-500 hover:text-heading md:hidden">
+          <LogOut className="size-4" aria-hidden />
+        </button>
       </div>
     </header>
   );

@@ -124,7 +124,7 @@ function Mark({ tone }: { tone: "blue" | "lime" | "red" | "green" | "muted" | "a
   if (tone === "green") return <Check className="size-3.5 text-success-500" aria-hidden />;
   if (tone === "red") return <span className="text-[12px] font-extrabold text-error-500">!</span>;
   if (tone === "approx") return <span className="text-[12px] text-neutral-400">≈</span>;
-  return <span className={cn("size-2.5 rounded-[3px]", tone === "blue" ? "bg-[#7aa2ff]" : tone === "lime" ? "bg-accent-500" : "bg-neutral-300")} aria-hidden />;
+  return <span className={cn("size-2.5 rounded-[3px]", tone === "blue" ? "bg-accent-500/60" : tone === "lime" ? "bg-accent-500" : "bg-neutral-300")} aria-hidden />;
 }
 
 function Switch({ on }: { on: boolean }) {

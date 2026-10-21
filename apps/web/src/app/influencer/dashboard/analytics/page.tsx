@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { AnimatedNumber } from "@/components/influencer/animated-number";
+import { AXIS_TICK, CHART_PALETTE, GRID, LEGEND_STYLE, TOOLTIP } from "@/lib/chart-theme";
 import {
   Bar,
   BarChart,
@@ -52,7 +54,7 @@ import { AGE_GROUP_ORDER } from "@/components/influencer/audience-insights";
 import { AudienceGeoCard } from "@/components/influencer/audience-geo-card";
 import type { InfluencerMeRead, InfluencerPlatformRead } from "@/lib/influencer-types";
 
-const PALETTE = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#06b6d4", "#a855f7", "#ec4899", "#84cc16", "#94a3b8"];
+const PALETTE = CHART_PALETTE;
 const LOCATION_LEVELS = ["COUNTRY", "CITY"] as const;
 
 type BaseFields = Omit<InfluencerSelfProfileInput, "platforms" | "portfolioItems" | "pricingItems" | "pricingCards">;
@@ -281,9 +283,10 @@ export default function InfluencerAnalyticsPage() {
   );
 }
 
-function ChartCard({ title, empty, children }: { title: string; empty?: boolean; children: React.ReactNode }) {
+function ChartCard({ title, empty, children, delay = 0 }: { title: string; empty?: boolean; children: React.ReactNode; delay?: number }) {
   return (
-    <Card>
+    <div className="fade-up h-full" style={{ ["--d" as string]: `${delay}s` }}>
+    <Card className="h-full">
       <CardHeader className="pb-0">
         <CardTitle className="text-h5">{title}</CardTitle>
       </CardHeader>
@@ -295,6 +298,7 @@ function ChartCard({ title, empty, children }: { title: string; empty?: boolean;
         )}
       </CardContent>
     </Card>
+    </div>
   );
 }
 
@@ -329,11 +333,13 @@ function PlatformPanel({ platform }: { platform: InfluencerPlatformRead }) {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-neutral-200 p-5">
-          <p className="text-label uppercase text-neutral-400">Followers</p>
-          <p className="mt-2 text-h4 font-semibold text-heading">{formatCompactNumber(platform.followers)}</p>
-        </div>
-        <ChartCard title="Engagement rate">
+        <ChartCard delay={0} title="Followers">
+          <div className="flex h-full flex-col items-center justify-center text-center">
+            <p className="font-heading text-[clamp(3rem,2rem+3vw,4.5rem)] font-extrabold leading-none tracking-tight text-heading"><AnimatedNumber value={formatCompactNumber(platform.followers)} /></p>
+            <p className="mt-2 text-body-sm text-neutral-500">on this platform</p>
+          </div>
+        </ChartCard>
+        <ChartCard delay={0.08} title="Engagement rate">
           <ResponsiveContainer width="100%" height="100%">
             <RadialBarChart
               innerRadius="70%"
@@ -343,36 +349,36 @@ function PlatformPanel({ platform }: { platform: InfluencerPlatformRead }) {
               endAngle={-270}
             >
               <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-              <RadialBar dataKey="value" cornerRadius={8} fill={PALETTE[0]} background={{ fill: "#f1f5f9" }} />
+              <RadialBar dataKey="value" cornerRadius={8} fill={PALETTE[0]} background={{ fill: "var(--color-neutral-100)" }} />
               <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-heading text-lg font-semibold">
-                {formatEngagementRate(platform.engagementRate)}
+                <AnimatedNumber value={formatEngagementRate(platform.engagementRate)} />
               </text>
             </RadialBarChart>
           </ResponsiveContainer>
         </ChartCard>
         <div className="sm:col-span-2">
-          <ChartCard title="Reach">
+          <ChartCard delay={0.16} title="Reach">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={reachData} layout="vertical" margin={{ left: 24 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
-                <XAxis type="number" fontSize={11} tickLine={false} axisLine={false} tickFormatter={formatCompactNumber} />
-                <YAxis type="category" dataKey="name" fontSize={11} tickLine={false} axisLine={false} width={120} />
-                <Tooltip formatter={(v) => formatCompactNumber(Number(v))} />
-                <Bar dataKey="value" fill={PALETTE[1]} radius={[0, 4, 4, 0]} />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={GRID} />
+                <XAxis type="number" tick={AXIS_TICK} tickLine={false} axisLine={false} tickFormatter={formatCompactNumber} />
+                <YAxis type="category" dataKey="name" tick={AXIS_TICK} tickLine={false} axisLine={false} width={120} />
+                <Tooltip {...TOOLTIP} formatter={(v) => formatCompactNumber(Number(v))} />
+                <Bar dataKey="value" fill={PALETTE[0]} radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
         </div>
       </div>
 
-      <ChartCard title="Engagement breakdown">
+      <ChartCard delay={0.1} title="Engagement breakdown">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={engagementData}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-            <XAxis dataKey="name" fontSize={11} tickLine={false} axisLine={false} />
-            <YAxis fontSize={11} tickLine={false} axisLine={false} width={40} tickFormatter={formatCompactNumber} />
-            <Tooltip formatter={(v) => formatCompactNumber(Number(v))} />
-            <Bar dataKey="value" fill={PALETTE[2]} radius={[4, 4, 0, 0]} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={GRID} />
+            <XAxis dataKey="name" tick={AXIS_TICK} tickLine={false} axisLine={false} />
+            <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={40} tickFormatter={formatCompactNumber} />
+            <Tooltip {...TOOLTIP} formatter={(v) => formatCompactNumber(Number(v))} />
+            <Bar dataKey="value" fill={PALETTE[0]} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -380,7 +386,7 @@ function PlatformPanel({ platform }: { platform: InfluencerPlatformRead }) {
       <div>
         <h3 className="text-label uppercase tracking-wide text-neutral-400">Audience</h3>
         <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <ChartCard title="Audience by gender" empty={genderData.length === 0}>
+          <ChartCard delay={0} title="Audience by gender" empty={genderData.length === 0}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={genderData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={2}>
@@ -388,20 +394,20 @@ function PlatformPanel({ platform }: { platform: InfluencerPlatformRead }) {
                     <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v) => `${v}%`} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Tooltip {...TOOLTIP} formatter={(v) => `${v}%`} />
+                <Legend wrapperStyle={LEGEND_STYLE} />
               </PieChart>
             </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title="Audience by age" empty={ageEntries.length === 0}>
+          <ChartCard delay={0.08} title="Audience by age" empty={ageEntries.length === 0}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={ageEntries.map(([group, value]) => ({ group, value: Number(value) }))}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                <XAxis dataKey="group" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis fontSize={11} tickLine={false} axisLine={false} width={36} />
-                <Tooltip formatter={(v) => `${v}%`} />
-                <Bar dataKey="value" fill={PALETTE[3]} radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={GRID} />
+                <XAxis dataKey="group" tick={AXIS_TICK} tickLine={false} axisLine={false} />
+                <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={36} />
+                <Tooltip {...TOOLTIP} formatter={(v) => `${v}%`} />
+                <Bar dataKey="value" fill={PALETTE[0]} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -409,7 +415,7 @@ function PlatformPanel({ platform }: { platform: InfluencerPlatformRead }) {
           <AudienceGeoCard
             countries={countries.map((l) => ({ name: l.name, value: Number(l.percentage) }))}
             cities={cities.map((l) => ({ name: l.name, value: Number(l.percentage) }))}
-            color={PALETTE[4]!}
+            color={PALETTE[0]!}
           />
         </div>
       </div>

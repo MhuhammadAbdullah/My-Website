@@ -11,6 +11,10 @@ interface ContactSubmissionEmailData {
   source: string | null;
 }
 
+export async function sendAdminPasswordResetEmail(user: { name: string; email: string }, resetUrl: string) {
+  await sendTemplatedEmail("admin.password_reset", user.email, { name: user.name, resetUrl });
+}
+
 export async function sendInquiryAutoReply(to: string, name: string, message: string) {
   await sendTemplatedEmail("contact.auto_reply", to, { name, message: message.replace(/\n/g, "<br />") });
 }

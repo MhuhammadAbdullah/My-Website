@@ -193,6 +193,7 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: "Performance", href: "/influencers/performance", icon: TrendingUp, resource: "influencers" },
       { label: "Badges", href: "/influencers/badges", icon: Award, resource: "influencerBadges" },
       { label: "Reviews", href: "/influencers/reviews", icon: Quote, resource: "influencers" },
+      { label: "Legal", href: "/influencers/legal", icon: Scale, resource: "influencerSettings" },
       { label: "Settings", href: "/influencers/settings", icon: SlidersHorizontal, resource: "influencerSettings" },
       { label: "Reports", href: "/influencers/reports", icon: FileBarChart2, resource: "influencers" },
     ],

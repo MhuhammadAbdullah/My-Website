@@ -30,9 +30,20 @@ export interface ChartsResponse {
   outstandingTrend: { label: string; outstanding: number }[];
 }
 
-// Series colours: the site accent first, then hues that stay readable on the dark surface.
 const ACCENT = "var(--accent)";
-const PALETTE = ["var(--accent)", "#7aa2ff", "#f5d547", "#ff7a3d", "#b58cff", "#4fd1a5", "#ff6b9a", "#9aa0a6"];
+// Series colours: the site accent (e.g. orange) first, then black/white text colour, then greys and orange shades.
+const tint = (accentPercent: number, other: string) => `color-mix(in oklab, var(--accent) ${accentPercent}%, ${other})`;
+const PALETTE = [
+  "var(--accent)",
+  "var(--color-heading)",
+  "var(--color-neutral-500)",
+  tint(65, "white"),
+  "var(--color-neutral-400)",
+  tint(75, "black"),
+  "var(--color-neutral-300)",
+  "var(--color-neutral-700)",
+  tint(40, "white"),
+];
 const GRID = "var(--color-neutral-200)";
 const TICK = { fill: "var(--color-neutral-400)", fontSize: 11 };
 
@@ -134,7 +145,7 @@ export function DashboardCharts({ data, loading, currency }: { data: ChartsRespo
             <XAxis dataKey="label" tick={TICK} tickLine={false} axisLine={false} />
             <YAxis tick={TICK} tickLine={false} axisLine={false} width={48} />
             <Tooltip {...tooltipProps} formatter={money} />
-            <Line type="monotone" dataKey="outstanding" stroke={PALETTE[3]} strokeWidth={2.5} dot={false} />
+            <Line type="monotone" dataKey="outstanding" stroke={PALETTE[1]} strokeWidth={2.5} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -152,7 +163,7 @@ export function DashboardCharts({ data, loading, currency }: { data: ChartsRespo
             <XAxis type="number" tick={TICK} tickLine={false} axisLine={false} />
             <YAxis type="category" dataKey="label" tick={{ ...TICK, fontSize: 10 }} tickLine={false} axisLine={false} width={110} />
             <Tooltip {...tooltipProps} formatter={money} />
-            <Bar dataKey="revenue" fill={PALETTE[1]} radius={[0, 6, 6, 0]} />
+            <Bar dataKey="revenue" fill={PALETTE[0]} radius={[0, 6, 6, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -170,7 +181,7 @@ export function DashboardCharts({ data, loading, currency }: { data: ChartsRespo
             <XAxis type="number" tick={TICK} tickLine={false} axisLine={false} />
             <YAxis type="category" dataKey="label" tick={{ ...TICK, fontSize: 10 }} tickLine={false} axisLine={false} width={110} />
             <Tooltip {...tooltipProps} formatter={money} />
-            <Bar dataKey="revenue" fill={PALETTE[5]} radius={[0, 6, 6, 0]} />
+            <Bar dataKey="revenue" fill={PALETTE[0]} radius={[0, 6, 6, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>

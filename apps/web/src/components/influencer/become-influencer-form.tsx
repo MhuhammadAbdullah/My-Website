@@ -5,6 +5,9 @@ import Link from "next/link";
 import { Pencil, Trash2 } from "lucide-react";
 import { ImageUploader, VideoUploader } from "./media-uploaders";
 import { RegistrationStepper } from "./registration-stepper";
+import { CategoryPicker } from "./category-picker";
+import { PayoutMethodIcon } from "./payout-method-icon";
+import { PasswordField } from "@/components/password-field";
 import {
   Badge,
   Button,
@@ -46,7 +49,7 @@ import {
 } from "@/lib/influencer-api";
 import { formatCompactNumber, platformIconId, platformLabel } from "@/lib/influencer-format";
 
-const STEPS = ["Account", "Profile", "Platforms", "Creator Payout"] as const;
+const STEPS = ["You", "Your content", "Payout"] as const;
 
 const EMPTY_PLATFORM: InfluencerPlatformInput = {
   platform: "INSTAGRAM",
@@ -64,6 +67,19 @@ const EMPTY_PLATFORM: InfluencerPlatformInput = {
   avgSaves: 0,
   isPrimary: false,
 };
+
+// Red star after a label: this field is required.
+function Req() {
+  return (
+    <span className="ml-1 text-error-500" aria-hidden>
+      *
+    </span>
+  );
+}
+
+function Need({ show, children = "Required" }: { show: boolean; children?: React.ReactNode }) {
+  return show ? <p className="mt-1 text-body-sm text-error-500">{children}</p> : null;
+}
 
 type FormState = Omit<InfluencerApplicationInput, "termsAccepted"> & { termsAccepted: boolean };
 
@@ -100,6 +116,9 @@ export function BecomeInfluencerForm({
   const [submitted, setSubmitted] = React.useState(false);
   const [categories, setCategories] = React.useState<{ id: string; name: string }[]>([]);
   const [showVideoGuide, setShowVideoGuide] = React.useState(false);
+  const [showMore, setShowMore] = React.useState(false);
+  // Set when someone presses Continue with missing fields: the empty required ones then show a red note.
+  const [tried, setTried] = React.useState<number | null>(null);
   const [videoGuideContent, setVideoGuideContent] = React.useState("");
   const [platformDraft, setPlatformDraft] = React.useState<InfluencerPlatformInput>(EMPTY_PLATFORM);
   const [editingPlatformIndex, setEditingPlatformIndex] = React.useState<number | null>(null);
@@ -117,17 +136,18 @@ export function BecomeInfluencerForm({
   }
 
   function stepIsValid(index: number): boolean {
-    if (index === 0) return form.name.length >= 2 && /\S+@\S+\.\S+/.test(form.email) && form.password.length >= 8;
-    if (index === 1) return form.username.length >= 3 && form.categoryIds.length > 0;
-    if (index === 2) return form.platforms.length > 0;
+    if (index === 0) return form.name.length >= 2 && /\S+@\S+\.\S+/.test(form.email) && form.password.length >= 8 && form.username.length >= 3;
+    if (index === 1) return form.categoryIds.length > 0 && form.platforms.length > 0;
     return true;
   }
 
   function goNext() {
     if (!stepIsValid(step)) {
-      toast.error("Please fill in the required fields before continuing.");
+      setTried(step);
+      toast.error("Please fill in the fields marked * before continuing.");
       return;
     }
+    setTried(null);
     setStep((s) => Math.min(STEPS.length - 1, s + 1));
   }
 
@@ -207,230 +227,245 @@ export function BecomeInfluencerForm({
     <div className={cn(!bare && "rounded-3xl border border-neutral-200 p-8")}>
       <RegistrationStepper steps={STEPS} currentStep={step} />
 
-      {step === 0 && (
-        <div className="space-y-5">
-          <div>
-            <Label>Full name</Label>
-            <Input value={form.name} onChange={(e) => set("name", e.target.value)} />
+      <div key={step} className="animate-[chapter-in_0.35s_ease-out]">
+        {/* ---------------------------------------------------------- step 1: you */}
+        {step === 0 && (
+          <div className="space-y-5">
+            <p className="text-body-sm text-neutral-500">Takes about two minutes. We review every application by hand. Fields marked <span className="text-error-500">*</span> are required.</p>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <Label>
+                  Full name
+                  <Req />
+                </Label>
+                <Input value={form.name} onChange={(e) => set("name", e.target.value)} autoComplete="name" aria-invalid={tried === 0 && form.name.length < 2} />
+                <Need show={tried === 0 && form.name.length < 2} />
+              </div>
+              <div>
+                <Label>
+                  Email
+                  <Req />
+                </Label>
+                <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} autoComplete="email" aria-invalid={tried === 0 && !/\S+@\S+\.\S+/.test(form.email)} />
+                <Need show={tried === 0 && !/\S+@\S+\.\S+/.test(form.email)}>Enter a valid email address</Need>
+              </div>
+              <div>
+                <Label>
+                  Password
+                  <Req />
+                </Label>
+                <PasswordField value={form.password} onChange={(e) => set("password", e.target.value)} autoComplete="new-password" aria-invalid={tried === 0 && form.password.length < 8} />
+                {tried === 0 && form.password.length < 8 ? <Need show>At least 8 characters</Need> : <p className="mt-1.5 text-label text-neutral-500">At least 8 characters.</p>}
+              </div>
+              <div>
+                <Label>
+                  Username
+                  <Req />
+                </Label>
+                <Input value={form.username} onChange={(e) => set("username", e.target.value.toLowerCase().replace(/\s+/g, "-"))} placeholder="your-profile-name" aria-invalid={tried === 0 && form.username.length < 3} />
+                {tried === 0 && form.username.length < 3 ? <Need show>At least 3 characters</Need> : <p className="mt-1.5 truncate text-label text-neutral-500">Your link: /influencers/{form.username || "your-profile-name"}</p>}
+              </div>
+              <div>
+                <Label>Country</Label>
+                <CountrySelect value={form.countryCode ?? ""} onChange={(v) => set("countryCode", v)} placeholder="Select country" />
+              </div>
+              <div>
+                <Label>City</Label>
+                <Input value={form.city ?? ""} onChange={(e) => set("city", e.target.value)} />
+              </div>
+            </div>
           </div>
-          <div>
-            <Label>Email</Label>
-            <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
-          </div>
-          <div>
-            <Label>Password</Label>
-            <Input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} />
-            <p className="mt-1.5 text-body-sm text-neutral-500">At least 8 characters. You'll use this to log in once approved.</p>
-          </div>
-        </div>
-      )}
+        )}
 
-      {step === 1 && (
-        <div className="space-y-5">
-          <div>
-            <Label>Username</Label>
-            <Input
-              value={form.username}
-              onChange={(e) => set("username", e.target.value.toLowerCase())}
-              placeholder="your-profile-name"
-            />
-            <p className="mt-1.5 text-body-sm text-neutral-500">Your public profile URL: /influencers/{form.username || "your-profile-name"}</p>
-          </div>
-          <div>
-            <Label>Tagline</Label>
-            <Input value={form.tagline ?? ""} onChange={(e) => set("tagline", e.target.value)} placeholder="Lifestyle & travel creator" />
-          </div>
-          <div>
-            <Label>Bio</Label>
-            <Textarea value={form.bio ?? ""} onChange={(e) => set("bio", e.target.value)} rows={4} />
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2">
+        {/* ---------------------------------------------------------- step 2: content */}
+        {step === 1 && (
+          <div className="space-y-6">
             <div>
-              <Label>Country</Label>
-              <CountrySelect value={form.countryCode ?? ""} onChange={(v) => set("countryCode", v)} placeholder="Select country" />
+              <Label>
+                What do you create? (pick one or more)
+                <Req />
+              </Label>
+              <CategoryPicker categories={categories} value={form.categoryIds} onChange={(ids) => set("categoryIds", ids)} />
+              <FieldError>{errors.categoryIds}</FieldError>
+              <Need show={tried === 1 && form.categoryIds.length === 0}>Pick at least one category</Need>
             </div>
-            <div>
-              <Label>City</Label>
-              <Input value={form.city ?? ""} onChange={(e) => set("city", e.target.value)} />
-            </div>
-          </div>
-          <div>
-            <Label>Categories</Label>
-            <div className="mt-1.5 flex flex-wrap gap-2">
-              {categories.map((c) => {
-                const active = form.categoryIds.includes(c.id);
-                return (
-                  <button
-                    type="button"
-                    key={c.id}
-                    onClick={() =>
-                      set("categoryIds", active ? form.categoryIds.filter((id) => id !== c.id) : [...form.categoryIds, c.id])
-                    }
-                  >
-                    <Badge variant={active ? "accent" : "neutral"}>{c.name}</Badge>
-                  </button>
-                );
-              })}
-            </div>
-            <FieldError>{errors.categoryIds}</FieldError>
-          </div>
 
-          <ImageUploader
-            label="Profile image"
-            helpText="JPG, PNG, or WEBP — up to 10MB."
-            sign={() => signApplicationMediaUpload(sessionId.current)}
-            accept="image/jpeg,image/jpg,image/png,image/webp"
-            acceptedExtensions={["jpg", "jpeg", "png", "webp"]}
-            maxSizeMB={10}
-            value={form.profilePhoto}
-            onChange={(media) => set("profilePhoto", media)}
-          />
-
-          <div>
-            <div className="flex items-center justify-between">
-              <Label>Introduction video (optional)</Label>
-              <Button type="button" variant="ghost" size="sm" onClick={() => setShowVideoGuide(true)}>
-                Video Guide
+            <div className="space-y-4 rounded-[var(--radius-xl)] border border-neutral-200 p-5">
+              <div className="flex items-center justify-between">
+                <Label className="mb-0">
+                  {editingPlatformIndex !== null ? "Edit platform" : "Add your main platform"}
+                  <Req />
+                </Label>
+                {editingPlatformIndex !== null && (
+                  <Button type="button" variant="ghost" size="sm" onClick={resetPlatformDraft}>
+                    Cancel
+                  </Button>
+                )}
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <Label>Platform</Label>
+                  <Select value={platformDraft.platform} onValueChange={(v) => setPlatformDraft((p) => ({ ...p, platform: v as InfluencerPlatformInput["platform"] }))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INFLUENCER_SOCIAL_PLATFORMS.map((p) => (
+                        <SelectItem key={p} value={p}>
+                          {p.replace(/_/g, " ")}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>
+                    Username
+                    <Req />
+                  </Label>
+                  <Input value={platformDraft.handle ?? ""} onChange={(e) => setPlatformDraft((p) => ({ ...p, handle: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>Followers</Label>
+                  <Input type="number" value={platformDraft.followers || ""} onChange={(e) => setPlatformDraft((p) => ({ ...p, followers: Number(e.target.value) }))} />
+                </div>
+              </div>
+              <Button type="button" onClick={handleAddOrUpdatePlatform}>
+                {editingPlatformIndex !== null ? "Save changes" : "Add platform"}
               </Button>
             </div>
-            <VideoUploader sign={() => signApplicationMediaUpload(sessionId.current)} value={form.introVideo} onChange={(media) => set("introVideo", media)} />
-          </div>
-        </div>
-      )}
 
-      {step === 2 && (
-        <div className="space-y-6">
-          <div className="space-y-4 rounded-xl border border-neutral-200 p-5">
-            <div className="flex items-center justify-between">
-              <Label>{editingPlatformIndex !== null ? "Edit platform" : "Add a platform"}</Label>
-              {editingPlatformIndex !== null && (
-                <Button type="button" variant="ghost" size="sm" onClick={resetPlatformDraft}>
-                  Cancel
-                </Button>
-              )}
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label>Platform</Label>
-                <Select
-                  value={platformDraft.platform}
-                  onValueChange={(v) => setPlatformDraft((p) => ({ ...p, platform: v as InfluencerPlatformInput["platform"] }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {INFLUENCER_SOCIAL_PLATFORMS.map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {p.replace(/_/g, " ")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Profile Username</Label>
-                <Input value={platformDraft.handle ?? ""} onChange={(e) => setPlatformDraft((p) => ({ ...p, handle: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Profile URL</Label>
-                <Input value={platformDraft.profileUrl ?? ""} onChange={(e) => setPlatformDraft((p) => ({ ...p, profileUrl: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Followers</Label>
-                <Input
-                  type="number"
-                  value={platformDraft.followers}
-                  onChange={(e) => setPlatformDraft((p) => ({ ...p, followers: Number(e.target.value) }))}
-                />
-              </div>
-            </div>
-            <Button type="button" onClick={handleAddOrUpdatePlatform}>
-              {editingPlatformIndex !== null ? "Save changes" : "Add Platform"}
-            </Button>
-          </div>
-
-          {form.platforms.length > 0 ? (
-            <div className="space-y-3">
-              {form.platforms.map((p, i) => {
-                const iconId = platformIconId(p.platform);
-                return (
-                  <div key={i} className="flex items-center justify-between gap-3 rounded-xl border border-neutral-200 p-4">
-                    <div className="flex min-w-0 items-center gap-3">
-                      {iconId ? <SocialIcon platform={iconId} className="size-6 shrink-0" /> : null}
-                      <div className="min-w-0">
-                        <p className="flex items-center gap-1.5 font-medium text-heading">
-                          {platformLabel(p.platform)}
-                          {p.isPrimary && <Badge variant="accent">Primary</Badge>}
-                        </p>
-                        <p className="truncate text-body-sm text-neutral-500">
-                          @{p.handle || "—"} · {formatCompactNumber(p.followers)} followers
-                        </p>
+            {form.platforms.length > 0 ? (
+              <div className="space-y-3">
+                {form.platforms.map((p, i) => {
+                  const iconId = platformIconId(p.platform);
+                  return (
+                    <div key={i} className="animate-[chapter-in_0.3s_ease-out] flex items-center justify-between gap-3 rounded-[var(--radius-xl)] border border-neutral-200 p-4">
+                      <div className="flex min-w-0 items-center gap-3">
+                        {iconId ? <SocialIcon platform={iconId} className="size-6 shrink-0" /> : null}
+                        <div className="min-w-0">
+                          <p className="flex items-center gap-1.5 font-medium text-heading">
+                            {platformLabel(p.platform)}
+                            {p.isPrimary && <Badge variant="accent">Primary</Badge>}
+                          </p>
+                          <p className="truncate text-body-sm text-neutral-500">
+                            @{p.handle || "—"} · {formatCompactNumber(p.followers)} followers
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 gap-1">
+                        <Button type="button" variant="ghost" size="icon" aria-label="Edit platform" onClick={() => handleEditPlatform(i)}>
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button type="button" variant="ghost" size="icon" aria-label="Delete platform" onClick={() => handleDeletePlatform(i)}>
+                          <Trash2 className="size-4 text-error-500" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex shrink-0 gap-1">
-                      <Button type="button" variant="ghost" size="icon" aria-label="Edit platform" onClick={() => handleEditPlatform(i)}>
-                        <Pencil className="size-4" />
-                      </Button>
-                      <Button type="button" variant="ghost" size="icon" aria-label="Delete platform" onClick={() => handleDeletePlatform(i)}>
-                        <Trash2 className="size-4 text-error-500" />
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-body-sm text-neutral-500">No platforms added yet — add at least one above.</p>
-          )}
-          <FieldError>{errors.platforms}</FieldError>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div className="space-y-6">
-          <div>
-            <Label>Payout Method</Label>
-            <Select
-              value={form.payoutMethod.type}
-              onValueChange={(v) => set("payoutMethod", { type: v as RegistrationPayoutMethodTypeId, details: {} })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {REGISTRATION_PAYOUT_METHOD_TYPES.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {REGISTRATION_PAYOUT_METHOD_LABELS[t]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            {PAYOUT_METHOD_FIELDS_BY_TYPE[form.payoutMethod.type].map((field) => (
-              <div key={field.key}>
-                <Label>{field.label}</Label>
-                <Input value={form.payoutMethod.details[field.key] ?? ""} onChange={(e) => updatePayoutDetail(field.key, e.target.value)} />
+                  );
+                })}
               </div>
-            ))}
-          </div>
-          <FieldError>{errors.payoutMethod}</FieldError>
+            ) : (
+              <p className={tried === 1 ? "text-body-sm font-semibold text-error-500" : "text-body-sm text-neutral-500"}>Add at least one platform above (required). You can add your detailed stats later from your dashboard.</p>
+            )}
+            <FieldError>{errors.platforms}</FieldError>
 
-          <p className="text-body-sm text-neutral-500">
-            Your payout details are kept on file and won't become active until your application is approved.
-          </p>
-
-          <div className="flex items-start gap-3">
-            <Checkbox checked={form.termsAccepted} onCheckedChange={(c) => set("termsAccepted", c === true)} id="terms" />
-            <Label htmlFor="terms" className="font-normal">
-              I confirm the information above is accurate and I agree to the platform's terms for influencers.
-            </Label>
+            <button type="button" onClick={() => setShowMore((v) => !v)} aria-expanded={showMore} className="text-body-sm font-bold text-accent-500 hover:underline">
+              {showMore ? "Hide extra details" : "Add more about you (optional)"}
+            </button>
+            {showMore && (
+              <div className="animate-[chapter-in_0.3s_ease-out] space-y-5">
+                <div>
+                  <Label>Tagline</Label>
+                  <Input value={form.tagline ?? ""} onChange={(e) => set("tagline", e.target.value)} placeholder="Lifestyle & travel creator" />
+                </div>
+                <div>
+                  <Label>Bio</Label>
+                  <Textarea value={form.bio ?? ""} onChange={(e) => set("bio", e.target.value)} rows={3} />
+                </div>
+                <ImageUploader
+                  label="Profile image"
+                  helpText="JPG, PNG, or WEBP, up to 10MB."
+                  sign={() => signApplicationMediaUpload(sessionId.current)}
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  acceptedExtensions={["jpg", "jpeg", "png", "webp"]}
+                  maxSizeMB={10}
+                  value={form.profilePhoto}
+                  onChange={(media) => set("profilePhoto", media)}
+                />
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label>Introduction video</Label>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setShowVideoGuide(true)}>
+                      Video Guide
+                    </Button>
+                  </div>
+                  <VideoUploader sign={() => signApplicationMediaUpload(sessionId.current)} value={form.introVideo} onChange={(media) => set("introVideo", media)} />
+                </div>
+              </div>
+            )}
           </div>
-          <FieldError>{errors.termsAccepted}</FieldError>
-        </div>
-      )}
+        )}
+
+        {/* ---------------------------------------------------------- step 3: payout */}
+        {step === 2 && (
+          <div className="space-y-6">
+            <div>
+              <Label>
+                How would you like to be paid?
+                <Req />
+              </Label>
+              <Select value={form.payoutMethod.type} onValueChange={(v) => set("payoutMethod", { type: v as RegistrationPayoutMethodTypeId, details: {} })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {REGISTRATION_PAYOUT_METHOD_TYPES.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      <span className="flex items-center gap-2.5">
+                        <PayoutMethodIcon type={t} size={6} />
+                        {REGISTRATION_PAYOUT_METHOD_LABELS[t]}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div key={form.payoutMethod.type} className="grid animate-[chapter-in_0.3s_ease-out] gap-4 sm:grid-cols-2">
+              {PAYOUT_METHOD_FIELDS_BY_TYPE[form.payoutMethod.type].map((field) => (
+                <div key={field.key}>
+                  <Label>
+                    {field.label}
+                    {!/optional/i.test(field.label) && <Req />}
+                  </Label>
+                  <Input value={form.payoutMethod.details[field.key] ?? ""} onChange={(e) => updatePayoutDetail(field.key, e.target.value)} />
+                </div>
+              ))}
+            </div>
+            <FieldError>{errors.payoutMethod}</FieldError>
+
+            <p className="text-body-sm text-neutral-500">Your payout details are kept on file and are not active until your application is approved.</p>
+
+            <div className="flex items-start gap-3">
+              <Checkbox checked={form.termsAccepted} onCheckedChange={(c) => set("termsAccepted", c === true)} id="terms" />
+              <Label htmlFor="terms" className="font-normal">
+                I confirm the information above is accurate and I agree to the{" "}
+                <Link href="/influencer/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-accent-500 hover:underline">
+                  Influencer Terms &amp; Conditions
+                </Link>{" "}
+                and the{" "}
+                <Link href="/influencer/privacy-policy" target="_blank" rel="noopener noreferrer" className="font-semibold text-accent-500 hover:underline">
+                  Privacy Policy
+                </Link>
+                .
+                <Req />
+              </Label>
+            </div>
+            <FieldError>{errors.termsAccepted}</FieldError>
+          </div>
+        )}
+      </div>
 
       <div className="mt-8 flex items-center justify-between">
         <Button type="button" variant="outline" disabled={step === 0} onClick={() => setStep((s) => Math.max(0, s - 1))}>

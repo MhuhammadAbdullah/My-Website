@@ -44,7 +44,7 @@ export default async function PrivacyPolicyPage() {
     <Section>
       <Container className="mx-auto max-w-4xl">
         <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Privacy Policy" }]} />
-        <Heading level={1} className="mt-6">
+        <Heading level={1} className="mt-6" style={{ fontSize: "clamp(1.75rem, 1rem + 2.2vw, 3rem)" }}>
           {content?.title ?? "Privacy Policy"}
         </Heading>
         {content?.lastUpdatedAt && (

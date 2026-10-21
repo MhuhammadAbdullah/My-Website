@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { FileVideo } from "lucide-react";
+import { FileVideo, Image as ImageIcon } from "lucide-react";
 import { Button, Label, toast } from "@agency/ui";
 import {
   uploadRawFileToCloudinary,
@@ -76,25 +76,34 @@ export function ImageUploader({
           e.target.value = "";
         }}
       />
-      {value ? (
-        <div className="mt-2 flex items-center gap-4">
-          <div className="relative size-20 shrink-0 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100">
+      <div className="mt-1.5 overflow-hidden rounded-[var(--radius-lg)] border border-dashed border-neutral-300 bg-neutral-100">
+        {value ? (
+          <div className="relative h-40 w-full">
             {/* eslint-disable-next-line @next/next/no-img-element -- thumbnail of a freshly-uploaded, not-yet-optimizable Cloudinary asset */}
             <img src={value.url} alt="" className="size-full object-cover" />
+            {uploading && <span className="absolute inset-0 flex items-center justify-center bg-black/50 text-body-sm font-semibold text-white">Uploading…</span>}
           </div>
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => inputRef.current?.click()}>
-              {uploading ? "Uploading…" : "Replace"}
-            </Button>
-            <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)}>
-              Remove
-            </Button>
-          </div>
+        ) : (
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={() => inputRef.current?.click()}
+            className="flex h-40 w-full flex-col items-center justify-center gap-1.5 text-neutral-500 transition-colors hover:text-heading disabled:opacity-60"
+          >
+            <ImageIcon className="size-6" aria-hidden />
+            <span className="text-body-sm font-semibold">{uploading ? "Uploading…" : "Click to upload"}</span>
+          </button>
+        )}
+      </div>
+      {value && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => inputRef.current?.click()}>
+            {uploading ? "Uploading…" : "Replace"}
+          </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)}>
+            Remove
+          </Button>
         </div>
-      ) : (
-        <Button type="button" variant="outline" size="sm" className="mt-1.5" disabled={uploading} onClick={() => inputRef.current?.click()}>
-          {uploading ? "Uploading…" : "Upload image"}
-        </Button>
       )}
       {helpText && <p className="mt-1.5 text-body-sm text-neutral-500">{helpText}</p>}
     </div>

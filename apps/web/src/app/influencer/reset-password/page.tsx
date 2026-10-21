@@ -2,15 +2,34 @@
 
 import * as React from "react";
 import { Suspense } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Button, DialogHeader, DialogTitle, Input, Label, toast } from "@agency/ui";
+import { CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { Container, Heading, Input, Label, toast } from "@agency/ui";
 import { influencerAuthClient } from "@/lib/influencer-auth-client";
-import { InfluencerAuthModal } from "@/components/influencer/auth-modal";
 
+function PasswordField({ id, value, onChange }: { id: string; value: string; onChange: (v: string) => void }) {
+  const [visible, setVisible] = React.useState(false);
+  return (
+    <div className="relative">
+      <Input id={id} type={visible ? "text" : "password"} autoComplete="new-password" value={value} onChange={(e) => onChange(e.target.value)} className="pr-12" />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        aria-label={visible ? "Hide password" : "Show password"}
+        aria-pressed={visible}
+        className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-neutral-400 hover:text-heading"
+      >
+        {visible ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+      </button>
+    </div>
+  );
+}
+
+// A normal page (not a modal over an empty page, which left the header and footer squashed together behind it).
 function ResetPasswordInner() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const token = useSearchParams().get("token");
   const [password, setPassword] = React.useState("");
   const [confirm, setConfirm] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
@@ -44,38 +63,48 @@ function ResetPasswordInner() {
   }
 
   return (
-    <InfluencerAuthModal onRequestClose={() => router.push("/influencer/login")}>
-      <DialogHeader>
-        <DialogTitle>Set a new password</DialogTitle>
-      </DialogHeader>
+    <section className="flex min-h-[70vh] items-center py-10">
+      <Container>
+        <div className="influencer-auth mx-auto w-full max-w-md rounded-[var(--radius-2xl)] border border-neutral-200 bg-neutral-50 p-8 sm:p-10">
+          <Heading level={1} style={{ fontSize: "clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem)" }}>
+            Set a new password
+          </Heading>
 
-      {done ? (
-        <>
-          <p className="text-body-sm text-neutral-600">Your password has been updated.</p>
-          <Button className="mt-6 w-full" onClick={() => router.push("/influencer/login")}>
-            Back to login
-          </Button>
-        </>
-      ) : !token ? (
-        <p className="text-body-sm text-neutral-600">
-          This reset link is invalid or has expired. Please request a new one from the login page.
-        </p>
-      ) : (
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5" noValidate>
-          <div>
-            <Label htmlFor="new-password">New password</Label>
-            <Input id="new-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="confirm-password">Confirm password</Label>
-            <Input id="confirm-password" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
-          </div>
-          <Button type="submit" size="lg" disabled={submitting} className="w-full">
-            {submitting ? "Saving…" : "Set new password"}
-          </Button>
-        </form>
-      )}
-    </InfluencerAuthModal>
+          {done ? (
+            <div className="mt-6 text-center">
+              <CheckCircle2 className="mx-auto size-12 text-accent-500" aria-hidden />
+              <p className="mt-3 text-body-sm text-neutral-500">Your password has been updated.</p>
+              <button type="button" onClick={() => router.push("/influencer/login")} className="mt-6 w-full rounded-full bg-accent-500 px-6 py-3 text-body-sm font-bold text-on-accent hover:opacity-90">
+                Back to login
+              </button>
+            </div>
+          ) : !token ? (
+            <p className="mt-4 text-body-sm text-neutral-500">
+              This reset link is invalid or has expired. Please request a new one from the{" "}
+              <Link href="/influencer/login" className="font-semibold text-accent-500 hover:underline">
+                login page
+              </Link>
+              .
+            </p>
+          ) : (
+            <form onSubmit={handleSubmit} className="mt-6 space-y-5" noValidate>
+              <div>
+                <Label htmlFor="new-password">New password</Label>
+                <PasswordField id="new-password" value={password} onChange={setPassword} />
+                <p className="mt-1.5 text-label text-neutral-500">At least 8 characters.</p>
+              </div>
+              <div>
+                <Label htmlFor="confirm-password">Confirm password</Label>
+                <PasswordField id="confirm-password" value={confirm} onChange={setConfirm} />
+              </div>
+              <button type="submit" disabled={submitting} className="w-full rounded-full bg-accent-500 px-6 py-3 text-body-sm font-bold text-on-accent hover:opacity-90 disabled:opacity-60">
+                {submitting ? "Saving…" : "Set new password"}
+              </button>
+            </form>
+          )}
+        </div>
+      </Container>
+    </section>
   );
 }
 

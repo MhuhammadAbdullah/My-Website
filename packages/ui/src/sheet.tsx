@@ -9,9 +9,11 @@ export const Sheet = DialogPrimitive.Root;
 export const SheetTrigger = DialogPrimitive.Trigger;
 export const SheetClose = DialogPrimitive.Close;
 
+// Radix keeps the panel mounted until its CSS *animation* finishes (a transition is not enough), so open and close
+// both use keyframes (see noir.css): the panel slides in/out and the dimmed backdrop fades with it.
 const sideClasses = {
-  left: "inset-y-0 left-0 h-dvh w-72 data-[state=closed]:-translate-x-full data-[state=open]:translate-x-0",
-  right: "inset-y-0 right-0 h-dvh w-72 data-[state=closed]:translate-x-full data-[state=open]:translate-x-0",
+  left: "inset-y-0 left-0 h-dvh w-72 data-[state=open]:animate-[drawer-in_0.34s_cubic-bezier(0.22,1,0.36,1)_both] data-[state=closed]:animate-[drawer-out_0.26s_cubic-bezier(0.4,0,1,1)_both]",
+  right: "inset-y-0 right-0 h-dvh w-72 data-[state=open]:animate-[drawer-in-right_0.34s_cubic-bezier(0.22,1,0.36,1)_both] data-[state=closed]:animate-[drawer-out-right_0.26s_cubic-bezier(0.4,0,1,1)_both]",
 };
 
 export function SheetContent({
@@ -26,13 +28,13 @@ export function SheetContent({
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay
         className={cn(
-          "fixed inset-0 z-40 bg-neutral-950/40 backdrop-blur-sm transition-opacity duration-300",
-          "data-[state=closed]:opacity-0 data-[state=open]:opacity-100",
+          "fixed inset-0 z-40 bg-neutral-950/40 backdrop-blur-sm",
+          "data-[state=open]:animate-[overlay-in_0.3s_ease-out_both] data-[state=closed]:animate-[overlay-out_0.26s_ease-in_both]",
         )}
       />
       <DialogPrimitive.Content
         className={cn(
-          "fixed z-40 flex flex-col border-neutral-200 bg-background shadow-soft-xl transition-transform duration-300 ease-[var(--ease-premium)] focus:outline-none",
+          "fixed z-40 flex flex-col border-neutral-200 bg-background shadow-soft-xl focus:outline-none",
           side === "left" ? "border-r" : "border-l",
           sideClasses[side],
           className,

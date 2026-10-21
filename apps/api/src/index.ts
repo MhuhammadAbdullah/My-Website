@@ -5,13 +5,18 @@ import cors from "cors";
 import compression from "compression";
 import { rateLimit } from "express-rate-limit";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "@agency/auth/server";
+import { auth, setAdminResetPasswordSender } from "@agency/auth/server";
 import { influencerAuth, setInfluencerResetPasswordSender } from "@agency/auth/influencer-server";
 import { env } from "./env.js";
 import { apiRouter } from "./routes/index.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 import { csrfOriginCheck } from "./middleware/csrf.js";
 import { sendPasswordResetEmail } from "./lib/influencer-mailer.js";
+import { sendAdminPasswordResetEmail } from "./lib/mailer.js";
+
+setAdminResetPasswordSender(async ({ user, url }) => {
+  await sendAdminPasswordResetEmail({ name: user.name, email: user.email }, url);
+});
 
 setInfluencerResetPasswordSender(async ({ user, url }) => {
   await sendPasswordResetEmail({ name: user.name, email: user.email }, url);

@@ -15,6 +15,7 @@ import {
   themeSchema,
   sectionVisibilitySchema,
   careersPageSchema,
+  influencerLegalPageSchema,
   headerSettingsSchema,
   footerColumnsSchema,
   legalLinksSchema,
@@ -96,6 +97,8 @@ const settingValidators: Record<string, (value: unknown) => Prisma.InputJsonValu
   influencers_page: (value) => influencersPageSchema.parse(value),
   section_visibility: (value) => sectionVisibilitySchema.parse(value),
   careers_page: (value) => careersPageSchema.parse(value),
+  influencer_terms: (value) => influencerLegalPageSchema.parse(value),
+  influencer_privacy: (value) => influencerLegalPageSchema.parse(value),
 };
 
 const PRIVATE_KEYS = new Set<string>(PRIVATE_SETTING_KEYS);

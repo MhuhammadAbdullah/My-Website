@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { env } from "@/lib/env";
+import { Pencil, Trash2 } from "lucide-react";
 import {
   Badge,
   Button,
@@ -106,6 +108,14 @@ function cardToInput(card: InfluencerPricingCardRead): InfluencerPricingCardInpu
 function PricingCards({ me, maxCards, onSaved }: { me: InfluencerMeRead; maxCards: number; onSaved: () => Promise<void> }) {
   const [cards, setCards] = React.useState<InfluencerPricingCardRead[]>(me.profile!.pricingCards);
   const [editingIndex, setEditingIndex] = React.useState<number | null>(null);
+  // The platform currency set by the admin (Admin > Settings > Global currency). Influencers cannot change it.
+  const [currency, setCurrency] = React.useState("");
+  React.useEffect(() => {
+    fetch(`${env.NEXT_PUBLIC_API_URL}/api/v1/settings`)
+      .then((r) => r.json())
+      .then((r: { settings?: { currency?: string } }) => setCurrency(r.settings?.currency ?? ""))
+      .catch(() => undefined);
+  }, []);
   const [draft, setDraft] = React.useState<InfluencerPricingCardInput>(EMPTY_CARD);
   const [featuresText, setFeaturesText] = React.useState("");
   const [saving, setSaving] = React.useState(false);
@@ -128,7 +138,7 @@ function PricingCards({ me, maxCards, onSaved }: { me: InfluencerMeRead; maxCard
   }
 
   async function persist(nextCards: InfluencerPricingCardInput[]) {
-    const payload: InfluencerSelfProfileInput = { ...baseFieldsFrom(me), pricingCards: nextCards };
+    const payload: InfluencerSelfProfileInput = { ...baseFieldsFrom(me), pricingCards: nextCards.map((c) => ({ ...c, currency: currency || c.currency })) };
     const parsed = influencerSelfProfileSchema.safeParse(payload);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Please check the form for errors.");
@@ -152,13 +162,14 @@ function PricingCards({ me, maxCards, onSaved }: { me: InfluencerMeRead; maxCard
       toast.error("Title is required.");
       return;
     }
-    if (!draft.isCustomQuote && (!draft.price || draft.price <= 0)) {
+    if (!draft.price || draft.price <= 0) {
       toast.error("Enter a price greater than 0.");
       return;
     }
     const finalized: InfluencerPricingCardInput = {
       ...draft,
-      price: draft.isCustomQuote ? undefined : draft.price,
+      price: draft.price,
+      isCustomQuote: false,
       features: featuresText
         .split("\n")
         .map((f) => f.trim())
@@ -216,7 +227,7 @@ function PricingCards({ me, maxCards, onSaved }: { me: InfluencerMeRead; maxCard
                 <div>
                   <p className="font-medium text-heading">{card.title}</p>
                   <p className="text-h4 font-semibold text-heading">
-                    {card.isCustomQuote ? "Custom Quote" : `${card.currency ? `${card.currency} ` : ""}${Number(card.price).toLocaleString()}`}
+                    {card.isCustomQuote ? "Custom Quote" : `${card.currency || currency ? `${card.currency || currency} ` : ""}${Number(card.price).toLocaleString()}`}
                   </p>
                   {card.estimatedDeliveryTime && <p className="text-label text-neutral-400">{card.estimatedDeliveryTime}</p>}
                 </div>
@@ -238,12 +249,12 @@ function PricingCards({ me, maxCards, onSaved }: { me: InfluencerMeRead; maxCard
                   <span className="text-label text-neutral-400">Visible</span>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => openEdit(i)}>
-                    Edit
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(i)} disabled={saving}>
-                    Delete
-                  </Button>
+                  <button type="button" onClick={() => openEdit(i)} aria-label={`Edit ${card.title}`} title="Edit" className="flex size-9 items-center justify-center rounded-full border border-neutral-200 text-heading transition-colors hover:border-accent-500 hover:text-accent-500">
+                    <Pencil className="size-4" aria-hidden />
+                  </button>
+                  <button type="button" onClick={() => handleDelete(i)} disabled={saving} aria-label={`Delete ${card.title}`} title="Delete" className="flex size-9 items-center justify-center rounded-full border border-neutral-200 text-error-500 transition-colors hover:border-error-500 hover:bg-error-500/10 disabled:opacity-50">
+                    <Trash2 className="size-4" aria-hidden />
+                  </button>
                 </div>
               </div>
             </div>
@@ -261,29 +272,10 @@ function PricingCards({ me, maxCards, onSaved }: { me: InfluencerMeRead; maxCard
               <Label>Title</Label>
               <Input placeholder="Instagram Reel" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
             </div>
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={draft.isCustomQuote}
-                onCheckedChange={(v) => setDraft({ ...draft, isCustomQuote: v, price: v ? undefined : draft.price })}
-              />
-              <Label className="font-normal">Custom quote (no fixed price — you'll negotiate the amount)</Label>
+            <div>
+              <Label>Price{currency ? ` (${currency})` : ""}</Label>
+              <Input type="number" value={draft.price || ""} onChange={(e) => setDraft({ ...draft, price: Number(e.target.value) })} />
             </div>
-            {!draft.isCustomQuote && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Price</Label>
-                  <Input
-                    type="number"
-                    value={draft.price || ""}
-                    onChange={(e) => setDraft({ ...draft, price: Number(e.target.value) })}
-                  />
-                </div>
-                <div>
-                  <Label>Currency (optional)</Label>
-                  <Input placeholder="USD" value={draft.currency ?? ""} onChange={(e) => setDraft({ ...draft, currency: e.target.value })} />
-                </div>
-              </div>
-            )}
             <div>
               <Label>Estimated delivery time</Label>
               <Input

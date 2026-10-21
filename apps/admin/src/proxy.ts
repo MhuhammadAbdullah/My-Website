@@ -4,7 +4,10 @@ import { getSessionCookie } from "better-auth/cookies";
 export function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
 
-  if (!sessionCookie && !request.nextUrl.pathname.startsWith("/login")) {
+  const path = request.nextUrl.pathname;
+  const isPublic = path.startsWith("/login") || path.startsWith("/forgot-password") || path.startsWith("/reset-password");
+
+  if (!sessionCookie && !isPublic) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
