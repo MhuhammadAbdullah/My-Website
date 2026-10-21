@@ -20,6 +20,10 @@ export function InfluencerAuthPageClient({
   const fallback = initialMode === "register" ? "/influencers" : "/";
 
   return (
-    <InfluencerAuthFlow initialMode={initialMode} registrationFlags={registrationFlags} onRequestClose={() => router.push(fallback)} />
+    <>
+      {/* The form is a popup on top of this route; this keeps the page behind it at full height instead of collapsed. */}
+      <div className="min-h-[70vh]" aria-hidden />
+      <InfluencerAuthFlow initialMode={initialMode} registrationFlags={registrationFlags} onRequestClose={() => router.push(fallback)} />
+    </>
   );
 }

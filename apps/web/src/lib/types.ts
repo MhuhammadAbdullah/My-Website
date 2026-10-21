@@ -350,6 +350,8 @@ export interface SiteSettings {
   timezone?: string;
   section_visibility?: Record<string, string[]>;
   careers_page?: import("@agency/types").CareersPageSettings;
+  influencer_terms?: import("@agency/types").InfluencerLegalPage;
+  influencer_privacy?: import("@agency/types").InfluencerLegalPage;
   services_page?: import("@agency/types").ServicesPageSettings;
   portfolio_page?: import("@agency/types").PortfolioPageSettings;
   about_page?: import("@agency/types").AboutPageSettings;

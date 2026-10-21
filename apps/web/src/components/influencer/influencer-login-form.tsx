@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { PasswordField } from "@/components/password-field";
 import { usePathname, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -88,7 +89,7 @@ function PasswordStep({
               Forgot password?
             </button>
           </div>
-          <Input id="password" type="password" {...register("password")} aria-invalid={!!errors.password} />
+          <PasswordField id="password" autoComplete="current-password" {...register("password")} aria-invalid={!!errors.password} />
           <FieldError>{errors.password?.message}</FieldError>
         </div>
         <Button type="submit" size="lg" disabled={isSubmitting} className="w-full">

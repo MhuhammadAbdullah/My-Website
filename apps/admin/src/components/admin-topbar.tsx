@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Menu } from "lucide-react";
 import { Button } from "@agency/ui";
@@ -51,10 +52,10 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick: () => void }) {
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <ModeToggle />
         <NotificationBell />
-        <div className="flex items-center gap-2 rounded-full border border-neutral-200 py-1 pl-1 pr-1 sm:pr-3.5">
+        <Link href="/profile" aria-label="My profile" title="My profile" className="flex items-center gap-2 rounded-full border border-neutral-200 py-1 pl-1 pr-1 transition-colors hover:border-accent-500 sm:pr-3.5">
           <span className="flex size-7 items-center justify-center rounded-full bg-heading text-[12px] font-extrabold text-background">{name.charAt(0).toUpperCase()}</span>
           <span className="hidden max-w-32 truncate text-[13px] font-semibold text-heading sm:block">{name}</span>
-        </div>
+        </Link>
         <button
           type="button"
           onClick={handleSignOut}

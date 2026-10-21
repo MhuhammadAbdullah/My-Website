@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { AXIS_TICK, CHART_PALETTE, GRID, LEGEND_STYLE, TOOLTIP } from "@/lib/chart-theme";
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "@agency/ui";
 import { BOOKING_STATUS_LABELS, type BookingStatusId } from "@agency/types";
@@ -13,11 +14,12 @@ export interface DashboardChartsData {
   bookingsByStatus: { status: string; count: number }[];
 }
 
-const PALETTE = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#06b6d4", "#a855f7", "#ec4899", "#84cc16", "#94a3b8"];
+const PALETTE = CHART_PALETTE;
 
-function ChartCard({ title, loading, empty, children }: { title: string; loading: boolean; empty?: boolean; children: React.ReactNode }) {
+function ChartCard({ title, loading, empty, children, delay = 0 }: { title: string; loading: boolean; empty?: boolean; children: React.ReactNode; delay?: number }) {
   return (
-    <Card>
+    <div className="fade-up h-full" style={{ ["--d" as string]: `${delay}s` }}>
+    <Card className="h-full">
       <CardHeader className="pb-0">
         <CardTitle className="text-h5">{title}</CardTitle>
       </CardHeader>
@@ -31,6 +33,7 @@ function ChartCard({ title, loading, empty, children }: { title: string; loading
         )}
       </CardContent>
     </Card>
+    </div>
   );
 }
 
@@ -45,31 +48,31 @@ export function DashboardCharts({
 }) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <ChartCard title="Earnings trend" loading={loading} empty={data?.monthlyEarnings.every((d) => d.amount === 0)}>
+      <ChartCard delay={0.25} title="Earnings trend" loading={loading} empty={data?.monthlyEarnings.every((d) => d.amount === 0)}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data?.monthlyEarnings ?? []}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-            <XAxis dataKey="month" fontSize={11} tickLine={false} axisLine={false} />
-            <YAxis fontSize={11} tickLine={false} axisLine={false} width={48} />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={GRID} />
+            <XAxis dataKey="month" tick={AXIS_TICK} tickLine={false} axisLine={false} />
+            <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={48} />
+            <Tooltip {...TOOLTIP} />
             <Bar dataKey="amount" name="Earnings" fill={PALETTE[0]} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
 
-      <ChartCard title="Monthly bookings" loading={loading} empty={data?.monthlyBookings.every((d) => d.count === 0)}>
+      <ChartCard delay={0.33} title="Monthly bookings" loading={loading} empty={data?.monthlyBookings.every((d) => d.count === 0)}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data?.monthlyBookings ?? []}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-            <XAxis dataKey="month" fontSize={11} tickLine={false} axisLine={false} />
-            <YAxis fontSize={11} tickLine={false} axisLine={false} width={40} />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={GRID} />
+            <XAxis dataKey="month" tick={AXIS_TICK} tickLine={false} axisLine={false} />
+            <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={40} />
+            <Tooltip {...TOOLTIP} />
             <Bar dataKey="count" name="Bookings" fill={PALETTE[1]} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
 
-      <ChartCard title="Bookings by status" loading={loading} empty={!data?.bookingsByStatus.length}>
+      <ChartCard delay={0.41} title="Bookings by status" loading={loading} empty={!data?.bookingsByStatus.length}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -89,13 +92,13 @@ export function DashboardCharts({
                 <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
               ))}
             </Pie>
-            <Tooltip />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Tooltip {...TOOLTIP} />
+            <Legend wrapperStyle={LEGEND_STYLE} />
           </PieChart>
         </ResponsiveContainer>
       </ChartCard>
 
-      <ChartCard title="Platform audience distribution" loading={loading} empty={platforms.length === 0}>
+      <ChartCard delay={0.49} title="Platform audience distribution" loading={loading} empty={platforms.length === 0}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -112,8 +115,8 @@ export function DashboardCharts({
                 <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
               ))}
             </Pie>
-            <Tooltip />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Tooltip {...TOOLTIP} />
+            <Legend wrapperStyle={LEGEND_STYLE} />
           </PieChart>
         </ResponsiveContainer>
       </ChartCard>

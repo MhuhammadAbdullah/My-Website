@@ -3,16 +3,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "./lib/cn";
 
 export const badgeVariants = cva(
-  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-label uppercase tracking-wide",
+  // Compact status label: bold sans text on a soft tint of its colour (no outline, no monospace).
+  "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase leading-none tracking-[0.06em] [&>svg]:size-3 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
-        neutral: "border-neutral-200 bg-neutral-50 text-neutral-600",
-        accent: "border-accent-200 bg-accent-50 text-accent-700",
-        success: "border-success-500/20 bg-success-50 text-success-700",
-        warning: "border-warning-500/20 bg-warning-50 text-warning-700",
-        error: "border-error-500/20 bg-error-50 text-error-700",
-        dark: "border-transparent bg-heading text-background",
+        neutral: "bg-neutral-100 text-neutral-600",
+        accent: "bg-accent-500/15 text-accent-500",
+        success: "bg-success-500/15 text-success-700",
+        warning: "bg-warning-500/15 text-warning-700",
+        error: "bg-error-500/15 text-error-700",
+        dark: "bg-heading text-background",
       },
     },
     defaultVariants: { variant: "neutral" },

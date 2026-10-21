@@ -23,7 +23,7 @@ export function InfluencerAuthModal({
         if (!open) onRequestClose();
       }}
     >
-      <DialogContent className={cn("max-h-[90vh] w-[calc(100%-2rem)] max-w-lg overflow-y-auto", className)}>
+      <DialogContent className={cn("influencer-auth max-h-[90vh] w-[calc(100%-2rem)] max-w-lg overflow-y-auto", className)}>
         {children}
       </DialogContent>
     </Dialog>

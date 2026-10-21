@@ -941,3 +941,20 @@ export const careersPageSchema = z.object({
     .prefault({}),
 });
 export type CareersPageSettings = z.infer<typeof careersPageSchema>;
+
+// ---------------------------------------------------------------- Influencer legal pages
+// Terms & Conditions and Privacy Policy for creators. Two SiteSetting blobs (influencer_terms, influencer_privacy),
+// edited in Admin > Influencer Marketplace > Legal, shown at /influencer/terms and /influencer/privacy-policy.
+export const INFLUENCER_LEGAL_KEYS = ["influencer_terms", "influencer_privacy"] as const;
+export type InfluencerLegalKey = (typeof INFLUENCER_LEGAL_KEYS)[number];
+
+export const influencerLegalPageSchema = z.object({
+  title: z.string().trim().min(1, "Title is required").max(120),
+  // Rich text (HTML) written in the admin editor.
+  content: z.string().max(200000).default(""),
+  // Shown as "Last updated"; set to the day it was saved.
+  lastUpdated: z.string().trim().max(20).default(""),
+  // Off = the public page shows a "not available yet" note instead of the text.
+  published: z.boolean().default(true),
+});
+export type InfluencerLegalPage = z.infer<typeof influencerLegalPageSchema>;

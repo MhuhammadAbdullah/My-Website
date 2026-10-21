@@ -23,6 +23,15 @@ function parseOrigins(value: string | undefined): string[] {
 const rootDomain = process.env.AUTH_COOKIE_DOMAIN;
 const trustedOrigins = parseOrigins(process.env.AUTH_TRUSTED_ORIGINS);
 
+// packages/auth knows nothing about mail transport: apps/api registers the sender once at startup
+// (see apps/api/src/index.ts), same pattern as the influencer auth.
+type ResetPasswordSender = (data: { user: { id: string; name: string; email: string }; url: string }) => void | Promise<void>;
+let resetPasswordSender: ResetPasswordSender | undefined;
+
+export function setAdminResetPasswordSender(sender: ResetPasswordSender) {
+  resetPasswordSender = sender;
+}
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   secret: process.env.BETTER_AUTH_SECRET,
@@ -33,6 +42,13 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+    sendResetPassword: async ({ user, url }) => {
+      if (!resetPasswordSender) {
+        console.warn("No admin reset-password sender registered -- skipping email");
+        return;
+      }
+      await resetPasswordSender({ user, url });
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days

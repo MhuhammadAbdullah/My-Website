@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { AXIS_TICK, CHART_PALETTE, GRID, LEGEND_STYLE, TOOLTIP } from "@/lib/chart-theme";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, cn } from "@agency/ui";
 
@@ -55,10 +56,10 @@ export function AudienceGeoCard({
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data} layout="vertical" margin={{ left: 16 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
-                <XAxis type="number" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis type="category" dataKey="name" fontSize={11} tickLine={false} axisLine={false} width={90} />
-                <Tooltip formatter={(v) => `${v}%`} />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={GRID} />
+                <XAxis type="number" tick={AXIS_TICK} tickLine={false} axisLine={false} />
+                <YAxis type="category" dataKey="name" tick={AXIS_TICK} tickLine={false} axisLine={false} width={90} />
+                <Tooltip {...TOOLTIP} formatter={(v) => `${v}%`} />
                 <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>

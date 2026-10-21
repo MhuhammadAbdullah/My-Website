@@ -6,7 +6,7 @@ import { ArrowDown, ArrowRight, Bookmark, Rocket, Search } from "lucide-react";
 import { cn } from "@agency/ui";
 import { useAuthModal } from "./auth-modal-provider";
 
-// "I'm a brand | I'm a creator" switch: the creator side opens the sign-up (or login when registrations are closed).
+// "I am a brand | I am a creator" switch: the creator side opens the login form first (it has a link to sign up).
 export function AudienceToggle({ brand, creator, registrationEnabled }: { brand: string; creator: string; registrationEnabled: boolean }) {
   const { openAuthModal } = useAuthModal();
   return (
@@ -14,7 +14,7 @@ export function AudienceToggle({ brand, creator, registrationEnabled }: { brand:
       <span role="tab" aria-selected className="rounded-full bg-accent-500 px-4 py-1.5 text-body-sm font-bold text-on-accent">
         {brand}
       </span>
-      <button type="button" role="tab" aria-selected={false} onClick={() => openAuthModal(registrationEnabled ? "register" : "login")} className="rounded-full px-4 py-1.5 text-body-sm font-semibold text-heading hover:text-accent-500">
+      <button type="button" role="tab" aria-selected={false} onClick={() => openAuthModal("login")} className="rounded-full px-4 py-1.5 text-body-sm font-semibold text-heading hover:text-accent-500">
         {creator}
       </button>
     </div>

@@ -133,7 +133,7 @@ export function Combobox({
         <PopoverPrimitive.Content
           align="start"
           sideOffset={4}
-          className="z-50 w-(--radix-popover-trigger-width) min-w-[14rem] overflow-hidden rounded-xl border border-neutral-200 bg-surface shadow-soft-lg"
+          className="z-50 w-(--radix-popover-trigger-width) min-w-[14rem] overflow-hidden rounded-[10px] border border-neutral-200 bg-surface shadow-soft-lg"
           onOpenAutoFocus={(event) => {
             event.preventDefault();
             inputRef.current?.focus();
@@ -166,7 +166,7 @@ export function Combobox({
                   onClick={() => selectOption(option)}
                   onMouseEnter={() => setHighlightedIndex(index)}
                   className={cn(
-                    "flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-body-sm outline-none",
+                    "flex w-full cursor-pointer select-none items-center justify-between gap-2 rounded-[6px] px-3 py-2 text-left text-body-sm outline-none",
                     index === highlightedIndex && "bg-neutral-100",
                     option.value === value && "font-semibold text-heading",
                   )}

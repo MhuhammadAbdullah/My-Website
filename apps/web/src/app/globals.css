@@ -29,3 +29,20 @@
   line-height: 1;
   letter-spacing: normal;
 }
+
+/* Influencer dashboard: tighter corners on cards, inputs, popups and tables, matching the admin panel.
+   Set on <html> (see InfluencerDashboardShell) because dialogs render outside the dashboard markup. */
+:root.influencer-dash-root[data-theme="noir"] {
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.75rem;
+}
+
+/* Login, registration and reset-password: tighter corners on the popup/card and every input inside it. */
+.influencer-auth {
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.75rem;
+}

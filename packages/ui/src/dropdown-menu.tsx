@@ -21,7 +21,7 @@ export function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          "z-50 min-w-[10rem] overflow-hidden rounded-xl border border-neutral-200 bg-background p-1.5 shadow-soft-lg",
+          "z-50 min-w-[10rem] overflow-hidden rounded-[10px] border border-neutral-200 bg-background p-1.5 shadow-soft-lg",
           className,
         )}
         {...props}
@@ -38,7 +38,7 @@ export function DropdownMenuItem({
   return (
     <DropdownMenuPrimitive.Item
       className={cn(
-        "flex cursor-pointer select-none items-center gap-2 rounded-lg px-2.5 py-2 text-body-sm text-heading outline-none transition-colors data-[highlighted]:bg-neutral-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "flex cursor-pointer select-none items-center gap-2 rounded-[6px] px-2.5 py-2 text-body-sm text-heading outline-none transition-colors data-[highlighted]:bg-neutral-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         inset && "pl-8",
         className,
       )}
@@ -56,7 +56,7 @@ export function DropdownMenuCheckboxItem({
   return (
     <DropdownMenuPrimitive.CheckboxItem
       className={cn(
-        "relative flex cursor-pointer select-none items-center rounded-lg py-2 pl-8 pr-2.5 text-body-sm outline-none data-[highlighted]:bg-neutral-100",
+        "relative flex cursor-pointer select-none items-center rounded-[6px] py-2 pl-8 pr-2.5 text-body-sm outline-none data-[highlighted]:bg-neutral-100",
         className,
       )}
       checked={checked}

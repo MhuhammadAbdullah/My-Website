@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger, Button, Card, Heading, SocialIcon } from "@agency/ui";
+import { Button } from "@agency/ui";
+import { InsightsGuideTabs } from "@/components/influencer/insights-guide-tabs";
+import { SupportButton } from "@/components/influencer/support-dialog";
 import { getSettings } from "@/lib/api";
 import type { InfluencerInsightsGuide } from "@/lib/types";
 
@@ -61,70 +63,51 @@ const PLATFORMS: { key: keyof InfluencerInsightsGuide; label: string; icon: "ins
 export default async function InfluencerInsightsGuidePage() {
   const settings = await getSettings({ next: { revalidate: 0 } }).catch(() => null);
   const guide = { ...DEFAULT_GUIDE, ...settings?.influencer_insights_guide };
+  const platforms = PLATFORMS.map(({ key, label, icon }) => ({ key, label, icon, html: guide[key] || DEFAULT_GUIDE[key] }));
+
+  const steps = [
+    "Find the numbers you need using the guide for each platform you are active on.",
+    "Open the Analytics tab in this dashboard.",
+    "Click \"Edit stats\" on a platform tab (or \"Add platform\" if it is not listed yet) and enter the numbers.",
+    "Save. Engagement rate is calculated automatically, so you do not need to work it out yourself.",
+  ];
 
   return (
-    <div>
-      <Heading level={2}>Platform Insights Guide</Heading>
-      <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
-        Most influencers don't know exactly where to find these numbers on each platform — this guide walks you through it,
-        step by step.
+    <div className="mx-auto max-w-[1180px]">
+      <h1 className="font-heading font-extrabold tracking-tight text-heading" style={{ fontSize: "clamp(2rem, 1rem + 3vw, 3.25rem)", lineHeight: 0.98 }}>
+        Insights guide<span className="text-accent-500">.</span>
+      </h1>
+      <p className="mt-3 max-w-2xl text-body-sm text-neutral-500">
+        Most creators do not know where to find their numbers on each platform. Pick a platform and follow the steps.
       </p>
 
-      <div className="mt-8 max-w-3xl">
-        <Accordion type="single" collapsible>
-          {PLATFORMS.map(({ key, label, icon }) => (
-            <AccordionItem key={key} value={key}>
-              <AccordionTrigger>
-                <span className="flex items-center gap-2.5">
-                  <SocialIcon platform={icon} className="size-5 text-heading" />
-                  {label}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div
-                  className="space-y-2 text-body-sm text-neutral-600 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-5"
-                  dangerouslySetInnerHTML={{ __html: guide[key] || DEFAULT_GUIDE[key] }}
-                />
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+      <div className="mt-8 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <InsightsGuideTabs platforms={platforms} />
+
+        <aside className="grid gap-5 xl:sticky xl:top-24">
+          <section className="rounded-[var(--radius-xl)] border border-neutral-200 bg-neutral-50 p-5">
+            <h2 className="font-heading text-[1.125rem] font-extrabold tracking-tight text-heading">How to update your stats</h2>
+            <ol className="mt-4 space-y-3">
+              {steps.map((step, i) => (
+                <li key={i} className="flex gap-3 text-body-sm text-neutral-600">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-500 text-[12px] font-extrabold text-on-accent">{i + 1}</span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="mt-4 text-body-sm text-neutral-500">Update your stats at least once a month. Fresh, accurate numbers make your profile more credible to brands.</p>
+            <Button asChild className="mt-4 w-full">
+              <Link href="/influencer/dashboard/analytics">Go to Platform Analytics</Link>
+            </Button>
+          </section>
+
+          <section className="rounded-[var(--radius-xl)] border border-neutral-200 bg-neutral-50 p-5">
+            <h2 className="font-heading text-[1.125rem] font-extrabold tracking-tight text-heading">Need help?</h2>
+            <p className="mt-2 text-body-sm text-neutral-500">Cannot find your analytics, or not sure what a number means? Reach out and our team will help you find it.</p>
+            <SupportButton className="mt-4 w-full" />
+          </section>
+        </aside>
       </div>
-
-      <Card className="mt-10 max-w-3xl p-6">
-        <h3 className="text-body-sm font-semibold text-heading">How to update your statistics</h3>
-        <ol className="mt-3 space-y-2">
-          {[
-            "Find the numbers you need using the guide above for each platform you're active on.",
-            "Open the Analytics tab in this dashboard.",
-            "Click \"Edit stats\" on a platform tab (or \"Add platform\" if it isn't listed yet) and enter the numbers.",
-            "Save — engagement rate is calculated automatically from what you enter, so you don't need to work that out yourself.",
-          ].map((step, i) => (
-            <li key={i} className="flex gap-3 text-body-sm text-neutral-600">
-              <span className="shrink-0 font-medium text-heading">{i + 1}.</span>
-              <span>{step}</span>
-            </li>
-          ))}
-        </ol>
-        <p className="mt-4 text-body-sm text-neutral-500">
-          We recommend updating your stats at least once a month. Fresh, accurate numbers make your profile more credible to
-          brands and directly improve your chances of getting booked.
-        </p>
-        <Button asChild className="mt-4 w-fit">
-          <Link href="/influencer/dashboard/analytics">Go to Platform Analytics</Link>
-        </Button>
-      </Card>
-
-      <Card className="mt-6 max-w-3xl p-6">
-        <h3 className="text-body-sm font-semibold text-heading">Need help?</h3>
-        <p className="mt-2 text-body-sm text-neutral-600">
-          Can't find your analytics on one of your platforms, or not sure what a number means? Reach out and our team will help
-          you locate it.
-        </p>
-        <Button asChild variant="outline" className="mt-4 w-fit">
-          <Link href="/contact">Contact support</Link>
-        </Button>
-      </Card>
     </div>
   );
 }
