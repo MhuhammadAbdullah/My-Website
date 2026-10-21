@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { PwaInstallPrompt, PwaRegister, Toaster } from "@agency/ui";
+import { PwaInstallPrompt, PwaRegister, Toaster, TooltipProvider } from "@agency/ui";
 import { manrope, syne, playfairDisplay, ibmPlexMono } from "@/lib/fonts";
 import "./globals.css";
 
@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: `try{var m=localStorage.getItem("admin-mode");if(m==="light"||m==="dark")document.documentElement.dataset.mode=m}catch(e){}` }} />
       </head>
       <body className="bg-background">
-        {children}
+        <TooltipProvider delayDuration={120}>{children}</TooltipProvider>
         <Toaster />
         <PwaRegister enabled={process.env.NODE_ENV === "production"} />
         <PwaInstallPrompt appName="Admin" iconUrl="/pwa-icon/192" />

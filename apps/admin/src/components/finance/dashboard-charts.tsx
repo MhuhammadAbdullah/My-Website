@@ -59,7 +59,7 @@ function GhostBars() {
   return (
     <div className="flex h-full items-end gap-3 border-b border-neutral-200 px-1" aria-hidden>
       {GHOST.map((h, i) => (
-        <span key={i} className="flex-1 rounded-t-md bg-neutral-100" style={{ height: `${h}%` }} />
+        <span key={i} className="flex-1 rounded-t-sm bg-neutral-100" style={{ height: `${h}%` }} />
       ))}
     </div>
   );
@@ -81,7 +81,7 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[18px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
+    <section className="rounded-[8px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
       <h3 className="font-heading text-[1.0625rem] font-extrabold tracking-tight text-heading">{title}</h3>
       <div className="mt-5 h-44">
         {loading ? <Skeleton className="h-full w-full" /> : empty ? <GhostBars /> : children}

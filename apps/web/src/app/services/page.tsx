@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { isSectionVisible } from "@agency/types";
 import { Breadcrumb, Container, Heading, Reveal } from "@agency/ui";
 import { getPageSeo, getServices, getServicesPageContent, getSettings, getTestimonials } from "@/lib/api";
 import { withFallback } from "@/lib/safe-fetch";
@@ -32,6 +33,7 @@ export default async function ServicesPage() {
 
   // Everything under the hero is managed in Admin > Services > Page Sections.
   const cfg = servicesPageSchema.parse(settings.services_page ?? {});
+  const show = (key: string) => isSectionVisible(settings.section_visibility, "services", key);
 
   const rows: ExplorerService[] = services.map((s) => {
     // Cheapest real price among the plans (custom quotes have none).
@@ -89,7 +91,7 @@ export default async function ServicesPage() {
         </Container>
       </section>
 
-      {engagement.models.length > 0 && (
+      {engagement.models.length > 0 && show("models") && (
         <section className="py-[var(--spacing-section)]">
           <Container>
             <Reveal>
@@ -111,7 +113,7 @@ export default async function ServicesPage() {
         </section>
       )}
 
-      {estimate.heading && rows.length > 0 && (
+      {estimate.heading && rows.length > 0 && show("estimator") && (
         <section className="pb-[var(--spacing-section)]">
           <Container>
             <ServicesEstimator
@@ -126,6 +128,7 @@ export default async function ServicesPage() {
           </Container>
         </section>
       )}
+      {show("reviews") && (
       <section className="pb-[var(--spacing-section)]">
         <Container>
           <ReviewsSection
@@ -140,6 +143,7 @@ export default async function ServicesPage() {
           />
         </Container>
       </section>
+      )}
     </CurrencyProvider>
   );
 }

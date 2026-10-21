@@ -10,7 +10,7 @@ import type { SiteSettings } from "@/lib/types";
 
 function Group({ title, help, children }: { title: string; help?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-neutral-200 p-5">
+    <section className="rounded-2xl border border-neutral-200 p-5 bg-neutral-50">
       <Heading level={3}>{title}</Heading>
       {help && <p className="mt-1 text-body-sm text-neutral-500">{help}</p>}
       <div className="mt-4 grid gap-4">{children}</div>

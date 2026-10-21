@@ -187,7 +187,7 @@ export default function InfluencerReviewDetailPage() {
       {summaryLoading || !summary ? (
         <Skeleton className="h-40 w-full" />
       ) : (
-        <div className="rounded-2xl border border-neutral-200 p-6">
+        <div className="rounded-2xl border border-neutral-200 p-6 bg-neutral-50">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-3">
               {summary.influencer.profilePhoto ? (
@@ -198,7 +198,7 @@ export default function InfluencerReviewDetailPage() {
                 <div className="size-14 shrink-0 rounded-full bg-neutral-100" />
               )}
               <div>
-                <Heading level={2}>{summary.influencer.name}</Heading>
+                <Heading level={2} className="admin-page-title">{summary.influencer.name}</Heading>
                 {summary.influencer.username && <p className="text-body-sm text-neutral-400">@{summary.influencer.username}</p>}
               </div>
             </div>
@@ -260,11 +260,11 @@ export default function InfluencerReviewDetailPage() {
           ) : list.error ? (
             <p className="text-center text-body-sm text-error-500">{list.error}</p>
           ) : rows.length === 0 ? (
-            <div className="rounded-2xl border border-neutral-200 p-8 text-center text-body-sm text-neutral-500">No reviews yet.</div>
+            <div className="rounded-2xl border border-neutral-200 p-8 text-center text-body-sm text-neutral-500 bg-neutral-50">No reviews yet.</div>
           ) : (
             <div className="space-y-3">
               {rows.map((r) => (
-                <div key={r.id} className="rounded-xl border border-neutral-200 p-4">
+                <div key={r.id} className="rounded-xl border border-neutral-200 p-4 bg-neutral-50">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
                       {canDelete && (

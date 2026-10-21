@@ -95,13 +95,23 @@ function AffiliatePageInner() {
         },
         { key: "description", label: "Description", type: "textarea", required: true },
         { key: "benefits", label: "Benefits", type: "tags", placeholder: "Add a benefit…" },
-        { key: "specialOffer", label: "Special offer (add \"code ABC123\" to show a Copy code button)", type: "text" },
+        { key: "specialOffer", label: "Special offer (e.g. 20% off the first year)", type: "text" },
+        { key: "couponCode", label: "Discount code, e.g. MAB20 (visitors get a Copy code button)", type: "text" },
         { key: "disclosureNote", label: "Why we use it (short note shown on the card)", type: "textarea" },
         { key: "ctaUrl", label: "Link URL", type: "url", required: true },
         { key: "status", label: "Status", type: "select", options: statusOptions, required: true },
         { key: "isFeatured", label: "Featured", type: "checkbox" },
         { key: "order", label: "Sort order", type: "number" },
       ]}
+      toFormValues={(item) => {
+        // The code is stored inside the offer text ("... · Code: ABC123"); split it into its own field for editing.
+        const m = (item.specialOffer ?? "").match(/\s*(?:[·|]\s*)?\bcode[:\s]+([A-Za-z0-9_-]{3,})/i);
+        return {
+          ...(item as unknown as Record<string, unknown>),
+          specialOffer: (item.specialOffer ?? "").replace(/\s*(?:[·|]\s*)?\bcode[:\s]+[A-Za-z0-9_-]{3,}/i, "").trim(),
+          couponCode: m?.[1] ?? "",
+        } as never;
+      }}
       defaultValues={{
         name: "",
         slug: "",
@@ -109,6 +119,7 @@ function AffiliatePageInner() {
         description: "",
         benefits: [],
         specialOffer: "",
+        couponCode: "",
         disclosureNote: "",
         ctaUrl: "",
         status: "PUBLISHED",
@@ -133,7 +144,7 @@ export default function AffiliatePage() {
         </Suspense>
       </TabsContent>
       <TabsContent value="content">
-        <Heading level={2}>Affiliate Tools Page Content</Heading>
+        <Heading level={2} className="admin-page-title">Affiliate Tools Page Content</Heading>
         <p className="mt-1 text-body-sm text-neutral-500">The hero heading, paragraph, and disclosure text at the top of the public Affiliate Tools page.</p>
         <div className="mt-6">
           <PageHeroContentForm

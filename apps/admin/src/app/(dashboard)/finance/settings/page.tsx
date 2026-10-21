@@ -102,11 +102,11 @@ export default function FinanceSettingsPage() {
 
   return (
     <div>
-      <Heading level={2}>Finance Settings</Heading>
+      <Heading level={2} className="admin-page-title">Finance Settings</Heading>
       <p className="mt-1 text-body-sm text-neutral-500">Defaults used across quotations, invoices, and payments.</p>
 
-      <div className="mt-8 grid max-w-2xl gap-5">
-        <div className="grid gap-5 sm:grid-cols-2">
+      <div className="mt-8 grid max-w-none items-start gap-5 xl:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
           <div>
             <Label>Default currency</Label>
             <Combobox
@@ -154,7 +154,7 @@ export default function FinanceSettingsPage() {
           </div>
         </div>
 
-        <div className="mt-4 border-t border-neutral-200 pt-6">
+        <div className="mt-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
           <Heading level={3}>Document numbering</Heading>
           <div className="mt-5 grid gap-5 sm:grid-cols-2">
             <div>
@@ -179,7 +179,7 @@ export default function FinanceSettingsPage() {
           </p>
         </div>
 
-        <div className="mt-4 border-t border-neutral-200 pt-6">
+        <div className="mt-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
           <Heading level={3}>Banking details</Heading>
           <p className="mt-1 text-body-sm text-neutral-500">Shown in a "Bank details" section on generated quotation and invoice PDFs.</p>
           <div className="mt-5 grid gap-5 sm:grid-cols-2">
@@ -206,7 +206,7 @@ export default function FinanceSettingsPage() {
           </div>
         </div>
 
-        <div className="mt-4 border-t border-neutral-200 pt-6">
+        <div className="mt-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
           <Heading level={3}>Document text</Heading>
           <div className="mt-5 grid gap-5">
             <div>

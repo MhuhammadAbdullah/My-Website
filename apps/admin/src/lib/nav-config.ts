@@ -43,6 +43,8 @@ import {
   AppWindow,
   Images,
   Palette,
+  ToggleRight,
+  UserPlus,
 } from "lucide-react";
 
 export interface AdminNavItem {
@@ -129,6 +131,8 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: "Team", href: "/team", icon: Users, resource: "team" },
       { label: "Affiliate Tools", href: "/affiliate", icon: Link2, resource: "affiliate" },
       { label: "Contact Page", href: "/contact", icon: Send, resource: "contact" },
+      { label: "Page Sections", href: "/page-sections", icon: ToggleRight, resource: "settings" },
+      { label: "Careers", href: "/careers", icon: UserPlus, resource: "settings" },
     ],
   },
   {

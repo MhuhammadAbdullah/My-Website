@@ -85,7 +85,7 @@ function ListItem({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "flex items-center gap-1 rounded-[14px] border bg-neutral-50 pr-3 transition-colors",
+        "flex items-center gap-1 rounded-[8px] border bg-neutral-50 pr-3 transition-colors",
         selected ? "border-accent-500" : hasErrors ? "border-error-500" : "border-neutral-200 hover:border-neutral-300",
         isDragging && "z-10 shadow-soft-lg",
         !section.visible && "opacity-60",
@@ -97,7 +97,7 @@ function ListItem({
         </button>
       )}
       <button type="button" onClick={onSelect} aria-current={selected} className="flex min-w-0 flex-1 items-center gap-3 py-3 text-left">
-        <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-[9px] text-[12px] font-extrabold", selected ? "bg-accent-500 text-on-accent" : "bg-neutral-100 text-heading")}>{index + 1}</span>
+        <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-[6px] text-[12px] font-extrabold", selected ? "bg-accent-500 text-on-accent" : "bg-neutral-100 text-heading")}>{index + 1}</span>
         <span className="min-w-0">
           <span className="block truncate text-[14px] font-bold text-heading">{def?.label ?? section.type}</span>
           {summary && <span className="block truncate text-[12px] text-neutral-500">{summary}</span>}
@@ -234,7 +234,7 @@ export function HomeSectionsEditor({ tabs }: { tabs?: React.ReactNode }) {
   const card = (t: (typeof SECTION_TYPES)[number]) => {
     const Icon = SECTION_ICONS[t.type];
     return (
-      <button key={t.type} type="button" onClick={() => add(t.type)} className="flex items-start gap-3 rounded-xl border border-neutral-200 p-3 text-left transition-colors hover:border-accent-500">
+      <button key={t.type} type="button" onClick={() => add(t.type)} className="flex items-start gap-3 rounded-xl border border-neutral-200 p-3 text-left transition-colors hover:border-accent-500 bg-neutral-50">
         {Icon && <Icon className="mt-0.5 size-5 shrink-0 text-neutral-500" aria-hidden />}
         <span>
           <span className="block text-body-sm font-semibold text-heading">{t.label}</span>
@@ -298,12 +298,12 @@ export function HomeSectionsEditor({ tabs }: { tabs?: React.ReactNode }) {
               </ol>
             </SortableContext>
           </DndContext>
-          {sections.length === 0 && <p className="rounded-[14px] border border-dashed border-neutral-300 p-6 text-center text-body-sm text-neutral-500">No sections yet. Click “Add”.</p>}
+          {sections.length === 0 && <p className="rounded-[8px] border border-dashed border-neutral-300 p-6 text-center text-body-sm text-neutral-500">No sections yet. Click “Add”.</p>}
           <p className="mt-3 text-[12px] leading-relaxed text-neutral-400">Drag ⋮⋮ to reorder, or use the arrows in the editor. Eye = shown on site.</p>
         </aside>
 
         {/* MIDDLE: edit the selected section */}
-        <section className="min-w-0 self-start rounded-[24px] border border-neutral-200 bg-neutral-50">
+        <section className="min-w-0 self-start rounded-[12px] border border-neutral-200 bg-neutral-50">
           {current && currentDef ? (
             <>
               <div className="flex flex-wrap items-start justify-between gap-3 border-b border-neutral-200 p-5 sm:p-6">
@@ -374,7 +374,7 @@ export function HomeSectionsEditor({ tabs }: { tabs?: React.ReactNode }) {
         </section>
       </div>
 
-      <details className="mt-8 rounded-[14px] border border-neutral-200 bg-neutral-50">
+      <details className="mt-8 rounded-[8px] border border-neutral-200 bg-neutral-50">
         <summary className="cursor-pointer select-none px-5 py-3 text-[13px] font-bold text-heading">Where do I edit what?</summary>
         <ul className="divide-y divide-neutral-200 border-t border-neutral-200 text-[13px]">
           {GUIDE.map((g) => (

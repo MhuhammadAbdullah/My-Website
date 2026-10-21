@@ -120,7 +120,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Apply the visitor's saved light/dark choice before first paint (no flash). */}
         <script dangerouslySetInnerHTML={{ __html: `try{var m=localStorage.getItem("site-mode");if(m==="light"||m==="dark")document.documentElement.dataset.mode=m}catch(e){}` }} />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(organizationJsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: toJsonLd(websiteJsonLd) }} />
         {renderRawHtml(integrations?.headScript, "head-script")}

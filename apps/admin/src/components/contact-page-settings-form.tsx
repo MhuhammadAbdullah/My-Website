@@ -9,7 +9,7 @@ import type { SiteSettings } from "@/lib/types";
 
 function Group({ title, help, children }: { title: string; help?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-neutral-200 p-5">
+    <section className="rounded-2xl border border-neutral-200 p-5 bg-neutral-50">
       <Heading level={3}>{title}</Heading>
       {help && <p className="mt-1 text-body-sm text-neutral-500">{help}</p>}
       <div className="mt-4 grid gap-4">{children}</div>
@@ -84,8 +84,8 @@ export function ContactPageSettingsForm() {
   const sd = f.studio;
 
   return (
-    <div className="grid max-w-3xl gap-6">
-      <p className="text-body-sm text-neutral-500">
+    <div className="grid max-w-none items-start gap-6 xl:grid-cols-2">
+      <p className="xl:col-span-2 text-body-sm text-neutral-500">
         Email, WhatsApp number, address, hours, map and Calendly link come from <strong>Site Settings</strong>. The hero heading is in <strong>Page Content</strong>. Everything else is edited here.
       </p>
 
@@ -103,13 +103,13 @@ export function ContactPageSettingsForm() {
             ["call", "Call"],
           ] as const
         ).map(([k, name]) => (
-          <div key={k} className="grid gap-3 rounded-xl border border-neutral-200 p-3 sm:grid-cols-3">
+          <div key={k} className="grid gap-3 rounded-xl border border-neutral-200 p-3 sm:grid-cols-3 bg-neutral-50">
             <Field label={`${name}: small label`} value={ch[k].tag} onChange={(v) => setF({ ...f, channels: { ...ch, [k]: { ...ch[k], tag: v } } })} />
             <Field label="Big title (optional)" value={ch[k].title} onChange={(v) => setF({ ...f, channels: { ...ch, [k]: { ...ch[k], title: v } } })} />
             <Field label="Line under it" value={ch[k].sub} onChange={(v) => setF({ ...f, channels: { ...ch, [k]: { ...ch[k], sub: v } } })} />
           </div>
         ))}
-        <div className="grid gap-3 rounded-xl border border-neutral-200 p-3 sm:grid-cols-4">
+        <div className="grid gap-3 rounded-xl border border-neutral-200 p-3 sm:grid-cols-4 bg-neutral-50">
           <Field label="Influencers: small label" value={ch.influencers.tag} onChange={(v) => setF({ ...f, channels: { ...ch, influencers: { ...ch.influencers, tag: v } } })} />
           <Field label="Big title" value={ch.influencers.title} onChange={(v) => setF({ ...f, channels: { ...ch, influencers: { ...ch.influencers, title: v } } })} />
           <Field label="Line under it" value={ch.influencers.sub} onChange={(v) => setF({ ...f, channels: { ...ch, influencers: { ...ch.influencers, sub: v } } })} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Heading, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@agency/ui";
+import { Badge, Heading, Skeleton } from "@agency/ui";
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 
@@ -24,38 +24,30 @@ export default function PermissionsPage() {
 
   return (
     <div>
-      <Heading level={2}>Permissions</Heading>
-      <p className="mt-1 text-body-sm text-neutral-500">
+      <Heading level={2} className="admin-page-title">Permissions</Heading>
+      <p className="mt-2 text-body-sm text-neutral-500">
         Every permission available to assign to a role. Managed by the system — assign combinations via Roles.
       </p>
 
-      <div className="mt-8 space-y-8">
+      <div className="mt-6">
         {loading ? (
           <Skeleton className="h-64 w-full" />
         ) : (
-          Object.entries(grouped).map(([resource, perms]) => (
-            <div key={resource}>
-              <h3 className="font-mono text-label uppercase tracking-wide text-neutral-400">{resource}</h3>
-              <Table className="mt-2">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Label</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+          <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {Object.entries(grouped).map(([resource, perms]) => (
+              <section key={resource} className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+                <h3 className="font-heading text-[1.0625rem] font-extrabold tracking-tight text-heading">{resource.replace(/([A-Z])/g, " $1").replace(/^./, (c) => c.toUpperCase())}</h3>
+                <ul className="mt-3 divide-y divide-neutral-200">
                   {perms?.map((perm) => (
-                    <TableRow key={perm.id}>
-                      <TableCell>
-                        <Badge variant="neutral">{perm.action}</Badge>
-                      </TableCell>
-                      <TableCell>{perm.label}</TableCell>
-                    </TableRow>
+                    <li key={perm.id} className="flex items-center justify-between gap-3 py-2">
+                      <span className="text-[13px] text-heading">{perm.label}</span>
+                      <Badge variant="neutral">{perm.action}</Badge>
+                    </li>
                   ))}
-                </TableBody>
-              </Table>
-            </div>
-          ))
+                </ul>
+              </section>
+            ))}
+          </div>
         )}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { isSectionVisible } from "@agency/types";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Breadcrumb, Container, Heading, Reveal, SocialIcon, cn } from "@agency/ui";
@@ -63,6 +64,7 @@ export default async function AboutPage() {
   const roles = cfg.careers.roles.filter((r) => r.title);
   const stats = cfg.stats.filter((s) => s.value);
   const marquee = technologies.map((t) => t.name).filter(Boolean);
+  const show = (key: string) => isSectionVisible(settings.section_visibility, "about", key);
 
   return (
     <>
@@ -97,7 +99,7 @@ export default async function AboutPage() {
             )}
           </div>
 
-          {stats.length > 0 && (
+          {stats.length > 0 && show("stats") && (
             <dl className="mt-14 grid grid-cols-2 gap-x-8 gap-y-8 border-y border-neutral-200 py-8 md:grid-cols-4">
               {stats.map((st, i) => (
                 <div key={i}>
@@ -112,7 +114,26 @@ export default async function AboutPage() {
         </Container>
       </section>
 
-      {tabs.length > 0 && (
+      {marquee.length > 0 && show("tech") && (
+        <section aria-label="Technologies" className="mb-10 overflow-hidden bg-accent-500 py-5 text-on-accent">
+          <div className="tech-marquee-track flex w-max items-center" style={{ ["--tech-marquee-duration" as string]: "30s" }}>
+            {[false, true].map((hidden) => (
+              <ul key={String(hidden)} className="flex shrink-0 items-center" aria-hidden={hidden || undefined}>
+                {marquee.map((name, i) => (
+                  <li key={i} className="flex shrink-0 items-center">
+                    <span className="font-heading text-[clamp(1rem,0.8rem+0.6vw,1.5rem)] font-extrabold">{name}</span>
+                    <span aria-hidden className="mx-6 text-body-sm">
+                      &#10022;
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {tabs.length > 0 && show("mission") && (
         <section className="pb-[var(--spacing-section)] pt-6">
           <Container>
             <MissionTabs tabs={tabs} />
@@ -120,7 +141,7 @@ export default async function AboutPage() {
         </section>
       )}
 
-      {teamData.values.length > 0 && (
+      {teamData.values.length > 0 && show("values") && (
         <section className="pb-[var(--spacing-section)]">
           <Container>
             <Reveal>
@@ -133,7 +154,7 @@ export default async function AboutPage() {
         </section>
       )}
 
-      {teamData.timeline.length > 0 && (
+      {teamData.timeline.length > 0 && show("timeline") && (
         <section className="pb-[var(--spacing-section)]">
           <Container className="grid gap-10 lg:grid-cols-[22rem_1fr] lg:gap-20">
             <div className="lg:sticky lg:top-28 lg:self-start">
@@ -159,7 +180,7 @@ export default async function AboutPage() {
         </section>
       )}
 
-      {teamData.team.length > 0 && (
+      {teamData.team.length > 0 && show("team") && (
         <section id="team" className="scroll-mt-24 pb-[var(--spacing-section)]">
           <Container>
             <Heading level={2} style={H2}>
@@ -200,7 +221,7 @@ export default async function AboutPage() {
         </section>
       )}
 
-      {about.certificationsEnabled && teamData.certifications.length > 0 && (
+      {about.certificationsEnabled && show("certifications") && teamData.certifications.length > 0 && (
         <section className="pb-[var(--spacing-section)]">
           <Container>
             <Heading level={2} style={H2}>
@@ -226,7 +247,7 @@ export default async function AboutPage() {
         </section>
       )}
 
-      {roles.length > 0 && (
+      {roles.length > 0 && show("roles") && (
         <section className="pb-[var(--spacing-section)]">
           <Container>
             <div className="grid gap-10 rounded-[var(--radius-2xl)] border border-neutral-200 p-8 sm:p-12 lg:grid-cols-[18rem_1fr] lg:gap-16">
@@ -253,26 +274,7 @@ export default async function AboutPage() {
         </section>
       )}
 
-      {marquee.length > 0 && (
-        <section aria-label="Technologies" className="mb-[var(--spacing-section)] overflow-hidden bg-accent-500 py-5 text-on-accent">
-          <div className="tech-marquee-track flex w-max items-center" style={{ ["--tech-marquee-duration" as string]: "30s" }}>
-            {[false, true].map((hidden) => (
-              <ul key={String(hidden)} className="flex shrink-0 items-center" aria-hidden={hidden || undefined}>
-                {marquee.map((name, i) => (
-                  <li key={i} className="flex shrink-0 items-center">
-                    <span className="font-heading text-[clamp(1rem,0.8rem+0.6vw,1.5rem)] font-extrabold">{name}</span>
-                    <span aria-hidden className="mx-6 text-body-sm">
-                      &#10022;
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {cfg.cta.heading && (
+      {cfg.cta.heading && show("cta") && (
         <section className="pb-[var(--spacing-section)]">
           <Container className="text-center">
             <Heading level={2} className="mx-auto max-w-4xl" style={{ fontSize: "clamp(2.25rem, 1rem + 4.4vw, 5.25rem)" }}>

@@ -49,7 +49,7 @@ export function AdminBrandMark({ className = "h-8 max-w-28" }: { className?: str
     );
   }
   return (
-    <div className={cn("flex aspect-square shrink-0 items-center justify-center rounded-[10px] bg-accent-500 font-heading text-body-sm font-extrabold text-on-accent", className)}>
+    <div className={cn("flex aspect-square shrink-0 items-center justify-center rounded-[8px] bg-accent-500 font-heading text-body-sm font-extrabold text-on-accent", className)}>
       {(brandName || "A").charAt(0).toUpperCase()}
     </div>
   );
@@ -259,7 +259,7 @@ export function SidebarNav({ collapsed, onNavigate }: { collapsed: boolean; onNa
                     href={item.href}
                     onClick={onNavigate}
                     className={cn(
-                      "flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-[13px] font-semibold transition-colors",
+                      "flex items-center gap-2.5 rounded-[8px] px-3 py-2 text-[13px] font-semibold transition-colors",
                       active ? "bg-accent-500 text-on-accent" : "text-body hover:bg-neutral-100 hover:text-heading",
                     )}
                   >

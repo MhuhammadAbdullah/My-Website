@@ -239,7 +239,6 @@ export default function SettingsPage() {
             },
           }),
         }),
-        request("/settings/faq_section_heading", { method: "PUT", body: JSON.stringify({ value: form.faq_section_heading }) }),
       ]);
       toast.success("Settings saved");
     } catch (error) {
@@ -268,57 +267,65 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <Heading level={2}>Settings</Heading>
+      <Heading level={2} className="admin-page-title">Settings</Heading>
       <p className="mt-1 text-body-sm text-neutral-500">Global company info shown across the site.</p>
 
-      <div className="mt-8 grid max-w-2xl gap-5">
-        {field("company_name", "Company name")}
-        <div className="grid gap-5 sm:grid-cols-2">
-          {field("contact_email", "Contact email")}
-          {field("contact_phone", "Contact phone")}
-        </div>
+      <div className="mt-8 grid max-w-none items-start gap-5 xl:grid-cols-2">
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+          <h3 className="font-heading font-extrabold tracking-tight text-heading">Company &amp; contact</h3>
+          <div className="mt-4 grid gap-5 sm:grid-cols-2">
+            {field("company_name", "Company name")}
+            <div className="grid gap-5 sm:grid-cols-2">
+              {field("contact_email", "Contact email")}
+              {field("contact_phone", "Contact phone")}
+            </div>
+            <div>
+              <Label>Global currency</Label>
+              <Combobox
+                value={form.currency || DEFAULT_CURRENCY}
+                onValueChange={(v) => setForm({ ...form, currency: v })}
+                searchPlaceholder="Search currencies…"
+                options={CURRENCY_OPTIONS.map((c) => ({
+                  value: c.code,
+                  label: c.label,
+                  secondary: `${c.code} · ${c.symbol}`,
+                  keywords: [c.code, c.symbol],
+                }))}
+              />
+              <p className="mt-1.5 text-body-sm text-neutral-500">
+                Used for any service that doesn't set its own currency override.
+              </p>
+            </div>
+            <div>
+              {field("whatsapp_number", "WhatsApp number")}
+              <FieldError>{contactErrors.whatsapp_number}</FieldError>
+              <p className="mt-1.5 text-body-sm text-neutral-500">International format, e.g. +923001234567.</p>
+            </div>
+            <div>
+              <Label>WhatsApp prefilled message</Label>
+              <Input
+                value={form.whatsapp_message ?? ""}
+                maxLength={300}
+                onChange={(e) => setForm({ ...form, whatsapp_message: e.target.value })}
+                placeholder="Hi! I'd like to talk about a project."
+              />
+              {buildWhatsAppLink(form.whatsapp_number, form.whatsapp_message) ? (
+                <p className="mt-1.5 break-all text-body-sm text-neutral-500">
+                  Link: <a className="underline" href={buildWhatsAppLink(form.whatsapp_number, form.whatsapp_message)} target="_blank" rel="noopener noreferrer">{buildWhatsAppLink(form.whatsapp_number, form.whatsapp_message)}</a>
+                </p>
+              ) : (
+                <p className="mt-1.5 text-body-sm text-neutral-500">Enter a WhatsApp number to generate the wa.me link.</p>
+              )}
+            </div>
+            {field("address", "Address")}
+            {field("calendly_url", "Calendly URL")}
+          </div>
+        </section>
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+          <h3 className="font-heading font-extrabold tracking-tight text-heading">Business hours</h3>
+          <div className="mt-4">
         <div>
-          <Label>Global currency</Label>
-          <Combobox
-            value={form.currency || DEFAULT_CURRENCY}
-            onValueChange={(v) => setForm({ ...form, currency: v })}
-            searchPlaceholder="Search currencies…"
-            options={CURRENCY_OPTIONS.map((c) => ({
-              value: c.code,
-              label: c.label,
-              secondary: `${c.code} · ${c.symbol}`,
-              keywords: [c.code, c.symbol],
-            }))}
-          />
-          <p className="mt-1.5 text-body-sm text-neutral-500">
-            Used for any service that doesn't set its own currency override.
-          </p>
-        </div>
-        <div>
-          {field("whatsapp_number", "WhatsApp number")}
-          <FieldError>{contactErrors.whatsapp_number}</FieldError>
-          <p className="mt-1.5 text-body-sm text-neutral-500">International format, e.g. +923001234567.</p>
-        </div>
-        <div>
-          <Label>WhatsApp prefilled message</Label>
-          <Input
-            value={form.whatsapp_message ?? ""}
-            maxLength={300}
-            onChange={(e) => setForm({ ...form, whatsapp_message: e.target.value })}
-            placeholder="Hi! I'd like to talk about a project."
-          />
-          {buildWhatsAppLink(form.whatsapp_number, form.whatsapp_message) ? (
-            <p className="mt-1.5 break-all text-body-sm text-neutral-500">
-              Link: <a className="underline" href={buildWhatsAppLink(form.whatsapp_number, form.whatsapp_message)} target="_blank" rel="noopener noreferrer">{buildWhatsAppLink(form.whatsapp_number, form.whatsapp_message)}</a>
-            </p>
-          ) : (
-            <p className="mt-1.5 text-body-sm text-neutral-500">Enter a WhatsApp number to generate the wa.me link.</p>
-          )}
-        </div>
-        {field("address", "Address")}
-
-        <fieldset className="rounded-xl border border-neutral-200 p-4">
-          <legend className="px-1 text-body-sm font-medium text-heading">Business hours</legend>
+          
           <div className="grid gap-2">
             {BUSINESS_DAYS.map((d) => (
               <div key={d} className="grid grid-cols-[6rem_1fr_1fr_auto] items-center gap-2">
@@ -356,90 +363,43 @@ export default function SettingsPage() {
             <Input value={form.timezone ?? ""} onChange={(e) => setForm({ ...form, timezone: e.target.value })} placeholder={DEFAULT_TIMEZONE} aria-invalid={!!contactErrors.timezone} />
             <FieldError>{contactErrors.timezone}</FieldError>
           </div>
-        </fieldset>
-        {field("calendly_url", "Calendly URL")}
-
-        <div>
-          <Label>Google Maps URL</Label>
-          <Input
-            value={form.google_maps_embed ?? ""}
-            onChange={(e) => setForm({ ...form, google_maps_embed: e.target.value })}
-            placeholder="https://www.google.com/maps/place/..."
-            aria-invalid={!!mapErrors.google_maps_embed}
-          />
-          <p className="mt-1.5 text-body-sm text-neutral-500">Paste a standard Google Maps link.</p>
-          <FieldError>{mapErrors.google_maps_embed}</FieldError>
         </div>
-
-        <div>
-          <Label>Google Maps Embed Code</Label>
-          <Textarea
-            value={form.google_maps_embed_code ?? ""}
-            onChange={(e) => setForm({ ...form, google_maps_embed_code: e.target.value })}
-            placeholder='<iframe src="https://www.google.com/maps/embed?pb=..." width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>'
-            rows={4}
-            aria-invalid={!!mapErrors.google_maps_embed_code}
-          />
-          <p className="mt-1.5 text-body-sm text-neutral-500">
-            Paste the iframe embed code generated by Google Maps (recommended for maximum compatibility). Takes
-            priority over the URL above when both are set.
-          </p>
-          <FieldError>{mapErrors.google_maps_embed_code}</FieldError>
-        </div>
-
-        <div className="mt-4 border-t border-neutral-200 pt-6">
-          <Heading level={3}>Website Branding</Heading>
-          <p className="mt-1 text-body-sm text-neutral-500">
-            Controls what's shown in the header and footer — the uploaded logo or the brand name.
-          </p>
-
-          <div className="mt-5 grid gap-5">
-            <LogoField label="Website logo (header)" value={logo} folder="branding" onChange={setLogo} />
-            <LogoField label="Footer logo" value={footerLogo} folder="branding" onChange={setFooterLogo} />
-            <p className="-mt-3 text-body-sm text-neutral-500">Leave the footer logo empty to reuse the header logo above.</p>
-            <LogoField label="Logo for dark background (used by the new dark theme)" value={logoDark} folder="branding" onChange={setLogoDark} />
-            {displayMode === "LOGO" && !logoDark.url && (
-              <p className="-mt-3 text-body-sm text-warning-700">
-                No dark-background logo yet — the header falls back to the standard logo, which may be hard to see on dark.
-              </p>
-            )}
-            <LogoField label="Favicon" value={favicon} folder="branding" onChange={setFavicon} />
-            {field("brand_name", "Brand name")}
-            {field("footer_tagline", "Footer tagline")}
+          </div>
+        </section>
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5 self-stretch">
+          <h3 className="font-heading font-extrabold tracking-tight text-heading">Google Maps</h3>
+          <div className="mt-4 grid gap-5">
             <div>
-              {field("copyright_text", "Copyright text")}
+              <Label>Google Maps URL</Label>
+              <Input
+                value={form.google_maps_embed ?? ""}
+                onChange={(e) => setForm({ ...form, google_maps_embed: e.target.value })}
+                placeholder="https://www.google.com/maps/place/..."
+                aria-invalid={!!mapErrors.google_maps_embed}
+              />
+              <p className="mt-1.5 text-body-sm text-neutral-500">Paste a standard Google Maps link.</p>
+              <FieldError>{mapErrors.google_maps_embed}</FieldError>
+            </div>
+
+            <div>
+              <Label>Google Maps Embed Code</Label>
+              <Textarea
+                value={form.google_maps_embed_code ?? ""}
+                onChange={(e) => setForm({ ...form, google_maps_embed_code: e.target.value })}
+                placeholder='<iframe src="https://www.google.com/maps/embed?pb=..." width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>'
+                rows={4}
+                aria-invalid={!!mapErrors.google_maps_embed_code}
+              />
               <p className="mt-1.5 text-body-sm text-neutral-500">
-                Use <code>{"{year}"}</code> and <code>{"{brand}"}</code>. Empty shows “© year brand. All rights reserved.”
+                Paste the iframe embed code generated by Google Maps (recommended for maximum compatibility). Takes
+                priority over the URL above when both are set.
               </p>
-            </div>
-            <div>
-              {field("email_sender_name", "Email sender name")}
-              <p className="mt-1.5 text-body-sm text-neutral-500">Shown as the “From” name on emails the site sends. Empty uses the brand name.</p>
-            </div>
-            <div>
-              <Label>Branding display mode</Label>
-              <Select value={displayMode} onValueChange={(v) => setDisplayMode(v as BrandingDisplayMode)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {BRANDING_DISPLAY_MODES.map((mode) => (
-                    <SelectItem key={mode} value={mode}>
-                      {DISPLAY_MODE_LABELS[mode]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {displayMode === "LOGO" && !logo.url && (
-                <p className="mt-1.5 text-body-sm text-neutral-500">
-                  No logo uploaded — the brand name will be shown instead until you add one.
-                </p>
-              )}
+              <FieldError>{mapErrors.google_maps_embed_code}</FieldError>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="mt-4 border-t border-neutral-200 pt-6">
+        <div className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5 self-stretch">
           <Heading level={3}>Default Call-to-Action</Heading>
           <p className="mt-1 text-body-sm text-neutral-500">
             Fallback CTA banner text shown on pages that don't set their own (About, Services, and project/service
@@ -486,23 +446,68 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="mt-4 border-t border-neutral-200 pt-6">
-          <Heading level={3}>FAQ Section</Heading>
+
+        <div className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5 xl:col-span-2">
+          <Heading level={3}>Website Branding</Heading>
           <p className="mt-1 text-body-sm text-neutral-500">
-            The heading shown above the FAQ accordion on the Home, About, and Contact pages.
+            Controls what's shown in the header and footer — the uploaded logo or the brand name.
           </p>
-          <div className="mt-5">
-            {field("faq_section_heading", "FAQ section heading")}
+
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <LogoField variant="tile" label="Header logo" hint="Shown in the site header." value={logo} folder="branding" onChange={setLogo} />
+            <LogoField variant="tile" label="Footer logo" hint="Leave empty to reuse the header logo." value={footerLogo} folder="branding" onChange={setFooterLogo} />
+            <LogoField variant="tile" label="Dark-background logo" hint="Used by the dark theme, so it should be light-coloured." value={logoDark} folder="branding" onChange={setLogoDark} />
+            <LogoField variant="tile" label="Favicon" hint="The small icon in the browser tab." value={favicon} folder="branding" onChange={setFavicon} />
+          </div>
+          {displayMode === "LOGO" && !logoDark.url && (
+            <p className="mt-3 rounded-[8px] bg-warning-50 px-3 py-2 text-body-sm text-warning-700">
+              No dark-background logo yet — the header falls back to the standard logo, which may be hard to see on dark.
+            </p>
+          )}
+
+          <div className="mt-6 grid gap-5 border-t border-neutral-200 pt-6 md:grid-cols-2">
+            {field("brand_name", "Brand name")}
+            {field("footer_tagline", "Footer tagline")}
+            <div>
+              {field("copyright_text", "Copyright text")}
+              <p className="mt-1.5 text-body-sm text-neutral-500">
+                Use <code>{"{year}"}</code> and <code>{"{brand}"}</code>. Empty shows “© year brand. All rights reserved.”
+              </p>
+            </div>
+            <div>
+              {field("email_sender_name", "Email sender name")}
+              <p className="mt-1.5 text-body-sm text-neutral-500">Shown as the “From” name on emails the site sends. Empty uses the brand name.</p>
+            </div>
+            <div>
+              <Label>Branding display mode</Label>
+              <Select value={displayMode} onValueChange={(v) => setDisplayMode(v as BrandingDisplayMode)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {BRANDING_DISPLAY_MODES.map((mode) => (
+                    <SelectItem key={mode} value={mode}>
+                      {DISPLAY_MODE_LABELS[mode]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {displayMode === "LOGO" && !logo.url && (
+                <p className="mt-1.5 text-body-sm text-neutral-500">
+                  No logo uploaded — the brand name will be shown instead until you add one.
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="mt-4 border-t border-neutral-200 pt-6">
+        <div className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5 xl:col-span-2">
           <Heading level={3}>Social Media Settings</Heading>
           <p className="mt-1 text-body-sm text-neutral-500">
             Add a profile URL to show that platform's icon on the site. Leave a field blank to hide it.
           </p>
 
-          <div className="mt-5 grid gap-5 sm:grid-cols-2">
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {SOCIAL_PLATFORM_IDS.map((id) => {
               const key = `social_${id}`;
               return (

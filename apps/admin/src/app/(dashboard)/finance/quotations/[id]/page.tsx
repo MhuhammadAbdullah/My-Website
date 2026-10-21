@@ -216,7 +216,7 @@ export default function QuotationDetailPage() {
       </Link>
 
       <div className="mt-3 flex items-center justify-between">
-        <Heading level={2}>{isNew ? "New quotation" : quotation?.quoteNumber}</Heading>
+        <Heading level={2} className="admin-page-title">{isNew ? "New quotation" : quotation?.quoteNumber}</Heading>
         <div className="flex gap-2">
           {!isNew && quotation && (
             <Button variant="outline" onClick={handleDownloadPdf}>

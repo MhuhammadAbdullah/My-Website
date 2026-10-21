@@ -13,6 +13,8 @@ import {
   influencerCommissionNoticeSchema,
   announcementBarSchema,
   themeSchema,
+  sectionVisibilitySchema,
+  careersPageSchema,
   headerSettingsSchema,
   footerColumnsSchema,
   legalLinksSchema,
@@ -92,6 +94,8 @@ const settingValidators: Record<string, (value: unknown) => Prisma.InputJsonValu
   affiliate_page: (value) => affiliatePageSchema.parse(value),
   contact_page: (value) => contactPageSchema.parse(value),
   influencers_page: (value) => influencersPageSchema.parse(value),
+  section_visibility: (value) => sectionVisibilitySchema.parse(value),
+  careers_page: (value) => careersPageSchema.parse(value),
 };
 
 const PRIVATE_KEYS = new Set<string>(PRIVATE_SETTING_KEYS);

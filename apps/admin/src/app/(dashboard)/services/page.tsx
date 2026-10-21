@@ -413,7 +413,7 @@ function ServiceEditor({
                 <Plus className="size-4" /> Add plan
               </Button>
             </div>
-            <p className="mt-1 text-body-sm text-neutral-500">
+            <p className="mt-2 text-body-sm text-neutral-500">
               A service shows pricing on the site only when it has at least one plan here.
             </p>
             <div className="mt-3 space-y-4">
@@ -425,7 +425,7 @@ function ServiceEditor({
               {plans.map((plan, i) => {
                 const errs = planErrors[i] ?? {};
                 return (
-                  <div key={plan.id ?? i} className="space-y-3 rounded-xl border border-neutral-200 p-4">
+                  <div key={plan.id ?? i} className="space-y-3 rounded-xl border border-neutral-200 p-4 bg-neutral-50">
                     <div className="flex items-center justify-between gap-2">
                       <Input
                         placeholder="Plan name"
@@ -647,9 +647,9 @@ function ServicesPageInner() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Services</Heading>
+          <Heading level={2} className="admin-page-title">Services</Heading>
           <p className="mt-1 text-body-sm text-neutral-500">Manage services, pricing, and process shown on the public site.</p>
         </div>
         <Button onClick={() => setEditing(null)}>

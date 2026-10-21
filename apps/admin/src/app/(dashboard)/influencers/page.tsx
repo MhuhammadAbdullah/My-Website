@@ -153,10 +153,10 @@ function InfluencersPageInner() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Influencers</Heading>
-          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+          <Heading level={2} className="admin-page-title">Influencers</Heading>
+          <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
             Manage approved marketplace profiles — verification, featured placement, availability, and commission overrides.
           </p>
         </div>
@@ -167,7 +167,7 @@ function InfluencersPageInner() {
         )}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-5 rounded-[10px] border border-neutral-200 bg-neutral-50 p-3">
         <AdminListToolbar
           search={list.search}
           onSearchChange={list.setSearch}
@@ -365,7 +365,7 @@ function InfluencerManageDialog({ id, onClose, onSaved }: { id: string; onClose:
             <Skeleton className="h-64 w-full" />
           ) : (
             <div className="space-y-5">
-              <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3 bg-neutral-50">
                 <div>
                   <p className="text-body-sm font-medium text-heading">Verified badge</p>
                   <p className="text-label text-neutral-400">Shows a verified checkmark on their public profile</p>
@@ -373,7 +373,7 @@ function InfluencerManageDialog({ id, onClose, onSaved }: { id: string; onClose:
                 <Switch checked={form.isVerified} onCheckedChange={(v) => setForm((f) => ({ ...f, isVerified: v }))} />
               </div>
 
-              <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3 bg-neutral-50">
                 <div>
                   <p className="text-body-sm font-medium text-heading">Featured</p>
                   <p className="text-label text-neutral-400">Promotes this profile to the top of the marketplace</p>
@@ -392,7 +392,7 @@ function InfluencerManageDialog({ id, onClose, onSaved }: { id: string; onClose:
                 </div>
               )}
 
-              <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3 bg-neutral-50">
                 <div>
                   <p className="text-body-sm font-medium text-heading">Available for booking</p>
                   <p className="text-label text-neutral-400">Staff override — influencers also control this from their dashboard</p>

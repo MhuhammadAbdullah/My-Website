@@ -10,7 +10,7 @@ import type { SiteSettings } from "@/lib/types";
 
 function Group({ title, help, children }: { title: string; help?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-neutral-200 p-5">
+    <section className="rounded-2xl border border-neutral-200 p-5 bg-neutral-50">
       <Heading level={3}>{title}</Heading>
       {help && <p className="mt-1 text-body-sm text-neutral-500">{help}</p>}
       <div className="mt-4 grid gap-4">{children}</div>
@@ -66,8 +66,8 @@ export function AffiliatePageSettingsForm() {
   const setCmp = (patch: Partial<typeof cmp>) => setForm({ ...form, compare: { ...cmp, ...patch } });
 
   return (
-    <div className="grid max-w-3xl gap-6">
-      <p className="text-body-sm text-neutral-500">
+    <div className="grid max-w-none items-start gap-6 xl:grid-cols-2">
+      <p className="xl:col-span-2 text-body-sm text-neutral-500">
         The tools come from <strong>All Tools</strong> (promo code: write “code ABC123” in a tool’s Special offer; the “Why we use it” note is its own field). The heading and disclosure are in <strong>Page Content</strong>. Everything else is here.
       </p>
 
@@ -164,7 +164,7 @@ export function AffiliatePageSettingsForm() {
         {cmp.rows.map((r, i) => {
           const upd = (patch: Partial<typeof r>) => setCmp({ rows: cmp.rows.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
           return (
-            <div key={i} className="flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200 p-3">
+            <div key={i} className="flex flex-wrap items-center gap-2 rounded-xl border border-neutral-200 p-3 bg-neutral-50">
               <Input className="w-40" value={r.feature} placeholder="Feature" onChange={(e) => upd({ feature: e.target.value })} />
               {cmp.columns.map((c, ci) => (
                 <Input key={ci} className="w-40" value={r.values[ci] ?? ""} placeholder={c.name || `Column ${ci + 1}`} onChange={(e) => upd({ values: cmp.columns.map((_, k) => (k === ci ? e.target.value : (r.values[k] ?? ""))) })} />

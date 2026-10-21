@@ -71,7 +71,7 @@ export function LineItemsEditor({
         {items.map((item, index) => {
           const rowTotals = computeDocumentTotals([item]);
           return (
-            <div key={index} className="space-y-3 rounded-xl border border-neutral-200 p-4">
+            <div key={index} className="space-y-3 rounded-xl border border-neutral-200 p-4 bg-neutral-50">
               <div className="flex items-start justify-between gap-3">
                 <div className="grid flex-1 gap-3 sm:grid-cols-2">
                   <div>

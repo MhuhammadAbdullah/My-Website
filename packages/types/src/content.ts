@@ -63,6 +63,8 @@ export const affiliateToolSchema = z.object({
   description: z.string().min(1),
   benefits: z.array(z.string().min(1)).default([]),
   specialOffer: z.string().nullable().optional(),
+  // The discount code visitors can copy. Stored inside specialOffer as "Code: ABC123" (no extra column), see apps/api affiliate routes.
+  couponCode: z.string().trim().regex(/^$|^[A-Za-z0-9_-]{3,40}$/, "3-40 letters, numbers, - or _").optional(),
   disclosureNote: z.string().nullable().optional(),
   ctaLabel: z.string().default("Visit Site"),
   ctaUrl: z.string().url(),

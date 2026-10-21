@@ -402,10 +402,10 @@ function PortfolioPageInner() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Portfolio</Heading>
-          <p className="mt-1 text-body-sm text-neutral-500">Case studies shown on the Portfolio page.</p>
+          <Heading level={2} className="admin-page-title">Portfolio</Heading>
+          <p className="mt-2 text-body-sm text-neutral-500">Case studies shown on the Portfolio page.</p>
         </div>
         <Button onClick={() => setEditing(null)}>
           <Plus /> Add project

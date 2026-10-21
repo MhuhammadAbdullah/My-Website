@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { InfoHint } from "@/components/field-hint";
 import {
   DndContext,
   KeyboardSensor,
@@ -72,12 +73,14 @@ function FieldShell({ def, path, errors, children }: { def: FieldDef; path: stri
   const id = `${scope}f-${path}`;
   return (
     <div>
-      <Label htmlFor={id}>
-        {def.label}
-        {def.required && <span className="ml-1 text-error-500">*</span>}
-      </Label>
+      <div className="flex items-center gap-1.5">
+        <Label htmlFor={id}>
+          {def.label}
+          {def.required && <span className="ml-1 text-error-500">*</span>}
+        </Label>
+        {def.help && <InfoHint text={def.help} />}
+      </div>
       {children}
-      {def.help && <p className="mt-1 text-body-sm text-neutral-500">{def.help}</p>}
       <FieldError>{errors[path]}</FieldError>
     </div>
   );
@@ -168,7 +171,7 @@ function NumberField({ def, value, onChange, path, errors }: FieldProps<number>)
 function ToggleField({ def, value, onChange, path, errors }: FieldProps<boolean>) {
   const scope = useScope();
   return (
-    <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3">
+    <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3 bg-neutral-50">
       <div>
         <Label htmlFor={`${scope}f-${path}`} className="mb-0">
           {def.label}
@@ -238,7 +241,7 @@ function ButtonField({ def, value, onChange, path, errors }: FieldProps<ButtonVa
   const v = value ?? { label: "", href: "", style: "primary" as const, newTab: false };
   const set = (patch: Partial<ButtonValue>) => onChange({ ...v, ...patch });
   return (
-    <fieldset className="rounded-xl border border-neutral-200 p-4">
+    <fieldset className="rounded-xl border border-neutral-200 p-4 bg-neutral-50">
       <legend className="px-1 text-body-sm font-medium text-heading">{def.label}</legend>
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
@@ -626,7 +629,7 @@ function CollectionField({ def, value, onChange, path, errors }: FieldProps<stri
         {selected.map((id, i) => {
           const opt = byId.get(id);
           return (
-            <li key={id} className="flex items-center gap-1 rounded-lg border border-neutral-200 px-2 py-1.5">
+            <li key={id} className="flex items-center gap-1 rounded-lg border border-neutral-200 px-2 py-1.5 bg-neutral-50">
               <span className="w-6 text-center text-body-sm text-neutral-400">{i + 1}</span>
               <span className={`flex-1 truncate text-body-sm ${opt ? "text-heading" : "text-neutral-400 italic"}`}>
                 {opt ? opt.title : options ? "Item no longer exists" : "Loading…"}

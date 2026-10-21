@@ -55,7 +55,7 @@ export function AdminListToolbar({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={searchPlaceholder}
-          className="pl-10"
+          className="h-10 pl-10"
         />
       </div>
 
@@ -66,7 +66,7 @@ export function AdminListToolbar({
             value={filters[filter.key] || "__all__"}
             onValueChange={(v) => onFilterChange(filter.key, v === "__all__" ? "" : v)}
           >
-            <SelectTrigger className="h-9 w-auto min-w-[8.5rem]">
+            <SelectTrigger className="h-10 w-auto min-w-[8.5rem]">
               <SelectValue placeholder={filter.label} />
             </SelectTrigger>
             <SelectContent>
@@ -88,7 +88,7 @@ export function AdminListToolbar({
               onSortChange(field!, order === "asc" ? "asc" : "desc");
             }}
           >
-            <SelectTrigger className="h-9 w-auto min-w-[10rem]">
+            <SelectTrigger className="h-10 w-auto min-w-[10rem]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -105,7 +105,7 @@ export function AdminListToolbar({
         )}
 
         <Select value={String(limit)} onValueChange={(v) => onLimitChange(Number(v))}>
-          <SelectTrigger className="h-9 w-auto min-w-[8rem] shrink-0 whitespace-nowrap">
+          <SelectTrigger className="h-10 w-auto min-w-[8rem] shrink-0 whitespace-nowrap">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -118,7 +118,7 @@ export function AdminListToolbar({
         </Select>
 
         {hasActiveFilters && (
-          <Button type="button" variant="ghost" size="sm" onClick={onClearFilters}>
+          <Button type="button" variant="ghost" size="sm" onClick={onClearFilters} className="h-10">
             <X className="size-4" /> Clear filters
           </Button>
         )}

@@ -16,6 +16,10 @@ import {
   Skeleton,
   SocialIcon,
   Switch,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   Textarea,
   toast,
 } from "@agency/ui";
@@ -126,7 +130,11 @@ interface InfluencerAutomationSettings {
 }
 
 function StatusBadge({ enabled }: { enabled: boolean }) {
-  return <Badge variant={enabled ? "success" : "error"}>{enabled ? "🟢 Enabled" : "🔴 Disabled"}</Badge>;
+  return (
+    <Badge variant={enabled ? "success" : "error"} className="shrink-0 whitespace-nowrap">
+      {enabled ? "🟢 Enabled" : "🔴 Disabled"}
+    </Badge>
+  );
 }
 
 export default function InfluencerSettingsPage() {
@@ -187,11 +195,12 @@ export default function InfluencerSettingsPage() {
   }
 
   const loading = loadingSettings || loadingAutomation;
+  const [tab, setTab] = React.useState("page");
 
   return (
     <div>
-      <Heading level={2}>Influencer marketplace settings</Heading>
-      <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+      <Heading level={2} className="admin-page-title">Influencer marketplace settings</Heading>
+      <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
         Master kill-switches for the marketplace, registrations, and bookings — changes take effect immediately across the website, no
         redeploy required.
       </p>
@@ -199,194 +208,212 @@ export default function InfluencerSettingsPage() {
       {loading ? (
         <Skeleton className="mt-6 h-96 w-full" />
       ) : (
-        <div className="mt-6 max-w-2xl space-y-8">
-          <section className="space-y-4">
-            <div>
-              <p className="font-medium text-heading">Marketplace page</p>
-              <p className="mb-2 text-body-sm text-neutral-500">
-                The heading and paragraph shown at the top of the public Influencer Marketplace listing page (calibre.digital/influencers).
-              </p>
-            </div>
-            <PageHeroContentForm
-              endpoint="/pages/influencers"
-              emptyValues={{ heroHeading: "", heroDescription: "" }}
-              fields={[
-                { key: "heroHeading", label: "Heading", isHeading: true, placeholder: "Influencer Marketplace" },
-                { key: "heroDescription", label: "Paragraph", type: "textarea", placeholder: "Discover vetted creators, compare audience data and pricing, and book campaigns — we handle the rest." },
-              ]}
-              successMessage="Marketplace page content updated"
-            />
-          </section>
+        <Tabs value={tab} onValueChange={setTab} className="mt-6">
+          <TabsList>
+            <TabsTrigger value="page">Marketplace page</TabsTrigger>
+            <TabsTrigger value="access">Access &amp; messages</TabsTrigger>
+            <TabsTrigger value="guides">Guides &amp; notices</TabsTrigger>
+            <TabsTrigger value="automation">Automation</TabsTrigger>
+          </TabsList>
 
-          <section className="space-y-4">
-            <div>
-              <p className="font-medium text-heading">Marketplace page sections</p>
-              <p className="mb-2 text-body-sm text-neutral-500">Hero buttons and steps, labels, and the two closing cards on the public marketplace page.</p>
-            </div>
-            <InfluencersPageSettingsForm />
-          </section>
-
-          <section className="space-y-4 rounded-2xl border border-neutral-200 p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-heading">Influencer Marketplace</p>
-                <p className="text-body-sm text-neutral-500">Master toggle. When off, all public influencer pages 404.</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <StatusBadge enabled={flags.marketplaceEnabled} />
-                <Switch checked={flags.marketplaceEnabled} onCheckedChange={(v) => setFlag("marketplaceEnabled", v)} />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
-              <div>
-                <p className="font-medium text-heading">Influencer Registration</p>
-                <p className="text-body-sm text-neutral-500">Hides "Become an Influencer" and blocks new applications.</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <StatusBadge enabled={flags.registrationEnabled} />
-                <Switch checked={flags.registrationEnabled} onCheckedChange={(v) => setFlag("registrationEnabled", v)} />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
-              <div>
-                <p className="font-medium text-heading">Client Bookings</p>
-                <p className="text-body-sm text-neutral-500">Blocks new booking submissions. Existing bookings stay accessible.</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <StatusBadge enabled={flags.bookingsEnabled} />
-                <Switch checked={flags.bookingsEnabled} onCheckedChange={(v) => setFlag("bookingsEnabled", v)} />
-              </div>
-            </div>
-          </section>
-
-          <section className="space-y-4">
-            <div>
-              <p className="font-medium text-heading">Registration closed message</p>
-              <Textarea value={flags.registrationClosedMessage} onChange={(e) => setFlag("registrationClosedMessage", e.target.value)} rows={2} />
-            </div>
-            <div>
-              <p className="font-medium text-heading">Bookings disabled message</p>
-              <Textarea value={flags.bookingsDisabledMessage} onChange={(e) => setFlag("bookingsDisabledMessage", e.target.value)} rows={2} />
-            </div>
-            <div>
-              <p className="font-medium text-heading">Maintenance notice</p>
-              <p className="mb-2 text-body-sm text-neutral-500">Shown in place of the marketplace whenever it's disabled.</p>
-              <RichTextEditor value={flags.maintenanceNotice} onChange={(v) => setFlag("maintenanceNotice", v)} placeholder="Write a maintenance notice…" />
-            </div>
-          </section>
-
-          <section className="space-y-4 rounded-2xl border border-neutral-200 p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-heading">Earnings page commission notice</p>
-                <p className="text-body-sm text-neutral-500">
-                  Shown at the top of the influencer dashboard's Earnings page, disclosing that admin deducts a commission before payout.
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <StatusBadge enabled={commissionNotice.enabled} />
-                <Switch
-                  checked={commissionNotice.enabled}
-                  onCheckedChange={(v) => setCommissionNotice((c) => ({ ...c, enabled: v }))}
+          <TabsContent value="page" className="mt-5">
+            <div className="grid items-stretch gap-5">
+              <section className="h-full space-y-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+                <div>
+                  <p className="font-medium text-heading">Marketplace page</p>
+                  <p className="mb-2 text-body-sm text-neutral-500">
+                    The heading and paragraph shown at the top of the public Influencer Marketplace listing page (calibre.digital/influencers).
+                  </p>
+                </div>
+                <PageHeroContentForm
+                  endpoint="/pages/influencers"
+                  emptyValues={{ heroHeading: "", heroDescription: "" }}
+                  fields={[
+                    { key: "heroHeading", label: "Heading", isHeading: true, placeholder: "Influencer Marketplace" },
+                    { key: "heroDescription", label: "Paragraph", type: "textarea", placeholder: "Discover vetted creators, compare audience data and pricing, and book campaigns — we handle the rest." },
+                  ]}
+                  successMessage="Marketplace page content updated"
                 />
-              </div>
+              </section>
+              <section className="h-full space-y-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+                <div>
+                  <p className="font-medium text-heading">Marketplace page sections</p>
+                  <p className="mb-2 text-body-sm text-neutral-500">Hero buttons and steps, labels, and the two closing cards on the public marketplace page.</p>
+                </div>
+                <InfluencersPageSettingsForm />
+              </section>
             </div>
-            <Textarea
-              value={commissionNotice.content}
-              onChange={(e) => setCommissionNotice((c) => ({ ...c, content: e.target.value }))}
-              rows={2}
-            />
-          </section>
+          </TabsContent>
+          <TabsContent value="access" className="mt-5">
+            <div className="grid items-start gap-5 xl:grid-cols-2">
+              <section className="xl:order-2 space-y-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-heading">Influencer Marketplace</p>
+                    <p className="text-body-sm text-neutral-500">Master toggle. When off, all public influencer pages 404.</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <StatusBadge enabled={flags.marketplaceEnabled} />
+                    <Switch checked={flags.marketplaceEnabled} onCheckedChange={(v) => setFlag("marketplaceEnabled", v)} />
+                  </div>
+                </div>
 
-          <section className="space-y-4">
-            <div>
-              <p className="font-medium text-heading">Video Guide</p>
-              <p className="mb-2 text-body-sm text-neutral-500">
-                Shown to applicants in the "Video Guide" popup next to the Introduction Video upload on the registration form.
-              </p>
-              <RichTextEditor
-                value={videoGuide.content}
-                onChange={(v) => setVideoGuide({ content: v })}
-                placeholder="Write the introduction video guide…"
-              />
-            </div>
-          </section>
+                <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
+                  <div>
+                    <p className="font-medium text-heading">Influencer Registration</p>
+                    <p className="text-body-sm text-neutral-500">Hides "Become an Influencer" and blocks new applications.</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <StatusBadge enabled={flags.registrationEnabled} />
+                    <Switch checked={flags.registrationEnabled} onCheckedChange={(v) => setFlag("registrationEnabled", v)} />
+                  </div>
+                </div>
 
-          <section className="space-y-4">
-            <div>
-              <p className="font-medium text-heading">Platform Insights Guide</p>
-              <p className="mb-2 text-body-sm text-neutral-500">
-                Shown on the influencer dashboard's "Platform Insights Guide" page — where to find analytics on each platform.
-                Leave a platform's default text as-is, or rewrite it below.
-              </p>
+                <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
+                  <div>
+                    <p className="font-medium text-heading">Client Bookings</p>
+                    <p className="text-body-sm text-neutral-500">Blocks new booking submissions. Existing bookings stay accessible.</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <StatusBadge enabled={flags.bookingsEnabled} />
+                    <Switch checked={flags.bookingsEnabled} onCheckedChange={(v) => setFlag("bookingsEnabled", v)} />
+                  </div>
+                </div>
+              </section>
+              <section className="xl:order-1 space-y-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+                <div>
+                  <p className="font-medium text-heading">Registration closed message</p>
+                  <Textarea value={flags.registrationClosedMessage} onChange={(e) => setFlag("registrationClosedMessage", e.target.value)} rows={2} />
+                </div>
+                <div>
+                  <p className="font-medium text-heading">Bookings disabled message</p>
+                  <Textarea value={flags.bookingsDisabledMessage} onChange={(e) => setFlag("bookingsDisabledMessage", e.target.value)} rows={2} />
+                </div>
+                <div>
+                  <p className="font-medium text-heading">Maintenance notice</p>
+                  <p className="mb-2 text-body-sm text-neutral-500">Shown in place of the marketplace whenever it's disabled.</p>
+                  <RichTextEditor value={flags.maintenanceNotice} onChange={(v) => setFlag("maintenanceNotice", v)} placeholder="Write a maintenance notice…" />
+                </div>
+              </section>
             </div>
-            <Accordion type="single" collapsible className="rounded-2xl border border-neutral-200 px-5">
-              {INSIGHTS_GUIDE_PLATFORMS.map(({ key, label, icon }) => (
-                <AccordionItem key={key} value={key}>
-                  <AccordionTrigger>
-                    <span className="flex items-center gap-2.5 text-body font-medium">
-                      <SocialIcon platform={icon} className="size-4 text-heading" />
-                      {label}
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <RichTextEditor
-                      value={insightsGuide[key]}
-                      onChange={(v) => setInsightsGuide((g) => ({ ...g, [key]: v }))}
-                      placeholder={`Write where to find ${label}…`}
+          </TabsContent>
+          <TabsContent value="guides" className="mt-5">
+            <div className="grid items-start gap-5 xl:grid-cols-2">
+              <section className="xl:order-3 space-y-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-heading">Earnings page commission notice</p>
+                    <p className="text-body-sm text-neutral-500">
+                      Shown at the top of the influencer dashboard's Earnings page, disclosing that admin deducts a commission before payout.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <StatusBadge enabled={commissionNotice.enabled} />
+                    <Switch
+                      checked={commissionNotice.enabled}
+                      onCheckedChange={(v) => setCommissionNotice((c) => ({ ...c, enabled: v }))}
                     />
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </section>
-
-          <section className="space-y-4 rounded-2xl border border-neutral-200 p-5">
-            <p className="font-medium text-heading">Automation</p>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-body-sm font-medium text-heading">Auto-approve applications</p>
-                <p className="text-label text-neutral-400">Skip manual review — new applications go live immediately.</p>
-              </div>
-              <Switch
-                checked={auto.autoApproveApplications}
-                onCheckedChange={(v) => setAuto((a) => ({ ...a, autoApproveApplications: v }))}
-              />
-            </div>
-            <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
-              <div>
-                <p className="text-body-sm font-medium text-heading">Auto-approve badge recommendations</p>
-                <p className="text-label text-neutral-400">Skip the review queue — scoring-pass recommendations go live immediately.</p>
-              </div>
-              <Switch
-                checked={auto.badgeAutoApprovalEnabled}
-                onCheckedChange={(v) => setAuto((a) => ({ ...a, badgeAutoApprovalEnabled: v }))}
-              />
-            </div>
-            <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
-              <div>
-                <p className="text-body-sm font-medium text-heading">Maximum pricing cards</p>
-                <p className="text-label text-neutral-400">Caps how many showcase pricing cards each influencer can create.</p>
-              </div>
-              <div className="w-24">
-                <Label className="sr-only">Maximum pricing cards</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={auto.maxPricingCards}
-                  onChange={(e) => setAuto((a) => ({ ...a, maxPricingCards: Number(e.target.value) }))}
+                  </div>
+                </div>
+                <Textarea
+                  value={commissionNotice.content}
+                  onChange={(e) => setCommissionNotice((c) => ({ ...c, content: e.target.value }))}
+                  rows={2}
                 />
-              </div>
+              </section>
+              <section className="xl:order-1 space-y-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+                <div>
+                  <p className="font-medium text-heading">Video Guide</p>
+                  <p className="mb-2 text-body-sm text-neutral-500">
+                    Shown to applicants in the "Video Guide" popup next to the Introduction Video upload on the registration form.
+                  </p>
+                  <RichTextEditor
+                    value={videoGuide.content}
+                    onChange={(v) => setVideoGuide({ content: v })}
+                    placeholder="Write the introduction video guide…"
+                  />
+                </div>
+              </section>
+              <section className="xl:order-2 space-y-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+                <div>
+                  <p className="font-medium text-heading">Platform Insights Guide</p>
+                  <p className="mb-2 text-body-sm text-neutral-500">
+                    Shown on the influencer dashboard's "Platform Insights Guide" page — where to find analytics on each platform.
+                    Leave a platform's default text as-is, or rewrite it below.
+                  </p>
+                </div>
+                <Accordion type="single" collapsible className="rounded-2xl border border-neutral-200 px-5 bg-neutral-50">
+                  {INSIGHTS_GUIDE_PLATFORMS.map(({ key, label, icon }) => (
+                    <AccordionItem key={key} value={key}>
+                      <AccordionTrigger>
+                        <span className="flex items-center gap-2.5 text-body font-medium">
+                          <SocialIcon platform={icon} className="size-4 text-heading" />
+                          {label}
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <RichTextEditor
+                          value={insightsGuide[key]}
+                          onChange={(v) => setInsightsGuide((g) => ({ ...g, [key]: v }))}
+                          placeholder={`Write where to find ${label}…`}
+                        />
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </section>
             </div>
-          </section>
+          </TabsContent>
+          <TabsContent value="automation" className="mt-5">
+            <div className="grid items-stretch gap-5 xl:grid-cols-2">
+              <section className="h-full space-y-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+                <p className="font-medium text-heading">Automation</p>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-body-sm font-medium text-heading">Auto-approve applications</p>
+                    <p className="text-label text-neutral-400">Skip manual review — new applications go live immediately.</p>
+                  </div>
+                  <Switch
+                    checked={auto.autoApproveApplications}
+                    onCheckedChange={(v) => setAuto((a) => ({ ...a, autoApproveApplications: v }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
+                  <div>
+                    <p className="text-body-sm font-medium text-heading">Auto-approve badge recommendations</p>
+                    <p className="text-label text-neutral-400">Skip the review queue — scoring-pass recommendations go live immediately.</p>
+                  </div>
+                  <Switch
+                    checked={auto.badgeAutoApprovalEnabled}
+                    onCheckedChange={(v) => setAuto((a) => ({ ...a, badgeAutoApprovalEnabled: v }))}
+                  />
+                </div>
+                <div className="flex items-center justify-between border-t border-neutral-100 pt-4">
+                  <div>
+                    <p className="text-body-sm font-medium text-heading">Maximum pricing cards</p>
+                    <p className="text-label text-neutral-400">Caps how many showcase pricing cards each influencer can create.</p>
+                  </div>
+                  <div className="w-24">
+                    <Label className="sr-only">Maximum pricing cards</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={auto.maxPricingCards}
+                      onChange={(e) => setAuto((a) => ({ ...a, maxPricingCards: Number(e.target.value) }))}
+                    />
+                  </div>
+                </div>
+              </section>
+            </div>
+          </TabsContent>
 
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? "Saving…" : "Save settings"}
-          </Button>
-        </div>
+          {tab !== "page" && (
+            <Button onClick={handleSave} disabled={saving} className="mt-5">
+              {saving ? "Saving…" : "Save settings"}
+            </Button>
+          )}
+        </Tabs>
       )}
     </div>
   );

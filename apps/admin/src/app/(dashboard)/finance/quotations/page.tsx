@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Plus, Copy, ArrowRightLeft, Archive, ArchiveRestore, Trash2, Download } from "lucide-react";
 import { Badge, Button, Heading, Pagination, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, toast } from "@agency/ui";
+import { FinanceHeader } from "@/components/finance/finance-header";
 import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-list-toolbar";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { request } from "@/lib/api";
@@ -155,19 +156,20 @@ function QuotationsPageInner() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <Heading level={2}>Quotations</Heading>
-          <p className="mt-1 text-body-sm text-neutral-500">Create and track client quotations.</p>
-        </div>
+      <FinanceHeader
+        title="Quotations"
+        description="Create and track client quotations."
+        kpis={["quotations", "invoices", "clients", "pending"]}
+        action={
         <Button asChild>
           <Link href="/finance/quotations/new">
             <Plus /> New quotation
           </Link>
         </Button>
-      </div>
+        }
+      />
 
-      <div className="mt-6">
+      <div className="mt-5 rounded-[10px] border border-neutral-200 bg-neutral-50 p-3">
         <AdminListToolbar
           search={list.search}
           onSearchChange={list.setSearch}

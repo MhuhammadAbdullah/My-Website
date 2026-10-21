@@ -76,8 +76,8 @@ function statusVariant(status: string): "success" | "error" | "warning" | "neutr
 export default function InfluencerBadgesPage() {
   return (
     <div>
-      <Heading level={2}>Badges</Heading>
-      <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+      <Heading level={2} className="admin-page-title">Badges</Heading>
+      <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
         Manage the badge catalog (types, colors) and review awards to individual influencers.
       </p>
 
@@ -152,13 +152,13 @@ function ReviewQueue() {
         {loading ? (
           <Skeleton className="h-64 w-full" />
         ) : (items ?? []).length === 0 ? (
-          <div className="rounded-2xl border border-neutral-200 p-8 text-center text-body-sm text-neutral-500">
+          <div className="rounded-2xl border border-neutral-200 p-8 text-center text-body-sm text-neutral-500 bg-neutral-50">
             No {status.toLowerCase()} badges.
           </div>
         ) : (
           <div className="space-y-2">
             {(items ?? []).map((award) => (
-              <div key={award.id} className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3">
+              <div key={award.id} className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3 bg-neutral-50">
                 <div>
                   <p className="flex items-center gap-2 text-body-sm font-medium text-heading">
                     <ColorDot color={award.badge.color} />

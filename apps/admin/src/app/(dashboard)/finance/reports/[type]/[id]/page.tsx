@@ -147,7 +147,7 @@ export default function ReportDetailPage() {
       </Link>
 
       <div className="mt-3 flex flex-wrap items-center gap-3">
-        <Heading level={2}>{referenceNo}</Heading>
+        <Heading level={2} className="admin-page-title">{referenceNo}</Heading>
         <Badge variant="accent">{type}</Badge>
         <Badge variant="neutral">{status.replace(/_/g, " ")}</Badge>
       </div>

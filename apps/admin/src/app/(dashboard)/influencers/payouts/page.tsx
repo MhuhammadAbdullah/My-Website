@@ -203,10 +203,10 @@ function PayoutsPageInner() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Payouts</Heading>
-          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+          <Heading level={2} className="admin-page-title">Payouts</Heading>
+          <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
             Batch completed bookings into payouts, track their status, and review influencer payout method requests.
           </p>
         </div>
@@ -479,7 +479,7 @@ function PayoutManageDialog({ id, onClose, onChanged }: { id: string; onClose: (
 
               <div>
                 <h4 className="text-body-sm font-semibold text-heading">Payout method details (snapshot)</h4>
-                <div className="mt-2 space-y-1 rounded-lg border border-neutral-200 px-3 py-2 text-body-sm">
+                <div className="mt-2 space-y-1 rounded-lg border border-neutral-200 px-3 py-2 text-body-sm bg-neutral-50">
                   {Object.entries(item.payoutDetailsSnapshot).map(([k, v]) => (
                     <div key={k} className="flex justify-between">
                       <span className="text-neutral-400">{k}</span>
@@ -493,7 +493,7 @@ function PayoutManageDialog({ id, onClose, onChanged }: { id: string; onClose: (
                 <h4 className="text-body-sm font-semibold text-heading">Bookings included</h4>
                 <ul className="mt-2 space-y-1">
                   {item.bookings.map((b) => (
-                    <li key={b.booking.id} className="flex items-center justify-between rounded-lg border border-neutral-200 px-3 py-2 text-body-sm">
+                    <li key={b.booking.id} className="flex items-center justify-between rounded-lg border border-neutral-200 px-3 py-2 text-body-sm bg-neutral-50">
                       <span>
                         {b.booking.bookingNumber} — {b.booking.businessName}
                       </span>
@@ -521,7 +521,7 @@ function PayoutManageDialog({ id, onClose, onChanged }: { id: string; onClose: (
                     ))}
                   </div>
                   {pendingTransition && (
-                    <div className="mt-3 space-y-3 rounded-xl border border-neutral-200 p-4">
+                    <div className="mt-3 space-y-3 rounded-xl border border-neutral-200 p-4 bg-neutral-50">
                       <Textarea placeholder="Notes (optional)" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
                       <div className="flex justify-end gap-2">
                         <Button variant="outline" size="sm" onClick={() => setPendingTransition(null)} disabled={saving}>
@@ -667,7 +667,7 @@ function CreatePayoutBatchDialog({ onClose, onCreated }: { onClose: () => void; 
               ) : (
                 <div className="mt-2 space-y-1">
                   {(eligible ?? []).map((b) => (
-                    <label key={b.id} className="flex items-center justify-between gap-3 rounded-lg border border-neutral-200 px-3 py-2 text-body-sm">
+                    <label key={b.id} className="flex items-center justify-between gap-3 rounded-lg border border-neutral-200 px-3 py-2 text-body-sm bg-neutral-50">
                       <span className="flex items-center gap-2">
                         <Checkbox checked={selectedIds.includes(b.id)} onCheckedChange={() => toggle(b.id)} />
                         {b.bookingNumber} — {b.businessName}
@@ -739,7 +739,7 @@ function PayoutMethodQueue() {
       ) : (
         <div className="space-y-3">
           {(items ?? []).map((m) => (
-            <div key={m.id} className="rounded-xl border border-neutral-200 p-4">
+            <div key={m.id} className="rounded-xl border border-neutral-200 p-4 bg-neutral-50">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-heading">

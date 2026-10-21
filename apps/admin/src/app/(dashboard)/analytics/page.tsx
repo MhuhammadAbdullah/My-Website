@@ -146,10 +146,10 @@ function AnalyticsPageInner() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Messages</Heading>
-          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+          <Heading level={2} className="admin-page-title">Messages</Heading>
+          <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
             Contact form submissions received through the website.
           </p>
         </div>
@@ -160,7 +160,7 @@ function AnalyticsPageInner() {
         )}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-5 rounded-[10px] border border-neutral-200 bg-neutral-50 p-3">
         <AdminListToolbar
           search={list.search}
           onSearchChange={list.setSearch}

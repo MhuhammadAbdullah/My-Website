@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { FieldHint } from "@/components/field-hint";
 import {
   Button,
   Heading,
@@ -77,7 +78,7 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
     <div>
       <div className="flex items-baseline justify-between">
         <Label>{label}</Label>
-        {hint && <span className="text-body-sm text-neutral-400">{hint}</span>}
+        {hint && <FieldHint hint={hint} />}
       </div>
       {children}
     </div>
@@ -86,7 +87,7 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 
 function SectionCard({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 p-6">
+    <div className="rounded-2xl border border-neutral-200 p-6 bg-neutral-50">
       <Heading level={3}>{title}</Heading>
       {description && <p className="mt-1 text-body-sm text-neutral-500">{description}</p>}
       <div className="mt-5 grid gap-5">{children}</div>
@@ -167,7 +168,7 @@ export function AboutSeoForm() {
         </Button>
       </div>
 
-      <div className="mt-6 grid max-w-3xl gap-6">
+      <div className="mt-6 grid max-w-none items-start gap-6 xl:grid-cols-2">
         <SectionCard title="Search engine listing">
           <Field label="Meta title" hint={`${seo.metaTitle.length} / 60`}>
             <Input value={seo.metaTitle} onChange={(e) => setSeo("metaTitle", e.target.value.slice(0, 60))} maxLength={60} />

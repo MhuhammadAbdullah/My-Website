@@ -51,7 +51,7 @@ export default function ClientFinanceProfilePage() {
       </Link>
 
       <div className="mt-3">
-        <Heading level={2}>{data.client.name}</Heading>
+        <Heading level={2} className="admin-page-title">{data.client.name}</Heading>
         <p className="mt-1 text-body-sm text-neutral-500">
           {data.client.company ?? "—"} {data.client.email ? `· ${data.client.email}` : ""}
         </p>

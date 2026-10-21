@@ -72,12 +72,12 @@ export function PortfolioPageSettingsForm() {
   if (loading) return <Skeleton className="h-64 w-full max-w-3xl" />;
 
   return (
-    <div className="grid max-w-3xl gap-6">
-      <p className="text-body-sm text-neutral-500">
+    <div className="grid max-w-none items-start gap-6 xl:grid-cols-2">
+      <p className="xl:col-span-2 text-body-sm text-neutral-500">
         Projects come from <strong>All Projects</strong> (mark a few as <em>featured</em> for the big slider at the top). The heading at the top comes from <strong>Page Content</strong>. The rest is edited here.
       </p>
 
-      <section className="rounded-2xl border border-neutral-200 p-5">
+      <section className="rounded-2xl border border-neutral-200 p-5 bg-neutral-50">
         <Heading level={3}>Grid</Heading>
         <div className="mt-4 max-w-xs">
           <Label>Projects shown at first (and per “Load more”)</Label>
@@ -85,7 +85,7 @@ export function PortfolioPageSettingsForm() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-neutral-200 p-5">
+      <section className="rounded-2xl border border-neutral-200 p-5 bg-neutral-50">
         <Heading level={3}>Closing call-to-action</Heading>
         <p className="mt-1 text-body-sm text-neutral-500">The big accent block at the bottom. Wrap a word in **double stars** to underline it.</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
@@ -104,7 +104,7 @@ export function PortfolioPageSettingsForm() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-neutral-200 p-5">
+      <section className="rounded-2xl border border-neutral-200 p-5 bg-neutral-50">
         <Heading level={3}>Single project (case study) page</Heading>
         <p className="mt-1 text-body-sm text-neutral-500">
           Each project page is built from the project itself (All Projects tab): summary, live link, results, chapters (sections), gallery images and testimonial. For the Before → After slider, give two gallery images the captions “Before” and “After”; remaining images appear under “Screens”.
@@ -122,7 +122,7 @@ export function PortfolioPageSettingsForm() {
               const set = (patch: Partial<typeof g>) =>
                 setForm({ ...form, detail: { ...form.detail, chapterGroups: form.detail.chapterGroups.map((x, j) => (j === i ? { ...x, ...patch } : x)) } });
               return (
-                <div key={i} className="grid gap-2 rounded-xl border border-neutral-200 p-3 sm:grid-cols-2">
+                <div key={i} className="grid gap-2 rounded-xl border border-neutral-200 p-3 sm:grid-cols-2 bg-neutral-50">
                   <Input value={g.title} placeholder="Chapter title" onChange={(e) => set({ title: e.target.value })} />
                   <Input value={g.sections} placeholder="Section titles, comma separated" onChange={(e) => set({ sections: e.target.value })} />
                   <Input className="sm:col-span-2" value={g.lead} placeholder="Intro line under the title (optional)" onChange={(e) => set({ lead: e.target.value })} />
@@ -151,7 +151,7 @@ export function PortfolioPageSettingsForm() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-neutral-200 p-5">
+      <section className="rounded-2xl border border-neutral-200 p-5 bg-neutral-50">
         <Heading level={3}>Small labels</Heading>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           {LABEL_FIELDS.map((f) => (

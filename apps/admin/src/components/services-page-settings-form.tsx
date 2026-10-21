@@ -22,7 +22,7 @@ const LABEL_FIELDS: { key: keyof ServicesPageSettings["labels"]; label: string }
 
 function Group({ title, help, children }: { title: string; help?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-neutral-200 p-5">
+    <section className="rounded-2xl border border-neutral-200 p-5 bg-neutral-50">
       <Heading level={3}>{title}</Heading>
       {help && <p className="mt-1 text-body-sm text-neutral-500">{help}</p>}
       <div className="mt-4 grid gap-4">{children}</div>
@@ -65,8 +65,8 @@ export function ServicesPageSettingsForm() {
   if (loading) return <Skeleton className="h-64 w-full max-w-3xl" />;
 
   return (
-    <div className="grid max-w-3xl gap-6">
-      <p className="text-body-sm text-neutral-500">
+    <div className="grid max-w-none items-start gap-6 xl:grid-cols-2">
+      <p className="xl:col-span-2 text-body-sm text-neutral-500">
         The service rows themselves come from the <strong>All Services</strong> tab; the heading and paragraph at the very top come from <strong>Page Content</strong>. Everything below the list is edited here.
       </p>
 
@@ -103,7 +103,7 @@ export function ServicesPageSettingsForm() {
         {form.engagement.models.map((m, i) => {
           const upd = (patch: Partial<typeof m>) => set("engagement", { ...form.engagement, models: form.engagement.models.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
           return (
-            <div key={i} className="grid gap-3 rounded-xl border border-neutral-200 p-4">
+            <div key={i} className="grid gap-3 rounded-xl border border-neutral-200 p-4 bg-neutral-50">
               <div className="flex items-center justify-between">
                 <p className="text-body-sm font-semibold text-heading">Card {i + 1}</p>
                 <Button type="button" variant="ghost" size="sm" aria-label="Remove card" onClick={() => set("engagement", { ...form.engagement, models: form.engagement.models.filter((_, j) => j !== i) })}>
@@ -191,7 +191,7 @@ export function ServicesPageSettingsForm() {
               <Input value={form.reviews[k]} onChange={(e) => set("reviews", { ...form.reviews, [k]: e.target.value })} />
             </div>
           ))}
-          <div className="flex flex-wrap items-end gap-x-8 gap-y-3 rounded-xl border border-neutral-200 p-3 sm:col-span-3">
+          <div className="flex flex-wrap items-end gap-x-8 gap-y-3 rounded-xl border border-neutral-200 p-3 sm:col-span-3 bg-neutral-50">
             <label className="flex items-center gap-2 text-body-sm">
               <Switch checked={form.reviews.marquee.enabled} onCheckedChange={(v) => set("reviews", { ...form.reviews, marquee: { ...form.reviews.marquee, enabled: v } })} /> Slide reviews automatically (infinite slider)
             </label>

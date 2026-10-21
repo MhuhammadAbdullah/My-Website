@@ -181,7 +181,7 @@ function PopupsPageInner() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <Heading level={2}>Popups</Heading>
+          <Heading level={2} className="admin-page-title">Popups</Heading>
           <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
             Marketing popups shown to visitors on the public site — content, design, targeting, triggers, frequency, and analytics all
             configured per popup.
@@ -706,7 +706,7 @@ function PopupDialog({ item, onClose, onSaved }: { item: PopupListItem | null; o
               )}
 
               {fields.countdown && (
-                <div className="rounded-2xl border border-neutral-200 p-4">
+                <div className="rounded-2xl border border-neutral-200 p-4 bg-neutral-50">
                   <Label>Countdown</Label>
                   <div className="mt-2 grid gap-3 sm:grid-cols-2">
                     <div>
@@ -760,7 +760,7 @@ function PopupDialog({ item, onClose, onSaved }: { item: PopupListItem | null; o
                 </div>
               )}
 
-              <div className="rounded-2xl border border-neutral-200 p-4">
+              <div className="rounded-2xl border border-neutral-200 p-4 bg-neutral-50">
                 <div className="flex items-center gap-2">
                   <Switch checked={form.ctaEnabled} onCheckedChange={(v) => set("ctaEnabled", v)} id="popup-cta-enabled" />
                   <Label htmlFor="popup-cta-enabled" className="font-normal">
@@ -824,7 +824,7 @@ function PopupDialog({ item, onClose, onSaved }: { item: PopupListItem | null; o
                 <div>
                   <Label className="font-normal text-neutral-500">Background color</Label>
                   <div className="flex items-center gap-2">
-                    <input type="color" value={form.backgroundColor} onChange={(e) => set("backgroundColor", e.target.value)} className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5" />
+                    <input type="color" value={form.backgroundColor} onChange={(e) => set("backgroundColor", e.target.value)} className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5 bg-neutral-50" />
                     <Input value={form.backgroundColor} onChange={(e) => set("backgroundColor", e.target.value)} />
                   </div>
                 </div>
@@ -867,14 +867,14 @@ function PopupDialog({ item, onClose, onSaved }: { item: PopupListItem | null; o
                 <div>
                   <Label className="font-normal text-neutral-500">Button text color</Label>
                   <div className="flex items-center gap-2">
-                    <input type="color" value={form.buttonTextColor} onChange={(e) => set("buttonTextColor", e.target.value)} className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5" />
+                    <input type="color" value={form.buttonTextColor} onChange={(e) => set("buttonTextColor", e.target.value)} className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5 bg-neutral-50" />
                     <Input value={form.buttonTextColor} onChange={(e) => set("buttonTextColor", e.target.value)} />
                   </div>
                 </div>
                 <div>
                   <Label className="font-normal text-neutral-500">Button background color</Label>
                   <div className="flex items-center gap-2">
-                    <input type="color" value={form.buttonBackgroundColor} onChange={(e) => set("buttonBackgroundColor", e.target.value)} className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5" />
+                    <input type="color" value={form.buttonBackgroundColor} onChange={(e) => set("buttonBackgroundColor", e.target.value)} className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5 bg-neutral-50" />
                     <Input value={form.buttonBackgroundColor} onChange={(e) => set("buttonBackgroundColor", e.target.value)} />
                   </div>
                 </div>
@@ -884,7 +884,7 @@ function PopupDialog({ item, onClose, onSaved }: { item: PopupListItem | null; o
                 <div>
                   <Label className="font-normal text-neutral-500">Overlay color</Label>
                   <div className="flex items-center gap-2">
-                    <input type="color" value={form.overlayColor} onChange={(e) => set("overlayColor", e.target.value)} className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5" />
+                    <input type="color" value={form.overlayColor} onChange={(e) => set("overlayColor", e.target.value)} className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5 bg-neutral-50" />
                     <Input value={form.overlayColor} onChange={(e) => set("overlayColor", e.target.value)} />
                   </div>
                 </div>
@@ -975,7 +975,7 @@ function PopupDialog({ item, onClose, onSaved }: { item: PopupListItem | null; o
                 </Select>
               </div>
 
-              <div className="rounded-2xl border border-neutral-200 p-4">
+              <div className="rounded-2xl border border-neutral-200 p-4 bg-neutral-50">
                 <Label>Trigger</Label>
                 <Select value={form.triggerType} onValueChange={(v) => set("triggerType", v as PopupTriggerType)}>
                   <SelectTrigger className="mt-2">
@@ -1033,7 +1033,7 @@ function PopupDialog({ item, onClose, onSaved }: { item: PopupListItem | null; o
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-neutral-200 p-4">
+              <div className="rounded-2xl border border-neutral-200 p-4 bg-neutral-50">
                 <Label>Frequency</Label>
                 <Select value={form.frequencyMode} onValueChange={(v) => set("frequencyMode", v as PopupFrequencyMode)}>
                   <SelectTrigger className="mt-2">

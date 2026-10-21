@@ -105,13 +105,13 @@ export function ResourceManager<T extends { id: string }>({
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>{title}</Heading>
-          {description && <p className="mt-1 text-body-sm text-neutral-500">{description}</p>}
+          <Heading level={2} className="admin-page-title">{title}</Heading>
+          {description && <p className="mt-2 text-body-sm text-neutral-500">{description}</p>}
         </div>
         <Button onClick={openCreate}>
-          <Plus /> Add new
+          <Plus /> Add {title.toLowerCase().replace(/ies$/, "y").replace(/s$/, "")}
         </Button>
       </div>
 
@@ -142,10 +142,10 @@ export function ResourceManager<T extends { id: string }>({
                   ))}
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(item)} aria-label="Edit">
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(item)} aria-label="Edit" className="size-8 border border-neutral-200 hover:border-accent-500">
                         <Pencil className="size-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(item)} aria-label="Delete">
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(item)} aria-label="Delete" className="size-8 border border-neutral-200 hover:border-error-500">
                         <Trash2 className="size-4 text-error-500" />
                       </Button>
                     </div>

@@ -81,10 +81,10 @@ function InfluencerReviewsPageInner() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Influencer Reviews</Heading>
-          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+          <Heading level={2} className="admin-page-title">Influencer Reviews</Heading>
+          <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
             Reviews on each creator's public profile. Visitors can write them there and they go live at once — you only choose what stays visible.
             Open "View Reviews" to show or hide each one.
           </p>
@@ -94,7 +94,7 @@ function InfluencerReviewsPageInner() {
         </Button>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-5 rounded-[10px] border border-neutral-200 bg-neutral-50 p-3">
         <AdminListToolbar
           search={list.search}
           onSearchChange={list.setSearch}

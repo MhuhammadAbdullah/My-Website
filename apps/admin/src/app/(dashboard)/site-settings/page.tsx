@@ -91,7 +91,7 @@ function ThemeTab({ settings }: { settings: SiteSettings }) {
   }
 
   return (
-    <div className="max-w-xl">
+    <div className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
       <p className="text-body-sm text-neutral-500">One accent colour is used for buttons, highlighted words, bands and links across every page.</p>
       <div role="radiogroup" aria-label="Accent colour" className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {ACCENT_OPTIONS.map((id) => (
@@ -128,7 +128,7 @@ function ThemeTab({ settings }: { settings: SiteSettings }) {
                 setCustomColor(e.target.value);
                 setAccent("custom");
               }}
-              className="h-11 w-14 cursor-pointer rounded-lg border border-neutral-200 bg-background p-1"
+              className="h-11 w-14 cursor-pointer rounded-lg border border-neutral-200 bg-neutral-50 p-1"
             />
             <input
               value={customColor}
@@ -139,7 +139,7 @@ function ThemeTab({ settings }: { settings: SiteSettings }) {
               placeholder="#RRGGBB"
               maxLength={7}
               aria-label="Custom colour hex code"
-              className="h-11 w-28 rounded-xl border border-neutral-200 bg-background px-3 font-mono text-body-sm text-heading"
+              className="h-11 w-28 rounded-xl border border-neutral-200 bg-neutral-50 px-3 font-mono text-body-sm text-heading"
             />
           </div>
         </div>
@@ -173,7 +173,7 @@ function ThemeTab({ settings }: { settings: SiteSettings }) {
           </button>
         ))}
       </div>
-      <div className="mt-8 flex items-start gap-3 rounded-2xl border border-neutral-200 p-4">
+      <div className="mt-8 flex items-start gap-3 rounded-2xl border border-neutral-200 p-4 bg-neutral-50">
         <Switch checked={installPrompt} onCheckedChange={setInstallPrompt} aria-label="Show the install app prompt" />
         <div>
           <p className="text-body-sm font-medium text-heading">“Install app” prompt</p>
@@ -215,11 +215,11 @@ function HeaderTab({ settings }: { settings: SiteSettings }) {
   }
 
   return (
-    <div className="grid max-w-xl gap-5">
+    <div className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6 grid max-w-none items-start gap-5 xl:grid-cols-2">
       <p className="text-body-sm text-neutral-500">
         Menu links are managed under <a className="underline" href="/navigation">Navigation</a> (order, show/hide, new tab). The announcement bar has its own screen under <a className="underline" href="/announcement-bar">Announcement Bar</a>.
       </p>
-      <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3">
+      <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3 bg-neutral-50">
         <Label htmlFor="cta-visible" className="mb-0">Show the header button</Label>
         <Switch id="cta-visible" checked={form.ctaVisible} onCheckedChange={(v) => setForm({ ...form, ctaVisible: v })} />
       </div>
@@ -298,15 +298,15 @@ function FooterTab({ settings }: { settings: SiteSettings }) {
   }
 
   return (
-    <div className="grid max-w-3xl gap-8">
+    <div className="grid max-w-none items-start gap-8 xl:grid-cols-2">
       <p className="text-body-sm text-neutral-500">
         Brand name, logo, tagline and copyright come from <a className="underline" href="/settings">Settings → Branding</a>; social links from <a className="underline" href="/settings">Settings → Social Media</a>.
       </p>
-      <section>
+      <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
         <Heading level={3}>Link columns</Heading>
         <div className="mt-4 space-y-5">
           {columns.map((col, ci) => (
-            <div key={ci} className="rounded-2xl border border-neutral-200 p-4">
+            <div key={ci} className="rounded-2xl border border-neutral-200 p-4 bg-neutral-50">
               <div className="mb-3 flex items-center gap-2">
                 <Input aria-label="Column title" placeholder="Column title" value={col.title} onChange={(e) => setColumns(columns.map((x, j) => (j === ci ? { ...x, title: e.target.value } : x)))} />
                 <button type="button" className="rounded p-1 text-neutral-400 hover:text-error-500" aria-label="Remove column" onClick={() => setColumns(columns.filter((_, j) => j !== ci))}><Trash2 className="size-4" /></button>
@@ -319,7 +319,7 @@ function FooterTab({ settings }: { settings: SiteSettings }) {
           </Button>
         </div>
       </section>
-      <section>
+      <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
         <Heading level={3}>Legal links</Heading>
         <p className="mt-1 text-body-sm text-neutral-500">Shown in the bottom bar next to the copyright line.</p>
         <div className="mt-4">
@@ -378,7 +378,7 @@ function SeoTab({ settings }: { settings: SiteSettings }) {
   );
 
   return (
-    <div className="grid max-w-2xl gap-5">
+    <div className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6 grid max-w-none items-start gap-5 xl:grid-cols-2">
       <p className="text-body-sm text-neutral-500">Used by any page that does not set its own SEO. <code>{"{brand}"}</code> is replaced with the brand name from Branding.</p>
       {f("seo-template", "Title template", seo.titleTemplate, (v) => setSeo({ ...seo, titleTemplate: v }), { help: "%s = the page title. Example: %s | {brand}" })}
       {f("seo-title", "Default title (home / pages without a title)", seo.defaultTitle, (v) => setSeo({ ...seo, defaultTitle: v }))}
@@ -389,7 +389,7 @@ function SeoTab({ settings }: { settings: SiteSettings }) {
       {f("seo-og", "Default social share image URL", seo.ogImageUrl, (v) => setSeo({ ...seo, ogImageUrl: v }), { placeholder: "https://…", help: "1200×630 works best. Copy the URL from the Media Library." })}
       {f("seo-tw", "Twitter / X handle", seo.twitterHandle, (v) => setSeo({ ...seo, twitterHandle: v }), { placeholder: "@yourbrand" })}
 
-      <div className="mt-4 border-t border-neutral-200 pt-6">
+      <div className="mt-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
         <Heading level={3}>Organization (structured data)</Heading>
         <p className="mt-1 text-body-sm text-neutral-500">Feeds the Organization JSON-LD. Name, email, phone, address and social links are taken from Settings.</p>
         <div className="mt-4 grid gap-5">
@@ -441,7 +441,7 @@ function NotificationsTab() {
 
   if (loading) return <Skeleton className="h-32 max-w-xl" />;
   return (
-    <div className="grid max-w-xl gap-3">
+    <div className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6 grid max-w-none items-start gap-3 xl:grid-cols-2">
       <p className="text-body-sm text-neutral-500">
         These addresses get an email for every new form enquiry. They are private — never shown on the public site. Tracking IDs and the spam-protection site key live under <a className="underline" href="/integrations">Integrations</a>.
       </p>
@@ -472,7 +472,7 @@ export default function SiteSettingsPage() {
 
   return (
     <div>
-      <Heading level={2}>Site Settings</Heading>
+      <Heading level={2} className="admin-page-title">Site Settings</Heading>
       <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
         Sitewide options. Brand, logo and contact details are on the <a className="underline" href="/settings">Settings</a> screen.
       </p>
