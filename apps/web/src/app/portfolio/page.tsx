@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { isSectionVisible } from "@agency/types";
 import Link from "next/link";
 import { Breadcrumb, Container, Heading } from "@agency/ui";
 import { portfolioPageSchema } from "@agency/types";
@@ -29,6 +30,7 @@ export default async function PortfolioPage() {
 
   // Everything except the projects themselves is managed in Admin > Portfolio > Page Sections.
   const cfg = portfolioPageSchema.parse(settings.portfolio_page ?? {});
+  const show = (key: string) => isSectionVisible(settings.section_visibility, "portfolio", key);
 
   const all = projectsPage.items;
   const projects: WorkProject[] = all.map((p) => ({
@@ -53,7 +55,7 @@ export default async function PortfolioPage() {
             <Heading level={1} className="text-[clamp(2.75rem,1rem+7vw,8rem)]">
               {content.heroHeading}
             </Heading>
-            {projects.length > 0 && (
+            {projects.length > 0 && show("stats") && (
               <dl className="flex gap-10 pb-3">
                 <div>
                   <dd className="font-heading text-[clamp(1.75rem,1.2rem+1.8vw,2.75rem)] font-extrabold leading-none tracking-[0.01em] text-heading">{projects.length}+</dd>
@@ -78,7 +80,7 @@ export default async function PortfolioPage() {
         </Container>
       </section>
 
-      {cfg.cta.heading && (
+      {cfg.cta.heading && show("cta") && (
         <section className="pb-[var(--spacing-section)]">
           <Container>
             <div className="flex flex-wrap items-center justify-between gap-8 rounded-[var(--radius-2xl)] bg-accent-500 p-8 text-on-accent sm:p-14">

@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Plus, Copy, Trash2, Wallet, Download } from "lucide-react";
 import { Badge, Button, Heading, Pagination, Skeleton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, toast } from "@agency/ui";
+import { FinanceHeader } from "@/components/finance/finance-header";
 import { AdminListToolbar, EmptyState, ListSummary } from "@/components/admin-list-toolbar";
 import { usePaginatedList } from "@/lib/use-paginated-list";
 import { request } from "@/lib/api";
@@ -142,19 +143,20 @@ function InvoicesPageInner() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <Heading level={2}>Invoices</Heading>
-          <p className="mt-1 text-body-sm text-neutral-500">Create, send, and track client invoices.</p>
-        </div>
+      <FinanceHeader
+        title="Invoices"
+        description="Create, send, and track client invoices."
+        kpis={["pending", "outstanding", "overdue", "paid"]}
+        action={
         <Button asChild>
           <Link href="/finance/invoices/new">
             <Plus /> New invoice
           </Link>
         </Button>
-      </div>
+        }
+      />
 
-      <div className="mt-6">
+      <div className="mt-5 rounded-[10px] border border-neutral-200 bg-neutral-50 p-3">
         <AdminListToolbar
           search={list.search}
           onSearchChange={list.setSearch}

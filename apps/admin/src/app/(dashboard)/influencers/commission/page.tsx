@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { InfoHint } from "@/components/field-hint";
 import { Button, Heading, Input, Label, Skeleton, Switch, toast } from "@agency/ui";
 import { request } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
@@ -52,87 +53,93 @@ export default function InfluencerCommissionPage() {
 
   return (
     <div>
-      <Heading level={2}>Commission & payout settings</Heading>
-      <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+      <Heading level={2} className="admin-page-title">Commission & payout settings</Heading>
+      <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
         Controls how much the agency keeps from every booking, and the rules around minimum booking size and payout processing.
       </p>
 
-      <div className="mt-6 max-w-xl">
+      <div className="mt-6">
         {loading || !form ? (
           <Skeleton className="h-64 w-full" />
         ) : (
-          <div className="space-y-5">
-            <div>
-              <Label>Default commission %</Label>
-              <Input
-                type="number"
-                min={0}
-                max={100}
-                step="0.1"
-                value={form.defaultCommissionPercent}
-                onChange={(e) => setForm({ ...form, defaultCommissionPercent: e.target.value })}
-              />
-              <p className="mt-1.5 text-body-sm text-neutral-500">Applied to every booking unless a per-influencer or per-campaign override is set.</p>
-            </div>
-
-            <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3">
+          <div className="grid items-start gap-5 xl:grid-cols-2">
+            <section className="grid gap-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+              <h3 className="font-heading font-extrabold tracking-tight text-heading">Commission</h3>
               <div>
-                <p className="text-body-sm font-medium text-heading">Allow per-influencer override</p>
-                <p className="text-label text-neutral-400">Lets staff set a custom commission % on an individual influencer's profile</p>
+                <div className="flex items-center gap-1.5">
+                  <Label>Default commission %</Label>
+                  <InfoHint text="Applied to every booking unless a per-influencer or per-campaign override is set." />
+                </div>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step="0.1"
+                  value={form.defaultCommissionPercent}
+                  onChange={(e) => setForm({ ...form, defaultCommissionPercent: e.target.value })}
+                />
               </div>
-              <Switch
-                checked={form.allowPerInfluencerOverride}
-                onCheckedChange={(v) => setForm({ ...form, allowPerInfluencerOverride: v })}
-              />
-            </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3">
-              <div>
-                <p className="text-body-sm font-medium text-heading">Allow per-campaign override</p>
-                <p className="text-label text-neutral-400">Lets staff set a custom commission % for a specific booking</p>
+              <div className="flex items-center justify-between gap-4 rounded-[8px] border border-neutral-200 px-4 py-3">
+                <div>
+                  <p className="text-body-sm font-medium text-heading">Allow per-influencer override</p>
+                  <p className="text-label text-neutral-500">Lets staff set a custom commission % on an individual influencer's profile</p>
+                </div>
+                <Switch checked={form.allowPerInfluencerOverride} onCheckedChange={(v) => setForm({ ...form, allowPerInfluencerOverride: v })} />
               </div>
-              <Switch
-                checked={form.allowPerCampaignOverride}
-                onCheckedChange={(v) => setForm({ ...form, allowPerCampaignOverride: v })}
-              />
-            </div>
 
-            <div>
-              <Label>Minimum booking amount (optional)</Label>
-              <Input
-                type="number"
-                min={0}
-                value={form.minimumBookingAmount ?? ""}
-                onChange={(e) => setForm({ ...form, minimumBookingAmount: e.target.value })}
-                placeholder="No minimum"
-              />
-            </div>
+              <div className="flex items-center justify-between gap-4 rounded-[8px] border border-neutral-200 px-4 py-3">
+                <div>
+                  <p className="text-body-sm font-medium text-heading">Allow per-campaign override</p>
+                  <p className="text-label text-neutral-500">Lets staff set a custom commission % for a specific booking</p>
+                </div>
+                <Switch checked={form.allowPerCampaignOverride} onCheckedChange={(v) => setForm({ ...form, allowPerCampaignOverride: v })} />
+              </div>
+            </section>
 
-            <div>
-              <Label>Minimum payout amount (optional)</Label>
-              <Input
-                type="number"
-                min={0}
-                value={form.payoutMinimumAmount ?? ""}
-                onChange={(e) => setForm({ ...form, payoutMinimumAmount: e.target.value })}
-                placeholder="No minimum"
-              />
-              <p className="mt-1.5 text-body-sm text-neutral-500">Shown to influencers as guidance — not yet enforced automatically at payout creation.</p>
-            </div>
+            <section className="grid gap-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+              <h3 className="font-heading font-extrabold tracking-tight text-heading">Limits &amp; payouts</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label>Minimum booking amount (optional)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={form.minimumBookingAmount ?? ""}
+                    onChange={(e) => setForm({ ...form, minimumBookingAmount: e.target.value })}
+                    placeholder="No minimum"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <Label>Minimum payout amount (optional)</Label>
+                    <InfoHint text="Shown to influencers as guidance — not yet enforced automatically at payout creation." />
+                  </div>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={form.payoutMinimumAmount ?? ""}
+                    onChange={(e) => setForm({ ...form, payoutMinimumAmount: e.target.value })}
+                    placeholder="No minimum"
+                  />
+                </div>
+              </div>
+              <div className="sm:max-w-[calc(50%-0.5rem)]">
+                <Label>Payout processing time (days)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={form.payoutProcessingDays}
+                  onChange={(e) => setForm({ ...form, payoutProcessingDays: Number(e.target.value) })}
+                />
+              </div>
+            </section>
 
-            <div>
-              <Label>Payout processing time (days)</Label>
-              <Input
-                type="number"
-                min={0}
-                value={form.payoutProcessingDays}
-                onChange={(e) => setForm({ ...form, payoutProcessingDays: Number(e.target.value) })}
-              />
+            <div className="xl:col-span-2">
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? "Saving…" : "Save settings"}
+              </Button>
             </div>
-
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Saving…" : "Save settings"}
-            </Button>
           </div>
         )}
       </div>

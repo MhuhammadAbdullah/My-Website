@@ -110,10 +110,10 @@ export function GlobalSearch({ className }: { className?: string }) {
         aria-expanded={open && targets.length > 0}
         aria-label="Search clients, invoices, creators"
         placeholder="Search clients, invoices, creators…"
-        className="h-10 w-full rounded-full border border-neutral-200 bg-neutral-50 pl-10 pr-4 text-[13px] text-heading outline-none transition-colors placeholder:text-neutral-400 focus:border-accent-500 [&::-webkit-search-cancel-button]:hidden"
+        className="h-10 w-full rounded-[8px] border border-neutral-200 bg-neutral-50 pl-10 pr-4 text-[13px] text-heading outline-none transition-colors placeholder:text-neutral-400 focus:border-accent-500 [&::-webkit-search-cancel-button]:hidden"
       />
       {open && targets.length > 0 && (
-        <div role="listbox" className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[14px] border border-neutral-200 bg-neutral-50 p-1.5 shadow-[var(--shadow-soft-lg)]">
+        <div role="listbox" className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[8px] border border-neutral-200 bg-neutral-50 p-1.5 shadow-[var(--shadow-soft-lg)]">
           {targets.map((t, i) => (
             <button
               key={t.href + i}
@@ -122,7 +122,7 @@ export function GlobalSearch({ className }: { className?: string }) {
               aria-selected={i === active}
               onMouseEnter={() => setActive(i)}
               onClick={() => go(t)}
-              className={cn("flex w-full items-center justify-between gap-3 rounded-[10px] px-3 py-2 text-left", i === active && "bg-neutral-100")}
+              className={cn("flex w-full items-center justify-between gap-3 rounded-[8px] px-3 py-2 text-left", i === active && "bg-neutral-100")}
             >
               <span className="min-w-0">
                 <span className="block truncate text-[13px] font-semibold text-heading">{t.label}</span>

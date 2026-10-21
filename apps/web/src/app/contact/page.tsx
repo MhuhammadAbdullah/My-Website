@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { isSectionVisible } from "@agency/types";
 import * as React from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -53,6 +54,7 @@ export default async function ContactPage() {
 
   // Everything except contact details (Site Settings) and the hero (Page Content) is managed in Admin > Contact > Page Sections.
   const cfg = contactPageSchema.parse(settings.contact_page ?? {});
+  const show = (key: string) => isSectionVisible(settings.section_visibility, "contact", key);
   const hours = Object.entries(settings.business_hours ?? {});
   const mapSrc = resolveGoogleMapsEmbedSrc(settings.google_maps_embed_code, settings.google_maps_embed);
   const email = settings.contact_email;
@@ -71,7 +73,7 @@ export default async function ContactPage() {
             <Heading level={1} style={{ fontSize: "clamp(1.75rem, 0.5rem + 3.8vw, 4.5rem)" }}>
               {content.heroHeading}
             </Heading>
-            {(cfg.status.text || cfg.status.hours || cfg.status.reply) && (
+            {show("status") && (cfg.status.text || cfg.status.hours || cfg.status.reply) && (
               <div className="rounded-[var(--radius-xl)] border border-neutral-200 bg-neutral-50 p-5 text-label text-neutral-500">
                 {cfg.status.text && (
                   <p className="flex items-center gap-2 text-body-sm font-semibold text-heading">
@@ -103,7 +105,7 @@ export default async function ContactPage() {
         </Container>
       </section>
 
-      {(settings.address || mapSrc) && (
+      {show("studio") && (settings.address || mapSrc) && (
         <section className="pb-[var(--spacing-section)]">
           <Container className="grid gap-5 lg:grid-cols-[22rem_1fr]">
             <div className="flex flex-col rounded-[var(--radius-2xl)] bg-accent-500 p-8 text-[#0b0b0c]">

@@ -106,7 +106,7 @@ function Tile({
     </>
   );
   const cls = cn(
-    "block rounded-[18px] border p-5 transition-colors",
+    "block rounded-[8px] border p-5 transition-colors",
     accent ? "border-transparent bg-accent-500 text-on-accent" : "border-neutral-200 bg-neutral-50 text-heading",
     href && !accent && "hover:border-accent-500",
   );
@@ -137,7 +137,7 @@ function Switch({ on }: { on: boolean }) {
 
 function FlagCard({ label, enabled }: { label: string; enabled: boolean }) {
   return (
-    <Link href="/influencers/settings" className="flex items-center justify-between gap-3 rounded-[18px] border border-neutral-200 bg-neutral-50 px-5 py-4 transition-colors hover:border-accent-500">
+    <Link href="/influencers/settings" className="flex items-center justify-between gap-3 rounded-[8px] border border-neutral-200 bg-neutral-50 px-5 py-4 transition-colors hover:border-accent-500">
       <span className="text-[14px] font-bold text-heading">{label}</span>
       <span className="flex items-center gap-3">
         <span className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-accent-500">{enabled ? "Enabled" : "Disabled"}</span>
@@ -153,7 +153,7 @@ function AttentionCard({ count, title, note, href, loading, lead, clear }: { cou
     <Link
       href={href}
       className={cn(
-        "group flex items-center gap-4 rounded-[18px] border px-5 py-4 transition-colors",
+        "group flex items-center gap-4 rounded-[8px] border px-5 py-4 transition-colors",
         lead ? "border-transparent bg-accent-500 text-on-accent" : "border-neutral-200 bg-neutral-50 text-heading hover:border-accent-500",
       )}
     >
@@ -273,7 +273,7 @@ export default function DashboardPage() {
         <SectionHead title="Finance" href="/finance/invoices" linkLabel="Open finance" />
 
         <div className="grid gap-4 lg:grid-cols-[1fr_20rem]">
-          <div className="rounded-[24px] bg-accent-500 p-6 text-on-accent sm:p-8">
+          <div className="rounded-[12px] bg-accent-500 p-6 text-on-accent sm:p-8">
             <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] opacity-70">Total revenue</p>
             {financeLoading ? (
               <Skeleton className="mt-4 h-16 w-64" />
@@ -289,7 +289,7 @@ export default function DashboardPage() {
                 { label: "Outstanding", v: finance?.outstandingPayments ?? 0 },
                 { label: "Received this month", v: finance?.paymentsThisMonth ?? 0 },
               ].map((s) => (
-                <div key={s.label} className="rounded-[14px] bg-black/10 px-4 py-3">
+                <div key={s.label} className="rounded-[8px] bg-black/10 px-4 py-3">
                   <p className="text-[11px] font-medium opacity-70">{s.label}</p>
                   <Num className="mt-1.5 text-[1.25rem]">{financeLoading ? "…" : money(s.v)}</Num>
                 </div>
@@ -297,7 +297,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="flex flex-col justify-between rounded-[24px] border border-neutral-200 bg-neutral-50 p-6">
+          <div className="flex flex-col justify-between rounded-[12px] border border-neutral-200 bg-neutral-50 p-6">
             <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-neutral-500">Quotation → Invoice</p>
             {chartsLoading ? <Skeleton className="my-6 h-16 w-40" /> : <Num className="my-6 text-[clamp(2.5rem,1.5rem+3vw,4rem)]">{(conversion?.rate ?? 0).toFixed(1)}%</Num>}
             <div>
@@ -362,13 +362,13 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <section className="rounded-[18px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
+          <section className="rounded-[8px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
             <h3 className="font-heading text-[1.0625rem] font-extrabold tracking-tight text-heading">Top influencers by revenue</h3>
             <div className="mt-5">
               {infLoading ? (
                 <Skeleton className="h-32 w-full" />
               ) : !inf || inf.topInfluencers.length === 0 ? (
-                <div className="rounded-[14px] border border-dashed border-neutral-200 px-4 py-8 text-center text-[13px] text-neutral-400">
+                <div className="rounded-[8px] border border-dashed border-neutral-200 px-4 py-8 text-center text-[13px] text-neutral-400">
                   No completed bookings yet.
                   {(inf?.pendingApplications ?? 0) > 0 && (
                     <Link href="/influencers/applications" className="mt-1 block font-bold text-accent-500 hover:underline">
@@ -392,13 +392,13 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <section className="rounded-[18px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
+          <section className="rounded-[8px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
             <h3 className="font-heading text-[1.0625rem] font-extrabold tracking-tight text-heading">Top categories</h3>
             <div className="mt-5">
               {infLoading ? (
                 <Skeleton className="h-32 w-full" />
               ) : !inf || inf.topCategories.length === 0 ? (
-                <p className="rounded-[14px] border border-dashed border-neutral-200 px-4 py-8 text-center text-[13px] text-neutral-400">No categories yet.</p>
+                <p className="rounded-[8px] border border-dashed border-neutral-200 px-4 py-8 text-center text-[13px] text-neutral-400">No categories yet.</p>
               ) : (
                 <ul className="space-y-3">
                   {inf.topCategories.map((c) => (
@@ -418,7 +418,7 @@ export default function DashboardPage() {
           </section>
         </div>
 
-        <section className="rounded-[18px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
+        <section className="rounded-[8px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
           <div className="flex items-baseline justify-between gap-3">
             <h3 className="font-heading text-[1.0625rem] font-extrabold tracking-tight text-heading">Monthly growth</h3>
             <span className="text-[11px] text-neutral-400">Completed bookings per month</span>

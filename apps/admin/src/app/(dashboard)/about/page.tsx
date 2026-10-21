@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Button, Checkbox, DynamicIcon, Heading, Input, Label, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, toast } from "@agency/ui";
+import { FieldHint } from "@/components/field-hint";
+import { Checkbox, DynamicIcon, Heading, Input, Label, Skeleton, Tabs, TabsContent, Textarea, cn, toast } from "@agency/ui";
+import { HomeHeader, PageTabs, StatusChip } from "@/components/home/home-header";
 import { request, createResourceClient } from "@/lib/api";
 import { useAsyncData } from "@/lib/use-resource";
 import { ResourceManager } from "@/components/resource-manager/resource-manager";
@@ -29,7 +31,6 @@ interface AboutContent {
 // in italic serif and everything else in the regular sans font (see the
 // Heading component in packages/ui). Admins can mark which words get that
 // treatment; they can't change fonts directly.
-const HEADING_HINT = "wrap words in **bold** to italicize them";
 
 const EMPTY_ABOUT_FORM: AboutContent = {
   story: "",
@@ -48,13 +49,50 @@ const EMPTY_ABOUT_FORM: AboutContent = {
   certificationsEnabled: true,
 };
 
-function AboutStoryForm() {
+// Heading input with the click-a-word-to-highlight chips (`**word**` is the accent-coloured word).
+function HighlightInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const highlighted = value.match(/\*\*(.+?)\*\*/)?.[1];
+  const words = value.replace(/\*\*/g, "").split(/\s+/).filter(Boolean);
+  const active = highlighted ? words.findIndex((w) => w === highlighted) : -1;
+  return (
+    <>
+      <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+      {words.length > 0 && (
+        <div className="mt-2" role="group" aria-label="Highlight one word in the accent colour">
+          <p className="text-body-sm text-neutral-500">Click a word to highlight it (click again to remove):</p>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {words.map((w, i) => (
+              <button
+                key={`${w}-${i}`}
+                type="button"
+                aria-pressed={i === active}
+                onClick={() => onChange(words.map((x, j) => (j === i && i !== active ? `**${x}**` : x)).join(" "))}
+                className={cn("rounded-full border px-3 py-1 text-body-sm transition-colors", i === active ? "border-accent-500 bg-accent-500 font-bold text-on-accent" : "border-neutral-300 text-heading hover:border-accent-500")}
+              >
+                {w}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+export interface StoryController {
+  dirty: boolean;
+  saving: boolean;
+  save: () => void;
+}
+
+function AboutStoryForm({ onController }: { onController: (c: StoryController) => void }) {
   const { data: content, loading } = useAsyncData<AboutContent | null>(
     () => request<{ item: AboutContent | null }>("/pages/about").then((r) => r.item),
     [],
   );
   const [form, setForm] = React.useState<AboutContent>(EMPTY_ABOUT_FORM);
   const [saving, setSaving] = React.useState(false);
+  const [baseline, setBaseline] = React.useState("");
 
   React.useEffect(() => {
     // Pick only the editable fields -- the GET response also includes id/
@@ -63,7 +101,9 @@ function AboutStoryForm() {
     // a raw `seo` object where it expects a nested-write shape, causing a
     // PrismaClientValidationError on every save.
     if (content) {
-      setForm({ ...EMPTY_ABOUT_FORM, ...content });
+      const next = { ...EMPTY_ABOUT_FORM, ...content };
+      setForm(next);
+      setBaseline(JSON.stringify(next));
     }
   }, [content]);
 
@@ -75,6 +115,7 @@ function AboutStoryForm() {
     setSaving(true);
     try {
       await request("/pages/about", { method: "PUT", body: JSON.stringify(form) });
+      setBaseline(JSON.stringify(form));
       toast.success("About page updated");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
@@ -83,19 +124,27 @@ function AboutStoryForm() {
     }
   }
 
+  const dirty = baseline !== "" && JSON.stringify(form) !== baseline;
+  const handleSaveRef = React.useRef(handleSave);
+  handleSaveRef.current = handleSave;
+  React.useEffect(() => {
+    onController({ dirty, saving, save: () => handleSaveRef.current() });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dirty, saving]);
+
   if (loading) return <Skeleton className="h-96 w-full max-w-2xl" />;
 
   return (
-    <div className="grid max-w-2xl gap-5">
-      <Field label="Hero heading" hint={HEADING_HINT}>
-        <Input value={form.heroHeading ?? ""} onChange={(e) => set("heroHeading", e.target.value || null)} placeholder="Our **story**, in plain terms." />
+    <div className="grid gap-x-6 gap-y-5 rounded-[12px] border border-neutral-200 bg-neutral-50 p-5 sm:p-8 lg:grid-cols-6">
+      <Field label="Hero heading" className="lg:col-span-6">
+        <HighlightInput value={form.heroHeading ?? ""} onChange={(v) => set("heroHeading", v || null)} placeholder="Our **story**, in plain terms." />
       </Field>
-      <div>
+      <div className="lg:col-span-6">
         <Label>Story</Label>
-        <Textarea rows={4} value={form.story} onChange={(e) => setForm({ ...form, story: e.target.value })} />
+        <Textarea rows={5} value={form.story} onChange={(e) => setForm({ ...form, story: e.target.value })} />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-3 lg:col-span-6">
         <div>
           <Label>Mission card label</Label>
           <Input value={form.missionLabel ?? ""} onChange={(e) => set("missionLabel", e.target.value || null)} placeholder="Mission" />
@@ -109,58 +158,55 @@ function AboutStoryForm() {
           <Input value={form.philosophyLabel ?? ""} onChange={(e) => set("philosophyLabel", e.target.value || null)} placeholder="Philosophy" />
         </div>
       </div>
-      <div>
+      <div className="lg:col-span-2">
         <Label>Mission</Label>
-        <Textarea value={form.mission} onChange={(e) => setForm({ ...form, mission: e.target.value })} />
+        <Textarea rows={7} value={form.mission} onChange={(e) => setForm({ ...form, mission: e.target.value })} />
       </div>
-      <div>
+      <div className="lg:col-span-2">
         <Label>Vision</Label>
-        <Textarea value={form.vision} onChange={(e) => setForm({ ...form, vision: e.target.value })} />
+        <Textarea rows={7} value={form.vision} onChange={(e) => setForm({ ...form, vision: e.target.value })} />
       </div>
-      <div>
+      <div className="lg:col-span-2">
         <Label>Development philosophy</Label>
-        <Textarea value={form.philosophy} onChange={(e) => setForm({ ...form, philosophy: e.target.value })} />
+        <Textarea rows={7} value={form.philosophy} onChange={(e) => setForm({ ...form, philosophy: e.target.value })} />
       </div>
-      <p className="-mt-2 text-body-sm text-neutral-400">
+      <p className="text-body-sm text-neutral-400 lg:col-span-6">
         Years in business and projects shipped are managed from Home Page → Statistics, so they stay in sync everywhere they're shown.
       </p>
 
-      <div className="mt-2 grid gap-4 border-t border-neutral-200 pt-5 sm:grid-cols-2">
-        <Field label="Core values heading" hint={HEADING_HINT}>
-          <Input value={form.valuesHeading ?? ""} onChange={(e) => set("valuesHeading", e.target.value || null)} placeholder="Core **values**" />
+      <div className="grid gap-4 border-t border-neutral-200 pt-5 sm:grid-cols-2 xl:grid-cols-3 lg:col-span-6">
+        <Field label="Core values heading">
+          <HighlightInput value={form.valuesHeading ?? ""} onChange={(v) => set("valuesHeading", v || null)} placeholder="Core **values**" />
         </Field>
-        <Field label="Timeline heading" hint={HEADING_HINT}>
-          <Input value={form.timelineHeading ?? ""} onChange={(e) => set("timelineHeading", e.target.value || null)} placeholder="Our **timeline**" />
+        <Field label="Timeline heading">
+          <HighlightInput value={form.timelineHeading ?? ""} onChange={(v) => set("timelineHeading", v || null)} placeholder="Our **timeline**" />
         </Field>
-        <Field label="Team heading" hint={HEADING_HINT}>
-          <Input value={form.teamHeading ?? ""} onChange={(e) => set("teamHeading", e.target.value || null)} placeholder="Meet the **team**" />
+        <Field label="Team heading">
+          <HighlightInput value={form.teamHeading ?? ""} onChange={(v) => set("teamHeading", v || null)} placeholder="Meet the **team**" />
         </Field>
-        <Field label="Certifications heading" hint={HEADING_HINT}>
-          <Input value={form.certificationsHeading ?? ""} onChange={(e) => set("certificationsHeading", e.target.value || null)} placeholder="Certifications" />
+        <Field label="Certifications heading">
+          <HighlightInput value={form.certificationsHeading ?? ""} onChange={(v) => set("certificationsHeading", v || null)} placeholder="Certifications" />
         </Field>
-        <Field label="Technologies heading" hint={HEADING_HINT}>
-          <Input value={form.technologiesHeading ?? ""} onChange={(e) => set("technologiesHeading", e.target.value || null)} placeholder="The **stack** behind the work" />
+        <Field label="Technologies heading">
+          <HighlightInput value={form.technologiesHeading ?? ""} onChange={(v) => set("technologiesHeading", v || null)} placeholder="The **stack** behind the work" />
         </Field>
       </div>
 
-      <div className="flex items-center gap-2.5 border-t border-neutral-200 pt-5">
+      <div className="flex items-center gap-2.5 border-t border-neutral-200 pt-5 lg:col-span-6">
         <Checkbox checked={form.certificationsEnabled} onCheckedChange={(c) => set("certificationsEnabled", c === true)} />
         <Label className="mb-0">Show Certifications section on the About page</Label>
       </div>
 
-      <Button onClick={handleSave} disabled={saving} className="w-fit">
-        {saving ? "Saving…" : "Save changes"}
-      </Button>
     </div>
   );
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Field({ label, hint, className, children }: { label: string; hint?: string; className?: string; children: React.ReactNode }) {
   return (
-    <div>
+    <div className={className}>
       <div className="flex items-baseline justify-between">
         <Label>{label}</Label>
-        {hint && <span className="text-body-sm text-neutral-400">{hint}</span>}
+        {hint && <FieldHint hint={hint} />}
       </div>
       {children}
     </div>
@@ -186,23 +232,50 @@ interface CertificationItem {
 }
 const certificationsClient = createResourceClient<CertificationItem>("/certifications");
 
+type AboutTab = "story" | "values" | "timeline" | "certifications" | "sections" | "seo";
+
 export default function AboutContentPage() {
+  const [tab, setTab] = React.useState<AboutTab>("story");
+  const [story, setStory] = React.useState<StoryController>({ dirty: false, saving: false, save: () => {} });
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
   return (
     <div>
-      <Heading level={2}>About Page</Heading>
-      <p className="mt-1 text-body-sm text-neutral-500">Story, values, timeline, and certifications.</p>
+      <HomeHeader
+        title="About page"
+        description="Story, values, timeline, and certifications."
+        tabs={
+          <PageTabs
+            tabs={[
+              { value: "story", label: "Story" },
+              { value: "values", label: "Core values" },
+              { value: "timeline", label: "Timeline" },
+              { value: "certifications", label: "Certifications" },
+              { value: "sections", label: "Page sections" },
+              { value: "seo", label: "SEO" },
+            ]}
+            value={tab}
+            onChange={setTab}
+          />
+        }
+        chips={tab === "story" ? story.dirty ? <StatusChip tone="unsaved">Unsaved edits</StatusChip> : <StatusChip tone="saved">All changes saved</StatusChip> : null}
+        actions={
+          <>
+            <a href={`${siteUrl}/about`} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center gap-1.5 rounded-full border border-neutral-300 px-4 text-[13px] font-bold text-heading transition-colors hover:border-accent-500 hover:text-accent-500">
+              View page ↗
+            </a>
+            {tab === "story" && (
+              <button type="button" onClick={story.save} disabled={story.saving || !story.dirty} className="inline-flex h-10 items-center rounded-full bg-accent-500 px-5 text-[13px] font-bold text-on-accent transition-opacity hover:opacity-90 disabled:opacity-50">
+                {story.saving ? "Saving…" : "Save changes"}
+              </button>
+            )}
+          </>
+        }
+      />
 
-      <Tabs defaultValue="story" className="mt-6">
-        <TabsList>
-          <TabsTrigger value="story">Story</TabsTrigger>
-          <TabsTrigger value="values">Core Values</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
-          <TabsTrigger value="certifications">Certifications</TabsTrigger>
-          <TabsTrigger value="sections">Page Sections</TabsTrigger>
-          <TabsTrigger value="seo">SEO</TabsTrigger>
-        </TabsList>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as AboutTab)} className="mt-8">
         <TabsContent value="story">
-          <AboutStoryForm />
+          <AboutStoryForm onController={setStory} />
         </TabsContent>
         <TabsContent value="values">
           <ResourceManager
@@ -262,10 +335,7 @@ export default function AboutContentPage() {
           />
         </TabsContent>
         <TabsContent value="sections">
-          <Heading level={2}>About Page Sections</Heading>
-          <div className="mt-6">
-            <AboutPageSettingsForm />
-          </div>
+          <AboutPageSettingsForm />
         </TabsContent>
         <TabsContent value="seo">
           <AboutSeoForm />

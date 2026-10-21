@@ -156,6 +156,15 @@ affiliateRouter.get(
   }),
 );
 
+const CODE_PART = /\s*(?:[·|]\s*)?\bcode[:\s]+[A-Za-z0-9_-]{3,}/i;
+
+// The copyable code lives inside specialOffer as "Code: ABC123" (the public page already reads it from there).
+// The admin form edits it as its own field, so merge it back into the offer text here.
+function mergeOffer(offer: string | null | undefined, code: string | undefined) {
+  const base = (offer ?? "").replace(CODE_PART, "").trim();
+  return [base, code ? `Code: ${code}` : ""].filter(Boolean).join(" · ") || null;
+}
+
 affiliateRouter.post(
   "/tools",
   requireAuth,
@@ -170,7 +179,7 @@ affiliateRouter.post(
         slug: data.slug,
         description: data.description,
         benefits: data.benefits,
-        specialOffer: data.specialOffer,
+        specialOffer: mergeOffer(data.specialOffer, data.couponCode),
         disclosureNote: data.disclosureNote,
         ctaLabel: data.ctaLabel,
         ctaUrl: data.ctaUrl,
@@ -189,7 +198,8 @@ affiliateRouter.patch(
   requireAuth,
   requirePermission("affiliate", "update"),
   asyncHandler(async (req, res) => {
-    const data = affiliateToolSchema.partial().parse(req.body);
+    const { couponCode, ...data } = affiliateToolSchema.partial().parse(req.body);
+    if (couponCode !== undefined) data.specialOffer = mergeOffer(data.specialOffer ?? (await prisma.affiliateTool.findUnique({ where: { id: req.params.id }, select: { specialOffer: true } }))?.specialOffer, couponCode);
     const item = await prisma.affiliateTool.update({ where: { id: req.params.id }, data, include: { category: true } });
     res.json({ item });
   }),

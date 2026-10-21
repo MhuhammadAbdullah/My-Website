@@ -62,10 +62,10 @@ export default function UsersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Users</Heading>
-          <p className="mt-1 text-body-sm text-neutral-500">Admin panel users and their assigned role.</p>
+          <Heading level={2} className="admin-page-title">Users</Heading>
+          <p className="mt-2 text-body-sm text-neutral-500">Admin panel users and their assigned role.</p>
         </div>
         <Button onClick={() => setShowNew(true)}>
           <Plus /> New user
@@ -82,17 +82,22 @@ export default function UsersPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Active</TableHead>
+                <TableHead>Active (can sign in)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {(users ?? []).map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell>{user.name}</TableCell>
+                  <TableCell>
+                    <span className="flex items-center gap-3">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-500 text-[12px] font-extrabold text-on-accent">{(user.name || user.email).charAt(0).toUpperCase()}</span>
+                      <span className="font-semibold text-heading">{user.name}</span>
+                    </span>
+                  </TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <Select value={user.role?.id} onValueChange={(roleId) => updateUser(user.id, { roleId })}>
-                      <SelectTrigger className="h-9 w-48">
+                      <SelectTrigger className="h-10 w-52">
                         <SelectValue placeholder="No role" />
                       </SelectTrigger>
                       <SelectContent>

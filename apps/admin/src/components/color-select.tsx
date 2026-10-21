@@ -91,7 +91,7 @@ export function ColorSelect({
             type="color"
             value={HEX_COLOR_REGEX.test(customHex) ? customHex : "#000000"}
             onChange={(e) => handleHexChange(e.target.value)}
-            className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5"
+            className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5 bg-neutral-50"
             aria-label="Pick a custom color"
           />
           <Input

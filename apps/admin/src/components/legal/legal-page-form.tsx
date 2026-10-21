@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { InfoHint } from "@/components/field-hint";
+import { FieldHint } from "@/components/field-hint";
 import {
   Badge,
   Button,
@@ -175,7 +177,7 @@ export function LegalContentForm({ pageKey, defaultTitle }: { pageKey: LegalPage
   const isPublished = record?.status === "PUBLISHED";
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <Badge variant={isPublished ? "success" : "warning"}>{isPublished ? "Published" : "Draft"}</Badge>
@@ -195,14 +197,18 @@ export function LegalContentForm({ pageKey, defaultTitle }: { pageKey: LegalPage
       </div>
 
       <div className="mt-6 grid gap-5">
-        <div>
-          <Label>Page title</Label>
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-        </div>
-        <div>
-          <Label>Last updated date (optional)</Label>
-          <Input type="date" value={lastUpdatedAt} onChange={(e) => setLastUpdatedAt(e.target.value)} className="max-w-xs" />
-          <p className="mt-1.5 text-body-sm text-neutral-400">Leave blank to auto-set to today when publishing.</p>
+        <div className="grid gap-5 sm:grid-cols-[1fr_16rem]">
+          <div>
+            <Label>Page title</Label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <Label>Last updated date (optional)</Label>
+              <InfoHint text="Leave blank to auto-set to today when publishing." />
+            </div>
+            <Input type="date" value={lastUpdatedAt} onChange={(e) => setLastUpdatedAt(e.target.value)} />
+          </div>
         </div>
         <div>
           <Label>Content</Label>
@@ -235,7 +241,7 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
     <div>
       <div className="flex items-baseline justify-between">
         <Label>{label}</Label>
-        {hint && <span className="text-body-sm text-neutral-400">{hint}</span>}
+        {hint && <FieldHint hint={hint} />}
       </div>
       {children}
     </div>
@@ -244,7 +250,7 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 
 function SectionCard({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 p-6">
+    <div className="rounded-2xl border border-neutral-200 p-6 bg-neutral-50">
       <Heading level={3}>{title}</Heading>
       {description && <p className="mt-1 text-body-sm text-neutral-500">{description}</p>}
       <div className="mt-5 grid gap-5">{children}</div>
@@ -328,7 +334,7 @@ export function LegalSeoForm({ pageKey }: { pageKey: LegalPageKey }) {
         </Button>
       </div>
 
-      <div className="mt-6 grid max-w-3xl gap-6">
+      <div className="mt-6 grid max-w-none items-start gap-6 xl:grid-cols-2">
         <SectionCard title="Search engine listing">
           <Field label="Meta title" hint={`${seo.metaTitle.length} / 60`}>
             <Input value={seo.metaTitle} onChange={(e) => setSeo("metaTitle", e.target.value.slice(0, 60))} maxLength={60} />

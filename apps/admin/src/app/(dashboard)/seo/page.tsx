@@ -86,7 +86,7 @@ const PAGE_TABS = [
 export default function SeoOverviewPage() {
   return (
     <div>
-      <Heading level={2}>SEO</Heading>
+      <Heading level={2} className="admin-page-title">SEO</Heading>
       <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
         Manage search and social metadata for each page. Home and About are managed from their own pages.
       </p>

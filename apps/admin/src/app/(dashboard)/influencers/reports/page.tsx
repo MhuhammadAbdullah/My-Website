@@ -151,10 +151,10 @@ export default function InfluencerReportsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Reports</Heading>
-          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+          <Heading level={2} className="admin-page-title">Reports</Heading>
+          <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
             Bookings, payouts, and performance reports for the Influencer Marketplace.
           </p>
         </div>
@@ -380,7 +380,7 @@ function TopCategoriesTable({ items }: { items: TopCategoryRow[] }) {
 
 function SummaryCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 p-4">
+    <div className="rounded-2xl border border-neutral-200 p-4 bg-neutral-50">
       <p className="text-label uppercase text-neutral-400">{label}</p>
       <p className="mt-1 text-h5 font-semibold text-heading">{value.toLocaleString()}</p>
     </div>

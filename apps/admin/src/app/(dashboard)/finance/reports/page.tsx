@@ -81,7 +81,7 @@ function FinanceReportsPageInner() {
     <div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Heading level={2}>Reports</Heading>
+          <Heading level={2} className="admin-page-title">Reports</Heading>
           <p className="mt-1 text-body-sm text-neutral-500">
             A complete financial statement of quotations, invoices, and payments — searchable, filterable, and exportable.
           </p>

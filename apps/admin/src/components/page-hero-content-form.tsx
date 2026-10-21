@@ -61,7 +61,7 @@ export function PageHeroContentForm({
   if (loading) return <Skeleton className="h-64 w-full max-w-2xl" />;
 
   return (
-    <div className="grid max-w-2xl gap-5">
+    <div className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6 grid max-w-none items-start gap-5 xl:grid-cols-2">
       {fields.map((field) => (
         <div key={field.key}>
           <div className="flex items-baseline justify-between">

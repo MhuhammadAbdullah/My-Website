@@ -33,6 +33,8 @@ import {
   Undo,
   Redo,
   RemoveFormatting,
+  Maximize2,
+  Minimize2,
   Loader2,
 } from "lucide-react";
 import { cn } from "./lib/cn";
@@ -51,9 +53,12 @@ export interface RichTextEditorProps {
    * this package taking a dependency on it -- returns the URL to insert. */
   onImageUpload?: (file: File) => Promise<string>;
   className?: string;
+  /** Filled with a function that inserts text at the cursor (e.g. an email placeholder picker). */
+  insertRef?: React.MutableRefObject<((text: string) => void) | null>;
 }
 
-export function RichTextEditor({ value, onChange, placeholder, onImageUpload, className }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, placeholder, onImageUpload, className, insertRef }: RichTextEditorProps) {
+  const [full, setFull] = React.useState(false);
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -73,7 +78,7 @@ export function RichTextEditor({ value, onChange, placeholder, onImageUpload, cl
     ],
     content: value,
     editorProps: {
-      attributes: { class: "rich-text min-h-[16rem] px-4 py-3 focus:outline-none" },
+      attributes: { class: "rich-text min-h-[26rem] px-5 py-4 focus:outline-none" },
     },
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   });
@@ -87,9 +92,25 @@ export function RichTextEditor({ value, onChange, placeholder, onImageUpload, cl
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, value]);
 
+  React.useEffect(() => {
+    if (!insertRef) return;
+    insertRef.current = editor ? (text: string) => void editor.chain().focus().insertContent(text).run() : null;
+    return () => {
+      insertRef.current = null;
+    };
+  }, [editor, insertRef]);
+
+  // Esc leaves the full-screen view.
+  React.useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setFull(false);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [full]);
+
   if (!editor) {
     return (
-      <div className={cn("overflow-hidden rounded-2xl border border-neutral-200", className)}>
+      <div className={cn("overflow-hidden rounded-xl border border-neutral-200", className)}>
         <Skeleton className="h-11 w-full rounded-none" />
         <Skeleton className="h-64 w-full rounded-none" />
       </div>
@@ -100,9 +121,9 @@ export function RichTextEditor({ value, onChange, placeholder, onImageUpload, cl
     // No `overflow-hidden` here -- it would clip the sticky toolbar below to
     // this container's own box, defeating position: sticky. Rounding is
     // applied to the toolbar/content pieces individually instead.
-    <div className={cn("rounded-2xl border border-neutral-200 bg-background", className)}>
+    <div className={cn("rounded-xl border border-neutral-200 bg-neutral-50", full ? "fixed inset-0 z-[60] overflow-y-auto rounded-none" : "", className)}>
       <TooltipProvider delayDuration={200}>
-        <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 rounded-t-2xl border-b border-neutral-200 bg-neutral-50/95 p-2 shadow-sm backdrop-blur">
+        <div className={cn("sticky z-10 flex flex-wrap items-center gap-1 rounded-t-xl border-b border-neutral-200 bg-neutral-50 px-3 py-2", full ? "top-0 rounded-none" : "top-[var(--editor-toolbar-top,0px)]")}>
           <BlockTypeSelect editor={editor} />
           <Divider />
           <ToolbarButton label="Bold" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()}>
@@ -189,9 +210,19 @@ export function RichTextEditor({ value, onChange, placeholder, onImageUpload, cl
           <ToolbarButton label="Redo" disabled={!editor.can().redo()} onClick={() => editor.chain().focus().redo().run()}>
             <Redo className="size-4" />
           </ToolbarButton>
+          <div className="ml-auto" />
+          <ToolbarButton label={full ? "Exit full screen (Esc)" : "Full screen"} active={full} onClick={() => setFull((v) => !v)}>
+            {full ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+          </ToolbarButton>
         </div>
       </TooltipProvider>
-      <EditorContent editor={editor} className="overflow-hidden rounded-b-2xl" />
+      <EditorContent editor={editor} className={cn("overflow-hidden", full && "mx-auto max-w-4xl")} />
+      <div className="flex items-center justify-between rounded-b-xl border-t border-neutral-200 bg-neutral-50 px-4 py-1.5 text-label text-neutral-500">
+        <span>
+          {editor.getText().trim() ? editor.getText().trim().split(/\s+/).length : 0} words · {editor.getText().length} characters
+        </span>
+        {full && <span>Press Esc to exit full screen</span>}
+      </div>
     </div>
   );
 }

@@ -241,7 +241,7 @@ function CategoryList({
           <EmptyState hasActiveFilters={list.hasActiveFilters} label={`${label.toLowerCase()}s`} />
         ) : (
           rows.map((item) => (
-            <div key={item.id} className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3">
+            <div key={item.id} className="flex items-center justify-between rounded-xl border border-neutral-200 px-4 py-3 bg-neutral-50">
               <div className="flex items-center gap-3">
                 {canBulkDelete && (
                   <Checkbox
@@ -314,7 +314,7 @@ function CategoriesPageInner() {
 
   return (
     <div>
-      <Heading level={2}>Categories</Heading>
+      <Heading level={2} className="admin-page-title">Categories</Heading>
       <p className="mt-1 text-body-sm text-neutral-500">
         Organize services, portfolio projects, technologies, affiliate tools, and influencer marketplace categories.
       </p>

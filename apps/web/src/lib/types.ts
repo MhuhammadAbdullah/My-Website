@@ -348,6 +348,8 @@ export interface SiteSettings {
   organization?: { legalName: string; description: string; foundingDate: string; areaServed: string };
   business_schedule?: Record<string, { closed: boolean; open: string; close: string }>;
   timezone?: string;
+  section_visibility?: Record<string, string[]>;
+  careers_page?: import("@agency/types").CareersPageSettings;
   services_page?: import("@agency/types").ServicesPageSettings;
   portfolio_page?: import("@agency/types").PortfolioPageSettings;
   about_page?: import("@agency/types").AboutPageSettings;

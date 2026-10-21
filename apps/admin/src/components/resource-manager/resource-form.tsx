@@ -327,7 +327,7 @@ function MultiSelectSearchField({
         />
       </div>
 
-      <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-neutral-200 p-1.5">
+      <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-neutral-200 p-1.5 bg-neutral-50">
         {filtered.length === 0 && <p className="p-2 text-body-sm text-neutral-400">No matches.</p>}
         {filtered.map((o) => {
           const active = selected.has(o.value);
@@ -367,7 +367,7 @@ function TagsField({
   return (
     <div>
       <Label>{label}</Label>
-      <div className="flex flex-wrap gap-2 rounded-xl border border-neutral-200 p-2">
+      <div className="flex flex-wrap gap-2 rounded-xl border border-neutral-200 p-2 bg-neutral-50">
         {value.map((tag, i) => (
           <span key={i} className="flex items-center gap-1 rounded-full bg-neutral-100 px-3 py-1 text-body-sm">
             {tag}

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Check, Search } from "lucide-react";
+import { ArrowUpRight, Check, Copy, Search } from "lucide-react";
 import { cn } from "@agency/ui";
 import { cloudinaryTransform } from "@/lib/cloudinary";
 
@@ -46,7 +46,8 @@ function CopyCode({ code, label, copiedLabel }: { code: string; label: string; c
   }
   return (
     <button type="button" onClick={copy} className="inline-flex items-center justify-center gap-2 rounded-full border border-accent-500 px-5 py-2.5 text-body-sm font-semibold text-accent-500 hover:bg-accent-500/10">
-      {done ? copiedLabel : `${label} ${code}`}
+      {done ? <Check className="size-4" aria-hidden /> : <Copy className="size-4" aria-hidden />}
+      <span aria-live="polite">{done ? copiedLabel : `${label} ${code}`}</span>
     </button>
   );
 }

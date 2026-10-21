@@ -51,19 +51,17 @@ export function StatusChip({ tone, children }: { tone: "saved" | "unsaved" | "to
 export function HomeHeader({ title, description, tabs, chips, actions }: { title: string; description: string; tabs?: React.ReactNode; chips?: React.ReactNode; actions?: React.ReactNode }) {
   return (
     <header>
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <h1 className="font-heading font-extrabold tracking-tight text-heading" style={{ fontSize: "clamp(2.25rem, 1rem + 4vw, 4.25rem)", lineHeight: 0.95 }}>
-            <Title text={title} />
-          </h1>
-          {tabs}
-        </div>
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <h1 className="font-heading font-extrabold tracking-tight text-heading" style={{ fontSize: "clamp(2rem, 1rem + 2.8vw, 3.25rem)", lineHeight: 0.95 }}>
+          <Title text={title} />
+        </h1>
         <div className="flex flex-wrap items-center gap-2">
           {chips}
           {actions}
         </div>
       </div>
-      <p className="mt-4 text-[14px] text-neutral-500">{description}</p>
+      <p className="mt-3 text-[14px] text-neutral-500">{description}</p>
+      {tabs && <div className="mt-5 max-w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{tabs}</div>}
     </header>
   );
 }

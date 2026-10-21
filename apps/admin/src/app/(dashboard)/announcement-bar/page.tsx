@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { InfoHint } from "@/components/field-hint";
 import { Button, FieldError, Heading, Input, Label, Skeleton, Switch, Textarea, toast } from "@agency/ui";
 import { announcementBarSchema, type AnnouncementBarInput } from "@agency/types";
 import { request } from "@/lib/api";
@@ -87,111 +88,102 @@ export default function AnnouncementBarPage() {
 
   return (
     <div>
-      <Heading level={2}>Announcement Bar</Heading>
-      <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+      <Heading level={2} className="admin-page-title">Announcement Bar</Heading>
+      <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
         A thin scrolling bar shown above the site header on every public page. Turning it off hides it instantly
         without losing your saved colors or messages.
       </p>
 
-      <div className="mt-8 grid max-w-2xl gap-8">
-        <section className="flex items-center justify-between rounded-2xl border border-neutral-200 p-4">
-          <div>
-            <Label>Show announcement bar</Label>
-            <p className="mt-1 text-body-sm text-neutral-500">Goes live on the site as soon as you save.</p>
-          </div>
-          <Switch checked={form.enabled} onCheckedChange={(v) => setField("enabled", v)} />
-        </section>
-
-        <section className="grid gap-4">
-          <div>
-            <Label>Link (optional)</Label>
-            <Input
-              value={form.link}
-              onChange={(e) => setField("link", e.target.value)}
-              placeholder="/contact or https://..."
-              aria-invalid={!!errors.link}
-            />
-            <FieldError>{errors.link}</FieldError>
-            <p className="mt-1 text-body-sm text-neutral-500">Makes the whole bar clickable. Leave empty for plain text.</p>
-          </div>
-          <div className="flex items-center justify-between rounded-2xl border border-neutral-200 p-4">
+      <div className="mt-6 grid items-start gap-5 xl:grid-cols-2">
+        <section className="grid min-w-0 gap-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+          <h3 className="font-heading font-extrabold tracking-tight text-heading">Behaviour</h3>
+          <div className="flex items-center justify-between gap-4 rounded-[8px] border border-neutral-200 px-4 py-3 bg-neutral-50">
             <div>
-              <Label>Visitors can dismiss it</Label>
-              <p className="mt-1 text-body-sm text-neutral-500">Shows a close button; the choice is remembered in the browser.</p>
+              <Label className="mb-0">Show announcement bar</Label>
+              <p className="mt-0.5 text-label text-neutral-500">Goes live on the site as soon as you save.</p>
+            </div>
+            <Switch checked={form.enabled} onCheckedChange={(v) => setField("enabled", v)} />
+          </div>
+          <div className="flex items-center justify-between gap-4 rounded-[8px] border border-neutral-200 px-4 py-3 bg-neutral-50">
+            <div>
+              <Label className="mb-0">Visitors can dismiss it</Label>
+              <p className="mt-0.5 text-label text-neutral-500">Shows a close button; the choice is remembered in the browser.</p>
             </div>
             <Switch checked={form.dismissible} onCheckedChange={(v) => setField("dismissible", v)} />
           </div>
-        </section>
-
-        <section className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label>Background color</Label>
-            <div className="mt-1.5 flex items-center gap-2">
-              <input
-                type="color"
-                value={/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(form.backgroundColor) ? form.backgroundColor : "#111111"}
-                onChange={(e) => setField("backgroundColor", e.target.value)}
-                className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5"
-                aria-label="Pick a background color"
-              />
-              <Input
-                value={form.backgroundColor}
-                onChange={(e) => setField("backgroundColor", e.target.value)}
-                placeholder="#111111"
-                aria-invalid={!!errors.backgroundColor}
-              />
+            <div className="flex items-center gap-1.5">
+              <Label>Link (optional)</Label>
+              <InfoHint text="Makes the whole bar clickable. Leave empty for plain text." />
             </div>
-            <FieldError>{errors.backgroundColor}</FieldError>
-          </div>
-          <div>
-            <Label>Text color</Label>
-            <div className="mt-1.5 flex items-center gap-2">
-              <input
-                type="color"
-                value={/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(form.textColor) ? form.textColor : "#ffffff"}
-                onChange={(e) => setField("textColor", e.target.value)}
-                className="size-9 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5"
-                aria-label="Pick a text color"
-              />
-              <Input
-                value={form.textColor}
-                onChange={(e) => setField("textColor", e.target.value)}
-                placeholder="#ffffff"
-                aria-invalid={!!errors.textColor}
-              />
-            </div>
-            <FieldError>{errors.textColor}</FieldError>
+            <Input value={form.link} onChange={(e) => setField("link", e.target.value)} placeholder="/contact or https://..." aria-invalid={!!errors.link} />
+            <FieldError>{errors.link}</FieldError>
           </div>
         </section>
 
-        <section
-          className="overflow-hidden rounded-2xl border border-neutral-200"
-          style={{ backgroundColor: form.backgroundColor, color: form.textColor }}
-        >
-          <div className="flex h-9 items-center whitespace-nowrap px-4 text-body-sm font-medium">
-            {previewMessages.length > 0 ? previewMessages.join("   •   ") : "Preview — add a message below"}
+        <section className="grid min-w-0 gap-4 rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
+          <h3 className="font-heading font-extrabold tracking-tight text-heading">Appearance</h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="min-w-0">
+              <Label>Background color</Label>
+              <div className="mt-1.5 flex items-center gap-2">
+                <input
+                  type="color"
+                  value={/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(form.backgroundColor) ? form.backgroundColor : "#111111"}
+                  onChange={(e) => setField("backgroundColor", e.target.value)}
+                  className="size-10 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5 bg-neutral-50"
+                  aria-label="Pick a background color"
+                />
+                <Input className="min-w-0 flex-1" value={form.backgroundColor} onChange={(e) => setField("backgroundColor", e.target.value)} placeholder="#111111" aria-invalid={!!errors.backgroundColor} />
+              </div>
+              <FieldError>{errors.backgroundColor}</FieldError>
+            </div>
+            <div className="min-w-0">
+              <Label>Text color</Label>
+              <div className="mt-1.5 flex items-center gap-2">
+                <input
+                  type="color"
+                  value={/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(form.textColor) ? form.textColor : "#ffffff"}
+                  onChange={(e) => setField("textColor", e.target.value)}
+                  className="size-10 shrink-0 cursor-pointer rounded-lg border border-neutral-200 p-0.5 bg-neutral-50"
+                  aria-label="Pick a text color"
+                />
+                <Input className="min-w-0 flex-1" value={form.textColor} onChange={(e) => setField("textColor", e.target.value)} placeholder="#ffffff" aria-invalid={!!errors.textColor} />
+              </div>
+              <FieldError>{errors.textColor}</FieldError>
+            </div>
+          </div>
+          <div className="min-w-0">
+            <p className="mb-1.5 text-label font-semibold uppercase tracking-wider text-neutral-500">Preview</p>
+            <div className="overflow-hidden rounded-[8px] border border-neutral-200" style={{ backgroundColor: form.backgroundColor, color: form.textColor }}>
+              <div className="flex h-9 items-center overflow-hidden text-ellipsis whitespace-nowrap px-4 text-body-sm font-medium">
+                {previewMessages.length > 0 ? previewMessages.join("   •   ") : "Preview — add a message below"}
+              </div>
+            </div>
           </div>
         </section>
 
-        <section>
-          <Label>Messages (one per line)</Label>
-          <p className="mt-1 text-body-sm text-neutral-500">
-            Each line scrolls in the bar as its own message, looping continuously. Add as many as you like.
-          </p>
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5 xl:col-span-2">
+          <div className="flex items-center gap-1.5">
+            <h3 className="font-heading font-extrabold tracking-tight text-heading">Messages</h3>
+            <InfoHint text="One message per line. Each line scrolls in the bar as its own message, looping continuously. Add as many as you like." />
+          </div>
           <Textarea
-            className="mt-1.5"
+            className="mt-3"
             value={messagesText}
             onChange={(e) => setMessagesText(e.target.value)}
             placeholder={"Free shipping on orders over $50\nNew: book influencers directly from the marketplace"}
-            rows={5}
+            rows={4}
             aria-invalid={!!errors.messages}
           />
           <FieldError>{errors.messages}</FieldError>
         </section>
 
-        <Button onClick={handleSave} disabled={saving} className="mt-2 w-fit">
-          {saving ? "Saving…" : "Save announcement bar"}
-        </Button>
+        <div className="xl:col-span-2">
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? "Saving…" : "Save announcement bar"}
+          </Button>
+        </div>
       </div>
     </div>
   );

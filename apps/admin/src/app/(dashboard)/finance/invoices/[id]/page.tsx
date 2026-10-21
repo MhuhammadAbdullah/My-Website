@@ -263,7 +263,7 @@ export default function InvoiceDetailPage() {
 
       <div className="mt-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Heading level={2}>{isNew ? "New invoice" : invoice?.invoiceNumber}</Heading>
+          <Heading level={2} className="admin-page-title">{isNew ? "New invoice" : invoice?.invoiceNumber}</Heading>
           {invoice?.quotation && (
             <Badge variant="neutral">From {invoice.quotation.quoteNumber}</Badge>
           )}
@@ -287,15 +287,15 @@ export default function InvoiceDetailPage() {
 
       {!isNew && invoice && (
         <div className="mt-4 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-neutral-200 p-3">
+          <div className="rounded-xl border border-neutral-200 p-3 bg-neutral-50">
             <p className="text-body-sm text-neutral-500">Total</p>
             <p className="text-h5 font-semibold text-heading">{formatMoney(invoice.grandTotal, invoice.currency)}</p>
           </div>
-          <div className="rounded-xl border border-neutral-200 p-3">
+          <div className="rounded-xl border border-neutral-200 p-3 bg-neutral-50">
             <p className="text-body-sm text-neutral-500">Paid</p>
             <p className="text-h5 font-semibold text-success-600">{formatMoney(invoice.amountPaid, invoice.currency)}</p>
           </div>
-          <div className="rounded-xl border border-neutral-200 p-3">
+          <div className="rounded-xl border border-neutral-200 p-3 bg-neutral-50">
             <p className="text-body-sm text-neutral-500">Balance</p>
             <p className="text-h5 font-semibold text-heading">{formatMoney(invoice.balance, invoice.currency)}</p>
           </div>

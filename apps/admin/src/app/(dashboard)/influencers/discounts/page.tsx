@@ -186,10 +186,10 @@ function DiscountsPageInner() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Discounts & promotions</Heading>
-          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+          <Heading level={2} className="admin-page-title">Discounts & promotions</Heading>
+          <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
             Percentage/fixed discounts and promo codes clients can redeem when booking. Codeless discounts (no code set) auto-apply to
             eligible bookings.
           </p>
@@ -206,7 +206,7 @@ function DiscountsPageInner() {
         </div>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-5 rounded-[10px] border border-neutral-200 bg-neutral-50 p-3">
         <AdminListToolbar
           search={list.search}
           onSearchChange={list.setSearch}

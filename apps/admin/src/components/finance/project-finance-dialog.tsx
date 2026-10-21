@@ -37,27 +37,27 @@ export function ProjectFinanceDialog({ projectId, projectTitle, onClose }: { pro
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-neutral-200 p-3">
+            <div className="rounded-xl border border-neutral-200 p-3 bg-neutral-50">
               <p className="text-body-sm text-neutral-500">Total quoted</p>
               <p className="mt-1 text-h5 font-semibold text-heading">
                 {formatMoney(data.totalQuoted, data.defaultCurrency ?? DEFAULT_CURRENCY, { maximumFractionDigits: 0 })}
               </p>
               <p className="text-body-sm text-neutral-400">{data.quotationsCount} quotation(s)</p>
             </div>
-            <div className="rounded-xl border border-neutral-200 p-3">
+            <div className="rounded-xl border border-neutral-200 p-3 bg-neutral-50">
               <p className="text-body-sm text-neutral-500">Total invoiced</p>
               <p className="mt-1 text-h5 font-semibold text-heading">
                 {formatMoney(data.totalInvoiced, data.defaultCurrency ?? DEFAULT_CURRENCY, { maximumFractionDigits: 0 })}
               </p>
               <p className="text-body-sm text-neutral-400">{data.invoicesCount} invoice(s)</p>
             </div>
-            <div className="rounded-xl border border-neutral-200 p-3">
+            <div className="rounded-xl border border-neutral-200 p-3 bg-neutral-50">
               <p className="text-body-sm text-neutral-500">Total received</p>
               <p className="mt-1 text-h5 font-semibold text-success-600">
                 {formatMoney(data.totalReceived, data.defaultCurrency ?? DEFAULT_CURRENCY, { maximumFractionDigits: 0 })}
               </p>
             </div>
-            <div className="rounded-xl border border-neutral-200 p-3">
+            <div className="rounded-xl border border-neutral-200 p-3 bg-neutral-50">
               <p className="text-body-sm text-neutral-500">Outstanding</p>
               <p className="mt-1 text-h5 font-semibold text-warning-600">
                 {formatMoney(data.totalOutstanding, data.defaultCurrency ?? DEFAULT_CURRENCY, { maximumFractionDigits: 0 })}

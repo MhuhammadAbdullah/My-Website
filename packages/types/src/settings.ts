@@ -797,3 +797,147 @@ export const influencersPageSchema = z.object({
     .prefault({}),
 });
 export type InfluencersPageSettings = z.infer<typeof influencersPageSchema>;
+
+// ---------------------------------------------------------------- section visibility
+// Which blocks of each public page the owner can switch off (Admin > Content > Page sections).
+// Stored as the list of HIDDEN keys per page, so everything is visible until switched off.
+export const PAGE_SECTIONS = {
+  about: {
+    label: "About",
+    href: "/about",
+    sections: [
+      { key: "stats", label: "Numbers under the intro" },
+      { key: "tech", label: "Technologies band" },
+      { key: "mission", label: "Mission / Vision / Philosophy" },
+      { key: "values", label: "Core values" },
+      { key: "timeline", label: "Timeline" },
+      { key: "team", label: "Team" },
+      { key: "certifications", label: "Certifications" },
+      { key: "roles", label: "Join the team (open roles)" },
+      { key: "cta", label: "Closing block" },
+    ],
+  },
+  services: {
+    label: "Services",
+    href: "/services",
+    sections: [
+      { key: "models", label: "Engagement models" },
+      { key: "estimator", label: "Project estimator" },
+      { key: "reviews", label: "Client reviews" },
+    ],
+  },
+  portfolio: {
+    label: "Portfolio",
+    href: "/portfolio",
+    sections: [
+      { key: "stats", label: "Numbers in the intro" },
+      { key: "cta", label: "Closing block" },
+    ],
+  },
+  affiliate: {
+    label: "Affiliate Tools",
+    href: "/affiliate-tools",
+    sections: [
+      { key: "disclosure", label: "Affiliate disclosure note" },
+      { key: "pick", label: "Our top pick" },
+      { key: "compare", label: "Comparison table" },
+      { key: "setup", label: "Setup call block" },
+    ],
+  },
+  contact: {
+    label: "Contact",
+    href: "/contact",
+    sections: [
+      { key: "status", label: "Studio status line" },
+      { key: "studio", label: "Studio address and map" },
+    ],
+  },
+  influencers: {
+    label: "Influencer Marketplace",
+    href: "/influencers",
+    sections: [{ key: "brief", label: "Brief card" }],
+  },
+} as const;
+export type PageSectionKey = keyof typeof PAGE_SECTIONS;
+
+export const sectionVisibilitySchema = z.record(z.string(), z.array(z.string()));
+export type SectionVisibility = z.infer<typeof sectionVisibilitySchema>;
+
+export function isSectionVisible(hidden: SectionVisibility | undefined, page: string, key: string) {
+  return !(hidden?.[page] ?? []).includes(key);
+}
+
+// ---------------------------------------------------------------- Careers (hiring) page
+// One SiteSetting blob (careers_page), edited in Admin > Content > Careers. No database table needed.
+export const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship"] as const;
+export const JOB_MODES = ["On-site", "Hybrid", "Remote"] as const;
+
+export const jobPositionSchema = z.object({
+  id: z.string().trim().min(1).max(60),
+  title: z.string().trim().min(1, "Title is required").max(100),
+  department: text(60),
+  location: text(80),
+  type: text(30, "Full-time"),
+  mode: text(30, "On-site"),
+  level: text(40),
+  salary: text(60),
+  summary: text(500),
+  responsibilities: z.array(text(240)).max(20).default([]),
+  requirements: z.array(text(240)).max(20).default([]),
+  // Optional: where "Apply" goes for this role. Empty = the apply email below (or the Contact page).
+  applyUrl: text(300),
+  open: z.boolean().default(true),
+});
+export type JobPosition = z.infer<typeof jobPositionSchema>;
+
+export const careersPageSchema = z.object({
+  hero: z
+    .object({
+      eyebrow: text(60, "We are hiring"),
+      heading: text(160, "Build great work **with us**"),
+      intro: text(500, "Join a small, senior team that designs and ships digital products. See the roles we are hiring for below."),
+    })
+    .prefault({}),
+  perks: z
+    .array(z.object({ title: text(60), text: text(240) }))
+    .max(8)
+    .default([
+      { title: "Meaningful work", text: "Real products for real brands, not busywork." },
+      { title: "Grow fast", text: "Senior teammates, honest feedback and room to learn." },
+      { title: "Flexible", text: "Work in a way that suits you: on-site, hybrid or remote where the role allows." },
+    ]),
+  positions: z.array(jobPositionSchema).max(60).default([]),
+  apply: z
+    .object({
+      email: text(120),
+      subjectPrefix: text(60, "Application:"),
+      buttonLabel: text(40, "Apply now"),
+      note: text(240, "Include your CV and a link to your best work."),
+    })
+    .prefault({}),
+  labels: z
+    .object({
+      all: text(40, "All departments"),
+      searchPlaceholder: text(60, "Search roles"),
+      openRoles: text(60, "{n} open roles"),
+      details: text(40, "View details"),
+      hideDetails: text(40, "Hide details"),
+      responsibilities: text(60, "What you will do"),
+      requirements: text(60, "What we look for"),
+    })
+    .prefault({}),
+  empty: z
+    .object({
+      heading: text(120, "No open roles right now"),
+      text: text(300, "We are not hiring at the moment, but we would still love to hear from you. Send us a note and your CV."),
+    })
+    .prefault({}),
+  cta: z
+    .object({
+      heading: text(160, "Do not see your role?"),
+      text: text(300, "Tell us how you would help. We read every message."),
+      buttonLabel: text(40, "Get in touch"),
+    })
+    .prefault({}),
+});
+export type CareersPageSettings = z.infer<typeof careersPageSchema>;

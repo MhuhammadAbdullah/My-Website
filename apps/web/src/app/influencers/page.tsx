@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { isSectionVisible } from "@agency/types";
 import Link from "next/link";
 import { Breadcrumb, Container, Section, Heading } from "@agency/ui";
 import { influencersPageSchema } from "@agency/types";
@@ -79,6 +80,7 @@ export default async function InfluencersPage({
   ]);
   // Hero buttons, steps, labels and the two closing cards are managed in Admin > Influencer Marketplace > Settings.
   const cfg = influencersPageSchema.parse(settings.influencers_page ?? {});
+  const show = (key: string) => isSectionVisible(settings.section_visibility, "influencers", key);
 
   // "Load more" raises ?limit by one step; the page is a plain server render of the first `limit` creators.
   const limit = Math.min(96, Math.max(cfg.pageSize, Number(params.limit ?? cfg.pageSize) || cfg.pageSize));
@@ -173,6 +175,7 @@ export default async function InfluencersPage({
         </Container>
       </section>
 
+      {show("brief") && (
       <section className="pb-[var(--spacing-section)]">
         <Container className="grid gap-5 md:grid-cols-2">
           <div className="flex flex-col rounded-[var(--radius-2xl)] bg-accent-500 p-8 text-[#0b0b0c] sm:p-10">
@@ -200,6 +203,7 @@ export default async function InfluencersPage({
           </div>
         </Container>
       </section>
+      )}
 
       <ShortlistBar text={L.shortlistBar} button={L.requestQuotes} />
     </ShortlistProvider>

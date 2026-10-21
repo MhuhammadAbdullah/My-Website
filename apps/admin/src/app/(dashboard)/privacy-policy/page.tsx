@@ -6,7 +6,7 @@ import { LegalContentForm, LegalSeoForm } from "@/components/legal/legal-page-fo
 export default function PrivacyPolicyPage() {
   return (
     <div>
-      <Heading level={2}>Privacy Policy</Heading>
+      <Heading level={2} className="admin-page-title">Privacy Policy</Heading>
       <p className="mt-1 text-body-sm text-neutral-500">Content and SEO for the public /privacy-policy page.</p>
 
       <Tabs defaultValue="content" className="mt-6">

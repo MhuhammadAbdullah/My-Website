@@ -10,7 +10,7 @@ import type { SiteSettings } from "@/lib/types";
 
 function Group({ title, help, children }: { title: string; help?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-neutral-200 p-5">
+    <section className="rounded-2xl border border-neutral-200 p-5 bg-neutral-50">
       <Heading level={3}>{title}</Heading>
       {help && <p className="mt-1 text-body-sm text-neutral-500">{help}</p>}
       <div className="mt-4 grid gap-4">{children}</div>
@@ -50,8 +50,8 @@ export function AboutPageSettingsForm() {
   if (loading) return <Skeleton className="h-64 w-full max-w-3xl" />;
 
   return (
-    <div className="grid max-w-3xl gap-6">
-      <p className="text-body-sm text-neutral-500">
+    <div className="grid max-w-none items-start gap-6 xl:grid-cols-2">
+      <p className="xl:col-span-2 text-body-sm text-neutral-500">
         The story, mission/vision/philosophy texts, core values, timeline and team come from the other tabs. The numbers, headlines, open roles and closing block are edited here.
       </p>
 
@@ -110,7 +110,7 @@ export function AboutPageSettingsForm() {
         {form.careers.roles.map((r, i) => {
           const upd = (patch: Partial<typeof r>) => setForm({ ...form, careers: { ...form.careers, roles: form.careers.roles.map((x, j) => (j === i ? { ...x, ...patch } : x)) } });
           return (
-            <div key={i} className="grid gap-2 rounded-xl border border-neutral-200 p-3 sm:grid-cols-[1fr_12rem_10rem_auto] sm:items-end">
+            <div key={i} className="grid gap-2 rounded-xl border border-neutral-200 p-3 sm:grid-cols-[1fr_12rem_10rem_auto] sm:items-end bg-neutral-50">
               <div>
                 <Label>Role</Label>
                 <Input value={r.title} onChange={(e) => upd({ title: e.target.value })} />

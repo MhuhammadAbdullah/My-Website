@@ -94,7 +94,7 @@ function DisplayStyleSelector() {
   }
 
   return (
-    <div className="rounded-xl border border-neutral-200 p-4">
+    <div className="rounded-xl border border-neutral-200 p-4 bg-neutral-50">
       <Label>Display style</Label>
       <p className="mt-1 text-body-sm text-neutral-500">
         Choose how the technology stack appears on the Home and About pages.
@@ -241,7 +241,7 @@ export function TechnologiesList() {
     <div className="space-y-6">
       <DisplayStyleSelector />
 
-      <div className="space-y-4 rounded-xl border border-neutral-200 p-4">
+      <div className="space-y-4 rounded-xl border border-neutral-200 p-4 bg-neutral-50">
         <div>
           <Label>Name</Label>
           <Input
@@ -284,7 +284,7 @@ export function TechnologiesList() {
           list.data!.map((item, index) => (
             <div
               key={item.id}
-              className="flex items-center justify-between gap-3 rounded-xl border border-neutral-200 px-4 py-3"
+              className="flex items-center justify-between gap-3 rounded-xl border border-neutral-200 px-4 py-3 bg-neutral-50"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <TechLogoThumb tech={item} />

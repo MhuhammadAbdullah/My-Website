@@ -97,14 +97,14 @@ export default function IntegrationsPage() {
 
   return (
     <div>
-      <Heading level={2}>Integrations</Heading>
+      <Heading level={2} className="admin-page-title">Integrations</Heading>
       <p className="mt-1 text-body-sm text-neutral-500">
         Connect tracking, analytics, and marketing pixels. Each integration only loads on the live site once its ID
         is set below — leave a field blank to keep it disabled.
       </p>
 
-      <div className="mt-8 grid max-w-2xl gap-8">
-        <section>
+      <div className="mt-8 grid max-w-none items-start gap-8 xl:grid-cols-2">
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
           <div className="flex items-center justify-between">
             <Heading level={3}>Google Tag Manager</Heading>
             <StatusBadge active={!!saved.gtmId} />
@@ -124,7 +124,7 @@ export default function IntegrationsPage() {
           </div>
         </section>
 
-        <section className="border-t border-neutral-200 pt-6">
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
           <div className="flex items-center justify-between">
             <Heading level={3}>Google Analytics 4</Heading>
             <StatusBadge active={!!saved.ga4Id} />
@@ -145,7 +145,7 @@ export default function IntegrationsPage() {
           </div>
         </section>
 
-        <section className="border-t border-neutral-200 pt-6">
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
           <div className="flex items-center justify-between">
             <Heading level={3}>Meta Pixel</Heading>
             <StatusBadge active={!!saved.metaPixelId} />
@@ -163,7 +163,7 @@ export default function IntegrationsPage() {
           </div>
         </section>
 
-        <section className="border-t border-neutral-200 pt-6">
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
           <div className="flex items-center justify-between">
             <Heading level={3}>Google Ads</Heading>
             <StatusBadge active={!!saved.googleAdsId} />
@@ -196,7 +196,7 @@ export default function IntegrationsPage() {
           </div>
         </section>
 
-        <section className="border-t border-neutral-200 pt-6">
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
           <div className="flex items-center justify-between">
             <Heading level={3}>Microsoft Clarity</Heading>
             <StatusBadge active={!!saved.clarityId} />
@@ -214,7 +214,7 @@ export default function IntegrationsPage() {
           </div>
         </section>
 
-        <section className="border-t border-neutral-200 pt-6">
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
           <div className="flex items-center justify-between">
             <Heading level={3}>Google Search Console</Heading>
             <StatusBadge active={!!saved.googleSiteVerification} />
@@ -237,7 +237,7 @@ export default function IntegrationsPage() {
           </div>
         </section>
 
-        <section className="border-t border-neutral-200 pt-6">
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
           <div className="flex items-center justify-between">
             <Heading level={3}>Form spam protection (Cloudflare Turnstile)</Heading>
             <StatusBadge active={!!saved.turnstileSiteKey} />
@@ -259,7 +259,7 @@ export default function IntegrationsPage() {
           </div>
         </section>
 
-        <section className="border-t border-neutral-200 pt-6">
+        <section className="rounded-[10px] border border-neutral-200 bg-neutral-50 p-5">
           <Heading level={3}>Custom Scripts</Heading>
           <p className="mt-1 text-body-sm text-neutral-500">
             Advanced: paste raw HTML/JavaScript snippets (verification tags, extra pixels, chat widgets). Only

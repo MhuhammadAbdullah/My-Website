@@ -12,7 +12,7 @@ export default function ContactPage() {
         <TabsTrigger value="sections">Page Sections</TabsTrigger>
       </TabsList>
       <TabsContent value="content">
-      <Heading level={2}>Contact Page</Heading>
+      <Heading level={2} className="admin-page-title">Contact Page</Heading>
       <p className="mt-1 text-body-sm text-neutral-500">
         The hero heading, paragraph, and button labels at the top of the public Contact page. Contact details
         (email, WhatsApp number, address, hours, Calendly link) are managed from Site → Settings; form

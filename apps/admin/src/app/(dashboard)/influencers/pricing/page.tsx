@@ -121,10 +121,10 @@ export default function InfluencerPricingPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Pricing catalog</Heading>
-          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+          <Heading level={2} className="admin-page-title">Pricing catalog</Heading>
+          <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
             Control which deliverable types influencers can price and offer (Instagram Story, TikTok Video, UGC, etc). Disabling a
             type hides it from every influencer's pricing form and public profile, without deleting any pricing already set.
           </p>

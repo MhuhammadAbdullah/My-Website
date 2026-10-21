@@ -179,10 +179,10 @@ function ApplicationsPageInner() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Influencer Applications</Heading>
-          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+          <Heading level={2} className="admin-page-title">Influencer Applications</Heading>
+          <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
             Review "Become an Influencer" submissions. Approving one publishes their profile and gives them dashboard access.
           </p>
         </div>
@@ -193,7 +193,7 @@ function ApplicationsPageInner() {
         )}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-5 rounded-[10px] border border-neutral-200 bg-neutral-50 p-3">
         <AdminListToolbar
           search={list.search}
           onSearchChange={list.setSearch}
@@ -454,7 +454,7 @@ function ApplicationReviewDialog({ id, onClose, onDecided }: { id: string; onClo
                     <p className="text-label uppercase text-neutral-400">Creator payout</p>
                     <Badge variant={payoutStatusVariant[app.payoutMethods[0]!.status]}>{app.payoutMethods[0]!.status}</Badge>
                   </div>
-                  <div className="mt-1.5 space-y-1 rounded-lg border border-neutral-200 px-3 py-2 text-body-sm">
+                  <div className="mt-1.5 space-y-1 rounded-lg border border-neutral-200 px-3 py-2 text-body-sm bg-neutral-50">
                     <div className="flex justify-between">
                       <span className="text-neutral-400">Method</span>
                       <span className="text-heading">{app.payoutMethods[0]!.type.replace(/_/g, " ")}</span>

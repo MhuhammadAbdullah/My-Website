@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { isSectionVisible } from "@agency/types";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Info, Star } from "lucide-react";
 import { Breadcrumb, Container, Heading, cn } from "@agency/ui";
@@ -34,6 +35,7 @@ export default async function AffiliateToolsPage() {
 
   // Everything except the tools themselves is managed in Admin > Affiliate Tools > Page Sections.
   const cfg = affiliatePageSchema.parse(settings.affiliate_page ?? {});
+  const show = (key: string) => isSectionVisible(settings.section_visibility, "affiliate", key);
   const raw = toolsPage.items;
   const items: AffiliateItem[] = raw.map((t) => ({
     id: t.id,
@@ -69,7 +71,7 @@ export default async function AffiliateToolsPage() {
             </Heading>
             {content.heroDescription && <p className="text-body text-neutral-500 lg:pb-4">{content.heroDescription}</p>}
           </div>
-          {content.disclosureText && (
+          {content.disclosureText && show("disclosure") && (
             <div className="mt-8 flex items-start gap-3 rounded-[var(--radius-xl)] border border-neutral-200 p-4 text-body-sm text-neutral-500">
               <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-accent-500 text-on-accent">
                 <Info className="size-3.5" aria-hidden />
@@ -82,7 +84,7 @@ export default async function AffiliateToolsPage() {
         </Container>
       </section>
 
-      {pickTool && (
+      {pickTool && show("pick") && (
         <section className="pb-[var(--spacing-section)] pt-4">
           <Container>
             <div className="grid gap-8 rounded-[var(--radius-2xl)] bg-accent-500 p-8 text-[#0b0b0c] sm:p-12 lg:grid-cols-[1fr_20rem] lg:items-center">
@@ -144,7 +146,7 @@ export default async function AffiliateToolsPage() {
         </Container>
       </section>
 
-      {hasCompare && (
+      {hasCompare && show("compare") && (
         <section id="compare" className="scroll-mt-24 pb-[var(--spacing-section)]">
           <Container>
             <Heading level={2} className="mb-8" style={{ fontSize: "clamp(2rem, 1rem + 3.4vw, 4.5rem)" }}>
@@ -181,6 +183,7 @@ export default async function AffiliateToolsPage() {
         </section>
       )}
 
+      {show("setup") && (
       <section className="pb-[var(--spacing-section)]">
         <Container className="grid gap-5 md:grid-cols-2">
           <div className="rounded-[var(--radius-2xl)] border border-neutral-200 bg-neutral-50 p-8">
@@ -203,6 +206,7 @@ export default async function AffiliateToolsPage() {
           </div>
         </Container>
       </section>
+      )}
     </>
   );
 }

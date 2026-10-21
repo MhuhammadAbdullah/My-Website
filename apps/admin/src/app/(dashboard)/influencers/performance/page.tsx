@@ -72,10 +72,10 @@ export default function InfluencerPerformancePage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
-          <Heading level={2}>Performance</Heading>
-          <p className="mt-1 max-w-2xl text-body-sm text-neutral-500">
+          <Heading level={2} className="admin-page-title">Performance</Heading>
+          <p className="mt-2 max-w-2xl text-body-sm text-neutral-500">
             Ranked by a composite score across followers, engagement, completed campaigns, ratings, revenue, and repeat clients. Run a
             scoring pass to refresh badge recommendations, or manually feature an influencer regardless of rank.
           </p>
