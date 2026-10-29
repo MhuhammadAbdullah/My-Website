@@ -537,6 +537,7 @@ model Service {
   benefits     String[]
   process      Json // ordered [{ title, description }]
   deliverables String[]
+  detailSections Json? // editable headings, descriptions, scope items and CTA for the service detail page
   timeline     String
   heroMediaId  String?
   status       ContentStatus @default(DRAFT)

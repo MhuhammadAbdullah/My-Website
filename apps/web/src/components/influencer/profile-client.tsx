@@ -626,6 +626,7 @@ export function ReviewsSection({
   name,
   labels,
   heading,
+  description,
   marquee,
 }: {
   reviews: InfluencerReviewRead[];
@@ -635,6 +636,7 @@ export function ReviewsSection({
   name: string;
   labels: ReviewLabels;
   heading: React.CSSProperties;
+  description?: string;
   /** Admin-controlled slider; off = the plain grid */
   marquee?: { enabled: boolean; speed: number; pauseOnHover: boolean };
 }) {
@@ -654,6 +656,7 @@ export function ReviewsSection({
           <h2 className="font-heading font-extrabold leading-none text-heading" style={heading}>
             {labels.heading}
           </h2>
+          {description && <p className="mt-3 max-w-3xl text-left text-body text-neutral-500">{description}</p>}
           {total > 0 && (
             <p className="mt-4 flex items-center gap-3 text-body-sm text-neutral-500">
               <Stars value={Math.round(avg)} size="size-5" />

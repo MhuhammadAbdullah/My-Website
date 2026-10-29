@@ -28,6 +28,32 @@ export const pricingPlanSchema = z.object({
 });
 export type PricingPlanInput = z.infer<typeof pricingPlanSchema>;
 
+export const serviceDetailSectionsSchema = z.object({
+  overviewHeading: z.string().max(160).optional(),
+  overviewDescription: z.string().max(2000).optional(),
+  overviewCards: z.array(z.object({ title: z.string().min(1), description: z.string().min(1) })).max(12).optional(),
+  benefitsHeading: z.string().max(160).optional(),
+  benefitsDescription: z.string().max(2000).optional(),
+  benefitItems: z.array(z.object({ title: z.string().min(1), description: z.string().max(2000).optional() })).max(30).optional(),
+  deliverableItems: z.array(z.object({ title: z.string().min(1), description: z.string().max(2000).optional() })).max(30).optional(),
+  scopeHeading: z.string().max(160).optional(),
+  scopeDescription: z.string().max(2000).optional(),
+  scopeItems: z.array(z.object({ title: z.string().min(1), description: z.string().min(1) })).max(20).optional(),
+  processHeading: z.string().max(160).optional(),
+  processDescription: z.string().max(2000).optional(),
+  deliverablesHeading: z.string().max(160).optional(),
+  deliverablesDescription: z.string().max(2000).optional(),
+  pricingHeading: z.string().max(160).optional(),
+  pricingDescription: z.string().max(2000).optional(),
+  reviewsHeading: z.string().max(160).optional(),
+  reviewsDescription: z.string().max(2000).optional(),
+  ctaHeading: z.string().max(160).optional(),
+  ctaDescription: z.string().max(2000).optional(),
+  ctaButtonLabel: z.string().max(80).optional(),
+  ctaButtonHref: z.string().max(300).optional(),
+});
+export type ServiceDetailSections = z.infer<typeof serviceDetailSectionsSchema>;
+
 export const serviceSchema = z.object({
   id: z.string().optional(),
   categoryId: z.string().nullable().optional(),
@@ -55,6 +81,7 @@ export const serviceSchema = z.object({
   // than here, since this schema is also used via `.partial()` for PATCH and
   // ZodEffects (what `.superRefine` would produce) has no `.partial()`.
   pricingPlans: z.array(pricingPlanSchema).max(20).default([]),
+  detailSections: serviceDetailSectionsSchema.optional(),
   seo: seoMetaSchema,
 });
 export type ServiceInput = z.infer<typeof serviceSchema>;

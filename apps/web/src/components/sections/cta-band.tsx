@@ -10,18 +10,22 @@ export function CtaBandSection({ content }: { content: Content }) {
   if (!heading && !body) return null;
 
   return (
-    <section className="py-[var(--spacing-section)]">
+    <section className="bg-background py-10 md:py-16">
       <Container>
-        <Reveal className="rounded-[var(--radius-2xl)] bg-accent-500 px-8 py-16 text-center text-on-accent sm:px-16">
-          {heading && (
-            <Heading level={2} className="mx-auto max-w-3xl !text-[#0b0b0c] [&_em]:!text-[#0b0b0c] [&_em]:underline">
-              {heading}
-            </Heading>
-          )}
-          {body && <p className="mx-auto mt-5 max-w-xl text-body-lg !text-[#0b0b0c]/80">{body}</p>}
-          <div className="mt-8 flex justify-center">
-            <CmsButton button={button} onAccent />
+        <Reveal className="flex flex-col items-start justify-between gap-8 rounded-[var(--radius-2xl)] bg-accent-500 px-7 py-10 text-on-accent sm:px-12 sm:py-12 lg:flex-row lg:items-center lg:px-16 lg:py-14">
+          <div className="w-full max-w-[58rem]">
+            {heading && (
+              <Heading
+                level={2}
+                className="!text-[#0b0b0c] [&_em]:!text-[#0b0b0c] [&_em]:underline [&_em]:decoration-2 [&_em]:underline-offset-8"
+                style={{ fontSize: "clamp(3rem, 4.2vw, 4.75rem)", lineHeight: 0.9 }}
+              >
+                {heading}
+              </Heading>
+            )}
+            {body && <p className="mt-5 max-w-2xl text-body-lg !text-[#0b0b0c]/80">{body}</p>}
           </div>
+          <CmsButton button={button} onAccent size="lg" className="shrink-0 !px-8 !text-white" />
         </Reveal>
       </Container>
     </section>
