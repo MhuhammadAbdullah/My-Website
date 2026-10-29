@@ -10,6 +10,7 @@ import type {
   PopupTargetingInput,
   PopupTriggerInput,
   PopupFrequencyInput,
+  ServiceDetailSections,
 } from "@agency/types";
 
 export interface MediaRead {
@@ -79,6 +80,7 @@ export interface ServiceListItem {
 }
 
 export interface ServiceDetail extends ServiceListItem {
+  detailSections?: ServiceDetailSections | null;
   description: string;
   benefits: string[];
   process: { title: string; description: string }[];

@@ -144,7 +144,7 @@ servicesRouter.post(
   requireAuth,
   requirePermission("services", "create"),
   asyncHandler(async (req, res) => {
-    const { technologyIds, faqIds, relatedServiceIds, pricingPlans, seo, ...data } = serviceSchema.parse(req.body);
+    const { technologyIds, faqIds, relatedServiceIds, pricingPlans, detailSections, seo, ...data } = serviceSchema.parse(req.body);
     pricingPlans.forEach(assertValidPricingPlan);
     const seoRecord = await prisma.seoMeta.create({ data: seo as Prisma.SeoMetaCreateInput });
     const createData: Prisma.ServiceUncheckedCreateInput = {
@@ -157,6 +157,7 @@ servicesRouter.post(
       benefits: data.benefits,
       process: data.process,
       deliverables: data.deliverables,
+      ...(detailSections ? { detailSections: detailSections as Prisma.InputJsonValue } : {}),
       timeline: data.timeline,
       status: data.status,
       isFeatured: data.isFeatured,
@@ -192,7 +193,7 @@ servicesRouter.patch(
   requireAuth,
   requirePermission("services", "update"),
   asyncHandler(async (req, res) => {
-    const { technologyIds, faqIds, relatedServiceIds, pricingPlans, seo, ...data } = serviceSchema
+    const { technologyIds, faqIds, relatedServiceIds, pricingPlans, detailSections, seo, ...data } = serviceSchema
       .partial()
       .parse(req.body);
 
@@ -214,6 +215,7 @@ servicesRouter.patch(
     // runtime.
     const updateData: Prisma.ServiceUncheckedUpdateInput = {
       ...data,
+      ...(detailSections ? { detailSections: detailSections as Prisma.InputJsonValue } : {}),
       ...(technologyIds ? { technologies: { set: technologyIds.map((id) => ({ id })) } } : {}),
       ...(faqIds ? { faqs: { set: faqIds.map((id) => ({ id })) } } : {}),
       ...(relatedServiceIds ? { relatedTo: { set: relatedServiceIds.map((id) => ({ id })) } } : {}),

@@ -39,11 +39,11 @@ export async function CtaSection({
         className="pointer-events-none absolute inset-0 opacity-40"
         style={{
           background:
-            "radial-gradient(600px circle at 50% 0%, oklch(58% 0.19 265 / 0.35), transparent 70%)",
+            "radial-gradient(600px circle at 50% 0%, color-mix(in oklab, var(--accent) 32%, transparent), transparent 70%)",
         }}
       />
       <div className="relative">
-        <Heading level={2} className="text-white [&_em]:text-accent-300">
+        <Heading level={2} className="text-white [&_em]:text-accent-500">
           {resolvedHeadline}
         </Heading>
         <p className="mx-auto mt-4 max-w-xl text-body-lg text-neutral-400">{resolvedSubheadline}</p>
