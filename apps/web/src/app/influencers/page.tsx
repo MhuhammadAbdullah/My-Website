@@ -55,9 +55,9 @@ export default async function InfluencersPage({
   if (!flags.marketplaceEnabled) {
     return (
       <Section>
-        <Container className="max-w-2xl">
+        <Container>
           <PageHeading breadcrumb={[{ label: "Home", href: "/" }, { label: "Influencers" }]}>
-            <Heading level={1} display>
+            <Heading level={1} style={{ fontSize: "clamp(2rem, 1rem + 3vw, 4rem)" }}>
               Influencer Marketplace
             </Heading>
           </PageHeading>
