@@ -1,8 +1,108 @@
+/* @import "@agency/ui/styles.css";
+@import "@agency/ui/noir.css"; */
+
+/* @source "../../../../packages/ui/src/**//*.{ts,tsx}"; */
+/* @source "../../src/**//*.{ts,tsx}"; */
+
+/* Wire the tokens in @agency/ui/styles.css to this app's next/font-loaded,
+   self-hosted font files instead of relying on a system/CDN "Manrope". */
+/* :root {
+  --font-heading: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-serif-emphasis: var(--font-playfair), ui-serif, Georgia, serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace; */
+
+  /* Site-wide: cards, dialogs/forms, and tables use rounded-2xl from the
+     shared design system -- dial that scale down to rounded-lg here, same
+     as the admin panel. */
+  /* --radius-2xl: var(--radius-lg);
+} */
+
+/* Manrope's `latin` subset has no ₨ glyph, so it falls back to a system font
+   for that character only. Pin the fallback stack explicitly and use a
+   weight that font actually has, instead of letting the browser synthesize
+   a bold from it (the cause of the blurry/uneven look). */
+/* .currency-symbol {
+  font-family: ui-sans-serif, "Segoe UI", "Noto Sans", Arial, sans-serif;
+  font-weight: inherit;
+  font-size: 1.1em;
+  line-height: 1;
+  letter-spacing: normal;
+} */
+
+/* Influencer dashboard: tighter corners on cards, inputs, popups and tables, matching the admin panel.
+   Set on <html> (see InfluencerDashboardShell) because dialogs render outside the dashboard markup. */
+/* :root.influencer-dash-root[data-theme="noir"] {
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.75rem;
+} */
+
+/* Login, registration and reset-password: tighter corners on the popup/card and every input inside it. */
+/* .influencer-auth {
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.75rem;
+} */
+
+
+
+
+
+
+
 @import "@agency/ui/styles.css";
 @import "@agency/ui/noir.css";
 
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 @source "../../src/**/*.{ts,tsx}";
+
+@keyframes search-eyes {
+  0%, 10% { transform: translateX(0) scaleY(1); }
+  22% { transform: translateX(-0.08em) scaleY(1); }
+  38% { transform: translateX(0.08em) scaleY(1); }
+  42%, 45% { transform: translateX(0.08em) scaleY(0.12); }
+  48% { transform: translateX(0.08em) scaleY(1); }
+  62% { transform: translateX(-0.08em) scaleY(1); }
+  70%, 100% { transform: translateX(0) scaleY(1); }
+}
+
+.search-neutral-mouth,
+.search-sad-mouth {
+  animation-duration: 4.8s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+}
+
+.search-neutral-mouth { animation-name: neutral-to-sad; }
+.search-sad-mouth { animation-name: reveal-sad-mouth; }
+
+@keyframes neutral-to-sad {
+  0%, 78% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes reveal-sad-mouth {
+  0%, 78% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes sad-blink {
+  0%, 90%, 100% { transform: translateX(0) scaleY(1); }
+  94%, 96% { transform: translateX(0) scaleY(0.12); }
+}
+
+.searching-eye {
+  animation: search-eyes 4.8s ease-in-out forwards, sad-blink 3.6s ease-in-out 4.8s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-neutral-mouth,
+  .search-sad-mouth,
+  .searching-eye { animation: none; }
+}
 
 /* Wire the tokens in @agency/ui/styles.css to this app's next/font-loaded,
    self-hosted font files instead of relying on a system/CDN "Manrope". */
@@ -46,3 +146,4 @@
   --radius-xl: 0.5rem;
   --radius-2xl: 0.75rem;
 }
+
