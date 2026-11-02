@@ -193,7 +193,7 @@ export default async function InfluencersPage({
               </Link>
             )}
           </div>
-          <div className="flex flex-col rounded-[var(--radius-2xl)] border border-neutral-200 bg-neutral-50 p-8 sm:p-10">
+          <div className="flex flex-col rounded-[var(--radius-2xl)] border border-neutral-200 bg-white p-8 sm:p-10">
             {cfg.creatorCard.tag && <p className="text-label font-bold uppercase tracking-wider text-neutral-500">{cfg.creatorCard.tag}</p>}
             <Heading level={2} className="mt-4" style={{ fontSize: "clamp(1.75rem, 1rem + 2vw, 3rem)" }}>
               {cfg.creatorCard.heading}
